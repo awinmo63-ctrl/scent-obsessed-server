@@ -51,8 +51,8 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail
             },
             order_meta: {
-                // Redirects back to the frontend with a success tag
-                return_url: "http://localhost:5000/?success=true&order_id={order_id}"
+                // Redirects back to the LIVE frontend with a success tag
+                return_url: "https://scent-obsessed-server.onrender.com/?success=true&order_id={order_id}"
             }
         };
 
@@ -114,5 +114,5 @@ app.post('/webhook', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Scent Obsessed secure backend running on http://localhost:${PORT}`);
+    console.log(`Scent Obsessed secure backend running on port ${PORT}`);
 });
