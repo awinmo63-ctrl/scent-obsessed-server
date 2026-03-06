@@ -16,13 +16,10 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 app.post('/create-order', async (req, res) => {
     try {
-        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, paymentMethod } = req.body;
-        const orderId = (paymentMethod === 'COD' ? 'COD_' : 'PRE_') + Date.now();
+        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress } = req.body;
+        const orderId = 'ORDER_' + Date.now();
 
-        // Determine the initial status for the database
-        const initialStatus = paymentMethod === 'COD' ? 'COD_PENDING' : 'PENDING';
-
-        // SAVE THE ORDER TO SUPABASE FIRST
+        // SAVE THE ORDER TO SUPABASE FIRST (Status: PENDING)
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -33,7 +30,7 @@ app.post('/create-order', async (req, res) => {
                     customer_email: customerEmail,
                     shipping_address: shippingAddress,
                     total_amount: orderAmount,
-                    payment_status: initialStatus
+                    payment_status: 'PENDING'
                 }
             ]);
 
@@ -42,12 +39,7 @@ app.post('/create-order', async (req, res) => {
             return res.status(500).json({ error: 'Failed to save order to database' });
         }
 
-        // IF IT IS COD, STOP HERE AND RETURN SUCCESS
-        if (paymentMethod === 'COD') {
-            return res.json({ success: true, method: 'COD', order_id: orderId });
-        }
-
-        // IF IT IS PREPAID, REQUEST PAYMENT SESSION FROM CASHFREE
+        // REQUEST PAYMENT SESSION FROM CASHFREE
         const requestBody = {
             order_amount: orderAmount,
             order_currency: "INR",
@@ -93,11 +85,9 @@ app.post('/create-order', async (req, res) => {
 // --- THE NEW WEBHOOK LISTENER ---
 app.post('/webhook', async (req, res) => {
     try {
-        // Cashfree sends the payment details inside req.body.data
         const paymentStatus = req.body.data.payment.payment_status;
         const orderId = req.body.data.order.order_id;
 
-        // If the payment was a success, update the Supabase spreadsheet to 'PAID'
         if (paymentStatus === 'SUCCESS') {
             const { error } = await supabase
                 .from('orders')
@@ -110,8 +100,6 @@ app.post('/webhook', async (req, res) => {
                 console.log(`[SUCCESS] Order ${orderId} has been marked as PAID!`);
             }
         }
-
-        // Always tell Cashfree we received the message, or they will keep sending it
         res.status(200).send('Webhook Received');
     } catch (error) {
         console.error("Webhook processing failed:", error.message);
