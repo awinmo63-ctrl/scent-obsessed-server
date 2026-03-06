@@ -94,10 +94,23 @@ app.post('/webhook', async (req, res) => {
                 .update({ payment_status: 'PAID' })
                 .eq('order_id', orderId);
 
-            if (error) {
-                console.error("Webhook Database Error:", error);
-            } else {
+            if (!error) {
                 console.log(`[SUCCESS] Order ${orderId} has been marked as PAID!`);
+
+                // --- THE LOYALTY DROP ---
+                // 1. Find the email attached to this order
+                const { data: orderData } = await supabase.from('orders').select('customer_email').eq('order_id', orderId).single();
+
+                if (orderData && orderData.customer_email) {
+                    // 2. Check their current Loyalty ML
+                    const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
+
+                    if (profileData) {
+                        // 3. Pour 20ml into the bottle!
+                        await supabase.from('profiles').update({ loyalty_ml: profileData.loyalty_ml + 20 }).eq('email', orderData.customer_email);
+                        console.log(`[LOYALTY] Added 20ml to ${orderData.customer_email}`);
+                    }
+                }
             }
         }
         res.status(200).send('Webhook Received');

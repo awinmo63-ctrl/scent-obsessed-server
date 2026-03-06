@@ -100,14 +100,14 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Package } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Package, Droplet } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
 
       // --- SUPABASE INITIALIZATION ---
       const supabaseUrl = 'https://dyfasmiifyhfvuzcbjlp.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZmFzbWlpZnloZnZ1emNiamxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTI3NjAsImV4cCI6MjA4ODEyODc2MH0.0PkXE4FEKUnUtIXVehmyz-NRCNPqQyPMk1Mqdz-GUsA'; 
+      const supabaseKey = 'PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE'; // <-- PASTE KEY HERE!
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       const PRODUCTS = [
@@ -265,7 +265,9 @@
         );
       };
 
-      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout }) => {
+      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, loyaltyMl }) => {
+        const bottlePercentage = Math.min((loyaltyMl / 100) * 100, 100);
+
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
             h('div', { className: "flex justify-between items-center mb-6" },
@@ -281,6 +283,29 @@
                   h(LogOut, { size: 12 }), "Sign Out"
                 )
               ),
+
+              // --- THE LOYALTY BOTTLE ---
+              h('div', { className: "mb-8 bg-black/40 p-6 border border-obsessed-gold/30 rounded relative flex flex-col items-center text-center shadow-[0_0_20px_rgba(212,175,55,0.05)]" },
+                  h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "The Loyalty Vessel"),
+                  h('p', { className: "text-[10px] font-sans text-gray-400 mb-6 leading-relaxed" }, "Collect 20 ML with every secure acquisition. Reach 100 ML to claim a complimentary 100 ML bottle."),
+                  
+                  // Bottle Container
+                  h('div', { className: "relative w-16 h-28 border-[3px] border-white/20 rounded-b-lg rounded-t-[2rem] overflow-hidden flex items-end justify-center bg-black/80" },
+                      // Dynamic Golden Liquid
+                      h('div', { 
+                          className: "w-full bg-gradient-to-t from-yellow-700 via-obsessed-gold to-yellow-500 transition-all duration-[1500ms] ease-out shadow-[0_0_15px_rgba(212,175,55,0.5)]", 
+                          style: { height: `${bottlePercentage}%` } 
+                      }),
+                      // Reflection Glare
+                      h('div', { className: "absolute top-0 left-2 w-1 h-full bg-white/10 rounded-full" })
+                  ),
+                  
+                  h('div', { className: "mt-4 font-mono text-white text-xs tracking-widest" }, 
+                    h('span', { className: "text-obsessed-gold font-bold" }, loyaltyMl), " / 100 ML"
+                  ),
+                  bottlePercentage >= 100 && h('button', { className: "mt-4 px-4 py-2 bg-obsessed-gold text-black font-bold text-[10px] uppercase tracking-[0.2em] w-full animate-pulse hover:bg-white transition-colors" }, "Claim Free Bottle")
+              ),
+
               h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Order History"),
               h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar" },
                 orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") :
@@ -297,7 +322,7 @@
               )
             ) : h('div', { className: "flex flex-col items-center justify-center h-full text-center" },
                 h(User, { size: 48, className: "text-gray-600 mb-4" }),
-                h('p', { className: "text-gray-400 font-serif italic mb-8" }, "Sign in to view your collection and track your acquisitions."),
+                h('p', { className: "text-gray-400 font-serif italic mb-8" }, "Sign in to view your collection, track your acquisitions, and earn loyalty rewards."),
                 h('button', { onClick: async () => {
                   await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
                 }, className: "w-full py-3 bg-white text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors flex items-center justify-center gap-2" },
@@ -394,12 +419,12 @@
         return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
           h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-10 text-center shadow-2xl flex flex-col items-center" },
             h('div', { className: "w-16 h-16 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/30" },
-              h(Box, { size: 32, className: "text-obsessed-gold" })
+              h(Droplet, { size: 32, className: "text-obsessed-gold" })
             ),
             h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-4" }, "Acquisition Complete"),
-            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. We have securely received your order."),
+            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. 20 ML has been added to your Loyalty Vessel."),
             orderId && h('p', { className: "font-mono text-[10px] text-obsessed-gold mb-8 bg-black px-4 py-2 border border-obsessed-gold/30 tracking-widest" }, `ID: ${orderId}`),
-            h('button', { onClick: onClose, className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors" }, "Continue Journey")
+            h('button', { onClick: onClose, className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors" }, "View My Vessel")
           )
         );
       };
@@ -414,6 +439,7 @@
         const [user, setUser] = useState(null);
         const [isOrdersOpen, setIsOrdersOpen] = useState(false);
         const [myOrders, setMyOrders] = useState([]);
+        const [loyaltyMl, setLoyaltyMl] = useState(0);
         
         const [searchQuery, setSearchQuery] = useState("");
         const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
@@ -447,20 +473,31 @@
           return () => subscription.unsubscribe();
         }, []);
 
+        // --- FETCH ORDERS & INITIALIZE LOYALTY PROFILE ---
         useEffect(() => {
-            const fetchOrders = async () => {
+            const fetchProfileData = async () => {
                 if (!user) return;
-                const { data, error } = await supabase
+                
+                const { data: ordersData } = await supabase
                     .from('orders')
                     .select('*')
                     .eq('customer_email', user.email)
                     .order('created_at', { ascending: false });
                 
-                if (!error && data) {
-                    setMyOrders(data);
+                if (ordersData) setMyOrders(ordersData);
+
+                // Fetch their Loyalty Profile
+                const { data: profileData, error } = await supabase.from('profiles').select('*').eq('email', user.email).single();
+                
+                if (!profileData) {
+                    // If they don't have a profile yet, give them an empty vessel (0 ML)
+                    await supabase.from('profiles').insert([{ id: user.id, email: user.email, loyalty_ml: 0 }]);
+                    setLoyaltyMl(0);
+                } else {
+                    setLoyaltyMl(profileData.loyalty_ml);
                 }
             };
-            if (isOrdersOpen) fetchOrders();
+            if (isOrdersOpen) fetchProfileData();
         }, [isOrdersOpen, user]);
 
         useEffect(() => {
@@ -476,6 +513,7 @@
         const handleLogout = async () => {
             await supabase.auth.signOut();
             setIsOrdersOpen(false);
+            setLoyaltyMl(0);
         };
 
         const displayedProducts = useMemo(() => {
@@ -578,7 +616,8 @@
               onClose: () => setIsOrdersOpen(false),
               user: user,
               orders: myOrders,
-              onLogout: handleLogout
+              onLogout: handleLogout,
+              loyaltyMl: loyaltyMl
           }),
 
           h(CartSidebar, { 
@@ -587,7 +626,7 @@
               cart, updateQty, checkout: handleCheckout, formData, setFormData, user 
           }),
           
-          h(SuccessModal, { isOpen: showSuccess, onClose: () => setShowSuccess(false), orderId: successOrderId }),
+          h(SuccessModal, { isOpen: showSuccess, onClose: () => { setShowSuccess(false); setIsOrdersOpen(true); }, orderId: successOrderId }),
           h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
