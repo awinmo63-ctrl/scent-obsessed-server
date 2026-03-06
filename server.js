@@ -1,3 +1,19 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// HOST YOUR BEAUTIFUL FRONTEND WEBSITE
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Initialize Supabase Connection
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
 app.post('/create-order', async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, paymentMethod } = req.body;
@@ -72,4 +88,38 @@ app.post('/create-order', async (req, res) => {
         console.error('Server Error:', error.message);
         res.status(500).json({ error: 'Failed to initialize checkout' });
     }
+});
+
+// --- THE NEW WEBHOOK LISTENER ---
+app.post('/webhook', async (req, res) => {
+    try {
+        // Cashfree sends the payment details inside req.body.data
+        const paymentStatus = req.body.data.payment.payment_status;
+        const orderId = req.body.data.order.order_id;
+
+        // If the payment was a success, update the Supabase spreadsheet to 'PAID'
+        if (paymentStatus === 'SUCCESS') {
+            const { error } = await supabase
+                .from('orders')
+                .update({ payment_status: 'PAID' })
+                .eq('order_id', orderId);
+
+            if (error) {
+                console.error("Webhook Database Error:", error);
+            } else {
+                console.log(`[SUCCESS] Order ${orderId} has been marked as PAID!`);
+            }
+        }
+
+        // Always tell Cashfree we received the message, or they will keep sending it
+        res.status(200).send('Webhook Received');
+    } catch (error) {
+        console.error("Webhook processing failed:", error.message);
+        res.status(500).send('Webhook Error');
+    }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Scent Obsessed secure backend running on port ${PORT}`);
 });
