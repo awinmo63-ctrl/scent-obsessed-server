@@ -234,6 +234,59 @@
         );
       };
 
+      const SearchOverlay = ({ isOpen, onClose, searchQuery, onSearch }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed top-0 left-0 right-0 z-50 p-6 bg-obsessed-black/95 backdrop-blur-xl border-b border-obsessed-gold/20 animate-fade-in" },
+           h('div', { className: "max-w-4xl mx-auto flex items-center gap-4" },
+             h(Search, { className: "text-obsessed-gold", size: 24 }),
+             h('input', { autoFocus: true, type: "text", placeholder: "Search...", value: searchQuery, onChange: (e) => onSearch(e.target.value), className: "w-full bg-transparent border-none outline-none font-display text-2xl text-white placeholder-gray-600 tracking-wider uppercase" }),
+             h('button', { onClick: onClose, className: "text-gray-400 hover:text-white" }, h(X, { size: 24 }))
+           )
+        );
+      };
+
+      const MobileMenu = ({ isOpen, onClose }) => {
+        const links = [
+          { name: 'The Collection', type: 'scroll' },
+          { name: 'Track Order', type: 'whatsapp', message: 'Hello, I would like to track my Scent Obsessed order.' },
+          { name: 'Contact Concierge', type: 'whatsapp', message: 'Hello Scent Obsessed, I need some assistance finding my signature scent.' }
+        ];
+
+        return h('div', { className: `fixed inset-y-0 left-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
+          h('div', { className: "flex flex-col h-full p-8" },
+            h('div', { className: "flex justify-between items-center mb-20" },
+              h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"),
+              h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
+            ),
+            h('nav', { className: "flex flex-col gap-8" },
+              links.map(link => {
+                if(link.type === 'scroll') {
+                  return h('a', { key: link.name, href: "#", onClick: (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); }, className: "font-display text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" }, link.name);
+                } else {
+                  return h('a', { key: link.name, href: `https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, target: "_blank", rel: "noopener noreferrer", className: "font-display text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" }, link.name);
+                }
+              })
+            ),
+            h('div', { className: "mt-auto opacity-50" },
+                h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-xs tracking-[0.3em] text-white hover:text-obsessed-gold transition-colors uppercase block mb-8" }, "Follow the Obsession"),
+                h('p', { className: "font-sans text-xs tracking-[0.3em] text-obsessed-gold mb-2" }, "SCENT OBSESSED"),
+                h('p', { className: "font-sans text-[10px] text-gray-400" }, "EST. 2026")
+            )
+          )
+        );
+      };
+
+      const LegalModal = ({ isOpen, onClose, title, children }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" },
+          h('div', { className: "relative w-full max-w-2xl max-h-[80vh] bg-[#111] border border-obsessed-gold/30 p-8 md:p-12 overflow-y-auto shadow-2xl" },
+            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })),
+            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title),
+            h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
+          )
+        );
+      };
+
       const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout }) => {
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
@@ -331,7 +384,7 @@
         );
       };
 
-      const Navigation = ({ onCartClick, onOrdersClick, onMenuClick, cartItemCount, is3DMode, onToggle3D, user }) => {
+      const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, is3DMode, onToggle3D, user }) => {
         return h('nav', { className: "fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-6 md:px-8 py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
           h('div', { className: "pointer-events-auto cursor-pointer hover:text-obsessed-gold transition-colors", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ),
           h('div', { className: "text-center pointer-events-auto absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0" }, 
@@ -342,6 +395,7 @@
             h('button', { onClick: onToggle3D, className: `hidden md:flex items-center gap-2 border ${is3DMode ? 'border-obsessed-gold text-obsessed-gold bg-obsessed-gold/10' : 'border-gray-500 text-gray-300'} px-3 py-1 rounded-sm hover:border-obsessed-gold hover:text-obsessed-gold transition-colors text-[10px] md:text-xs font-sans tracking-widest uppercase` }, 
               h(Box, { size: 14 }), h('span', null, is3DMode ? "3D Active" : "View 3D")
             ),
+            h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors" }, h(Search, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute -top-2 -right-2 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount) )
           )
@@ -368,6 +422,16 @@
         const [cart, setCart] = useState([]);
         const [isCartOpen, setIsCartOpen] = useState(false);
         const [isMenuOpen, setIsMenuOpen] = useState(false);
+        
+        // RESTORED SEARCH VARIABLES
+        const [isSearchOpen, setIsSearchOpen] = useState(false);
+        const [searchQuery, setSearchQuery] = useState("");
+
+        // RESTORED LEGAL MODAL VARIABLES
+        const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+        const [isTermsOpen, setIsTermsOpen] = useState(false);
+        const [isRefundOpen, setIsRefundOpen] = useState(false);
+        const [isShippingOpen, setIsShippingOpen] = useState(false);
         
         const [user, setUser] = useState(null);
         const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -433,7 +497,7 @@
             setTimeout(() => {
                 setMistState('idle'); 
                 setShowShine(true); 
-                // We don't artificially add it here anymore, the DB refresh handles the real math!
+                // DB refresh handles the real math!
                 setTimeout(() => setShowShine(false), 2000);
             }, 1400);
         };
@@ -467,7 +531,6 @@
                 setIsCartOpen(true);
                 
                 // NOTE: We only deduct the 100 ML from the database when they actually COMPLETE the checkout.
-                // This prevents them from losing points if they close the window!
             }, 1400);
         };
 
@@ -505,7 +568,7 @@
                   shipping_address: formData.address, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl
              }]);
              // Immediately deduct their 100 ML since we bypassed the webhook
-             await supabase.from('profiles').update({ loyalty_ml: loyaltyMl - 100 }).eq('email', formData.email);
+             await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
              window.location.href = `/?success=true&order_id=${fakeOrderId}`;
              return;
           }
@@ -555,9 +618,17 @@
             }`
           }),
 
+          // RESTORED MODALS AND SEARCH OVERLAY
+          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('p', null, "Privacy Policy content here.") ),
+          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('p', null, "Terms and Conditions content here.") ),
+          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('p', null, "Refund policy content here.") ),
+          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('p', null, "Shipping policy content here.") ),
+          h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
+
           h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false) }),
           
           h(Navigation, { 
+              onSearchClick: () => setIsSearchOpen(!isSearchOpen),
               onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, 
               onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); },
               onMenuClick: () => setIsMenuOpen(true), 
@@ -595,6 +666,33 @@
                 )
               )
             ))
+          ),
+          
+          h('footer', { className: "relative w-full bg-[#111] flex flex-col justify-between pt-24 pb-12 border-t border-obsessed-gold/20 z-20 mt-20 pointer-events-auto" },
+            h('div', { className: "w-full px-8 md:px-20 grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 relative z-10" },
+              h('div', null,
+                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Discover"),
+                h('button', { onClick: (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "The Collection")
+              ),
+              h('div', null,
+                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Concierge"),
+                h('a', { href: "https://mail.google.com/mail/?view=cm&fs=1&to=info@scentobsessed.in", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "info@scentobsessed.in"),
+                h('a', { href: "tel:+917814930720", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "+91 78149 30720"),
+                h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Instagram"),
+                h('a', { href: "https://wa.me/917814930720?text=Hello%2C%20I%20would%20like%20to%20track%20my%20Scent%20Obsessed%20order.", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Track Order")
+              ),
+              h('div', null,
+                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Legal"),
+                h('button', { onClick: () => setIsPrivacyOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Privacy Policy"),
+                h('button', { onClick: () => setIsTermsOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Terms & Conditions"),
+                h('button', { onClick: () => setIsRefundOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Refund & Cancellation"),
+                h('button', { onClick: () => setIsShippingOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Shipping Policy")
+              )
+            ),
+            h('div', { className: "w-full flex flex-col items-center mt-12 relative z-0 overflow-hidden" },
+              h('h2', { className: "font-display text-[11vw] md:text-[8.5vw] leading-none text-obsessed-gold opacity-10 whitespace-nowrap select-none pointer-events-none" }, "SCENT OBSESSED"),
+              h('p', { className: "font-sans text-[9px] tracking-[0.3em] text-gray-600 mt-8 uppercase" }, "© 2026 Scent Obsessed. All Rights Reserved.")
+            )
           )
         );
       };
