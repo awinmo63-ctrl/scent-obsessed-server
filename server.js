@@ -16,10 +16,11 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 app.post('/create-order', async (req, res) => {
     try {
-        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, itemsSummary } = req.body;
+        // WE CATCH THE 'cartItems' FROM THE FRONTEND HERE
+        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems } = req.body;
         const orderId = 'ORDER_' + Date.now();
 
-        // SAVE THE ORDER TO SUPABASE WITH THE EXACT MATH AND ITEMS
+        // SAVE THE ORDER WITH CART ITEMS TO SUPABASE
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -33,7 +34,7 @@ app.post('/create-order', async (req, res) => {
                     payment_status: 'PENDING',
                     reward_ml: rewardMl || 0,
                     claimed_reward_ml: claimedRewardMl || 0,
-                    items_summary: itemsSummary || 'No items listed' // NEW: Saves the exact perfumes!
+                    cart_items: cartItems || [] // <--- THIS SAVES THE PERFUMES!
                 }
             ]);
 
