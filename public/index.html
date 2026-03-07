@@ -118,7 +118,7 @@
           id: 'blue-monarch',
           name: 'Blue Monarch',
           tagline: 'Rule Your Realm',
-          narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nBlue Monarch: Don't just enter the room—command it.",
+          narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.\n\nBlue Monarch: Don't just enter the room—command it.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#0f52ba', 
@@ -131,7 +131,7 @@
           id: 'urban-ember',
           name: 'Urban Ember',
           tagline: 'Ignite Your Presence',
-          narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore.\n\nUrban Ember is not just a scent; it is the warmth of confidence in a cool city night.",
+          narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression. Guaiac Wood and Opoponax provide a warm, resinous glow, while Oakmoss adds an earthy depth that lingers on the skin like a memory.\n\nUrban Ember is not just a scent; it is the warmth of confidence in a cool city night.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#d4af37', 
@@ -144,7 +144,7 @@
           id: 'flora-essence',
           name: 'Flora Essence',
           tagline: 'The Scent of Sunlight',
-          narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart.\n\nFlora Essence is not just a perfume; it is an aura of natural elegance.",
+          narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin. Flora Essence is not just a perfume; it is an aura of natural elegance.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#046307', 
@@ -157,7 +157,7 @@
           id: 'savage-wind',
           name: 'Savage Wind',
           tagline: 'Unleash the Storm',
-          narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses.\n\nSavage Wind: Fresh enough to wake you up, dark enough to keep them guessing.",
+          narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness that lingers for hours.\n\nSavage Wind: Fresh enough to wake you up, dark enough to keep them guessing.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#555555', 
@@ -309,13 +309,31 @@
               h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar" },
                 orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") :
                 orders.map(order => (
-                  h('div', { key: order.id, className: "bg-obsessed-charcoal/50 p-4 border border-gray-800 rounded" },
-                    h('div', { className: "flex justify-between items-start mb-2" },
+                  // --- NEW ITEMIZED ORDER CARD ---
+                  h('div', { key: order.id, className: "bg-obsessed-charcoal/50 p-4 border border-gray-800 rounded flex flex-col gap-2" },
+                    h('div', { className: "flex justify-between items-start" },
                       h('p', { className: "text-white font-mono text-xs" }, order.order_id.substring(0, 15) + '...'),
                       h('span', { className: `text-[9px] uppercase tracking-widest px-2 py-1 rounded ${order.payment_status === 'PAID' ? 'bg-green-900/30 text-green-400' : 'bg-obsessed-gold/20 text-obsessed-gold'}` }, order.payment_status.replace('_', ' '))
                     ),
-                    h('p', { className: "text-gray-400 text-xs mb-2" }, new Date(order.created_at).toLocaleDateString()),
-                    h('p', { className: "text-obsessed-gold font-display text-sm" }, formatPrice(order.total_amount))
+                    h('div', { className: "flex justify-between items-center" },
+                        h('p', { className: "text-gray-400 text-xs" }, new Date(order.created_at).toLocaleDateString()),
+                        h('p', { className: "text-obsessed-gold font-display text-sm" }, formatPrice(order.total_amount))
+                    ),
+                    // Itemized list of perfumes bought
+                    order.cart_items && order.cart_items.length > 0 ? 
+                    h('div', { className: "mt-2 pt-3 border-t border-gray-800/80 space-y-2" },
+                        order.cart_items.map((item, idx) => (
+                            h('div', { key: idx, className: "flex justify-between items-center text-[10px] font-sans" },
+                                h('div', { className: "flex items-center gap-2" },
+                                    h('span', { className: "text-gray-500 font-mono" }, `${item.qty}x`),
+                                    h('span', { className: "text-gray-300" }, item.name)
+                                ),
+                                item.isReward 
+                                  ? h('span', { className: "text-green-400 font-bold uppercase tracking-widest text-[8px] bg-green-400/10 px-1 py-0.5 rounded" }, "Reward") 
+                                  : h('span', { className: "text-gray-500" }, item.price)
+                            )
+                        ))
+                    ) : h('div', { className: "mt-1 pt-2 border-t border-gray-800/80 text-[9px] text-gray-600 italic" }, "Legacy acquisition (details unavailable)")
                   )
                 ))
               )
@@ -454,7 +472,6 @@
         const observerRefs = useRef([]);
 
         useEffect(() => {
-          console.log("App successfully mounted");
           supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) { setUser(session.user); }
           });
