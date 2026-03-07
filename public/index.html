@@ -216,7 +216,7 @@
         );
       };
 
-      const VisualsLayer = ({ products, activeIndex, is3DMode }) => {
+      const VisualsLayer = ({ products, activeIndex, is3DMode, isSidebarActive }) => {
         const safeProducts = products.length > 0 ? products : [];
         return h('div', { className: "fixed inset-0 z-0 pointer-events-none overflow-hidden bg-obsessed-black transition-colors duration-1000 ease-in-out" },
           safeProducts.length > 0 && h('div', { className: "absolute inset-0 opacity-20 transition-all duration-1000", style: { background: `radial-gradient(circle at 50% 50%, ${safeProducts[activeIndex]?.colorHex || '#1a1a1a'} 0%, transparent 70%)` } }),
@@ -229,7 +229,7 @@
             return h('div', { key: product.id, className: `absolute transition-all duration-1000 ease-in-out will-change-transform w-[85vw] h-[50vh] md:w-[60vh] md:h-[80vh]`, style: { ...transformStyle, opacity: opacity, zIndex: zIndex, filter: filter, pointerEvents: pointerEvents } },
               h('div', { className: "relative w-full h-full" },
                 h('div', { className: "absolute inset-0 rounded-full blur-3xl opacity-40 transform scale-75", style: { backgroundColor: product.colorHex } }),
-                is3DMode ? h('model-viewer', { src: product.modelSrc, orientation: product.orientation, 'auto-rotate': 'true', 'camera-controls': 'true', 'rotation-per-second': '30deg', 'interaction-prompt': 'none', style: { width: '100%', height: '100%', backgroundColor: 'transparent', position: 'absolute', inset: 0, zIndex: 20 }, className: `w-full h-full ${isActive ? 'active' : 'opacity-0'}` }) 
+                is3DMode ? h('model-viewer', { src: product.modelSrc, orientation: product.orientation, 'auto-rotate': 'true', 'camera-controls': 'true', 'rotation-per-second': '30deg', 'interaction-prompt': 'none', style: { width: '100%', height: '100%', backgroundColor: 'transparent', position: 'absolute', inset: 0, zIndex: 20 }, className: `w-full h-full ${isActive && !isSidebarActive ? 'active' : 'opacity-0'}` }) 
                 : h('img', { src: product.imageUrl, alt: product.name, className: `w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-opacity duration-500`, style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' } }),
                 !is3DMode && h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500` }, h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0]))
               )
@@ -295,7 +295,7 @@
       };
 
       const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout }) => {
-        return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
+        return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
             h('div', { className: "flex justify-between items-center mb-6" },
               h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white" }, h(X, { size: 24 }))
@@ -305,35 +305,45 @@
                 h('p', { className: "text-white font-sans text-sm mb-1" }, user.user_metadata?.full_name || user.email),
                 h('button', { onClick: onLogout, className: "mt-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-white uppercase tracking-widest transition-colors" }, h(LogOut, { size: 12 }), "Sign Out" )
               ),
-              h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Order History"),
-              h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar" },
+              h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"),
+              h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-6 no-scrollbar pb-10" },
                 orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") :
                 orders.map(order => (
-                  // --- NEW ITEMIZED ORDER CARD ---
-                  h('div', { key: order.id, className: "bg-obsessed-charcoal/50 p-4 border border-gray-800 rounded flex flex-col gap-2" },
-                    h('div', { className: "flex justify-between items-start" },
-                      h('p', { className: "text-white font-mono text-xs" }, order.order_id.substring(0, 15) + '...'),
-                      h('span', { className: `text-[9px] uppercase tracking-widest px-2 py-1 rounded ${order.payment_status === 'PAID' ? 'bg-green-900/30 text-green-400' : 'bg-obsessed-gold/20 text-obsessed-gold'}` }, order.payment_status.replace('_', ' '))
+                  // --- THE NEW LUXURY RECEIPT CARD ---
+                  h('div', { key: order.id, className: "relative bg-black p-5 border border-obsessed-gold/20 flex flex-col gap-3 group hover:border-obsessed-gold/50 transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.5)]" },
+                    // Top Receipt Header
+                    h('div', { className: "flex justify-between items-center border-b border-gray-800/60 pb-3" },
+                        h('div', { className: "flex flex-col" },
+                            h('span', { className: "font-sans text-[8px] tracking-[0.2em] text-gray-500 uppercase" }, "Date"),
+                            h('span', { className: "font-mono text-[10px] text-obsessed-gold mt-0.5" }, new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase())
+                        ),
+                        h('span', { className: `text-[8px] uppercase tracking-widest px-2 py-1 border ${order.payment_status === 'PAID' ? 'border-green-900/50 text-green-400 bg-green-900/10' : 'border-obsessed-gold/30 text-obsessed-gold bg-obsessed-gold/10'}` }, order.payment_status === 'PAID' ? 'Secured' : 'Pending')
                     ),
-                    h('div', { className: "flex justify-between items-center" },
-                        h('p', { className: "text-gray-400 text-xs" }, new Date(order.created_at).toLocaleDateString()),
-                        h('p', { className: "text-obsessed-gold font-display text-sm" }, formatPrice(order.total_amount))
+                    // Order ID Centered like a receipt number
+                    h('div', { className: "text-center py-2" },
+                        h('span', { className: "font-sans text-[8px] tracking-[0.3em] text-gray-600 uppercase block mb-1" }, "Dossier No."),
+                        h('span', { className: "font-mono text-[9px] text-white tracking-wider" }, order.order_id)
                     ),
-                    // Itemized list of perfumes bought
+                    // Itemized List
                     order.cart_items && order.cart_items.length > 0 ? 
-                    h('div', { className: "mt-2 pt-3 border-t border-gray-800/80 space-y-2" },
+                    h('div', { className: "pt-2 space-y-2" },
                         order.cart_items.map((item, idx) => (
-                            h('div', { key: idx, className: "flex justify-between items-center text-[10px] font-sans" },
-                                h('div', { className: "flex items-center gap-2" },
-                                    h('span', { className: "text-gray-500 font-mono" }, `${item.qty}x`),
-                                    h('span', { className: "text-gray-300" }, item.name)
+                            h('div', { key: idx, className: "flex justify-between items-baseline text-[10px] font-sans" },
+                                h('div', { className: "flex items-baseline gap-2" },
+                                    h('span', { className: "text-obsessed-gold font-mono text-[9px]" }, `0${item.qty}`),
+                                    h('span', { className: "text-gray-300 tracking-wider uppercase text-[9px]" }, item.name)
                                 ),
                                 item.isReward 
-                                  ? h('span', { className: "text-green-400 font-bold uppercase tracking-widest text-[8px] bg-green-400/10 px-1 py-0.5 rounded" }, "Reward") 
-                                  : h('span', { className: "text-gray-500" }, item.price)
+                                  ? h('span', { className: "text-obsessed-gold font-serif italic text-[10px]" }, "Complimentary") 
+                                  : h('span', { className: "text-gray-400 font-mono text-[9px]" }, item.price)
                             )
                         ))
-                    ) : h('div', { className: "mt-1 pt-2 border-t border-gray-800/80 text-[9px] text-gray-600 italic" }, "Legacy acquisition (details unavailable)")
+                    ) : h('div', { className: "pt-2 text-[9px] text-gray-600 italic font-serif text-center" }, "Archive dossier (details unavailable)"),
+                    // Total Line
+                    h('div', { className: "flex justify-between items-center border-t border-gray-800/60 pt-3 mt-1" },
+                        h('span', { className: "font-sans text-[9px] tracking-[0.2em] text-white uppercase" }, "Total"),
+                        h('span', { className: "font-display text-sm text-obsessed-gold" }, formatPrice(order.total_amount))
+                    )
                   )
                 ))
               )
@@ -468,6 +478,9 @@
         
         const [mistState, setMistState] = useState('idle');
         const [showShine, setShowShine] = useState(false);
+
+        // --- NEW: COMBINED SIDEBAR STATE FOR LAYOUT SHIFT ---
+        const isSidebarActive = isCartOpen || isOrdersOpen;
 
         const observerRefs = useRef([]);
 
@@ -688,12 +701,14 @@
           
           h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick }),
           
-          h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode }),
+          // --- LAYOUT FIX PASSED DOWN HERE ---
+          h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
             displayedProducts.map((product, index) => (
-              h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isCartOpen ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
-                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[55vh] md:mt-0 max-h-[45vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isCartOpen ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
+              // --- DYNAMIC SHIFT IS NOW TIED TO isSidebarActive ---
+              h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
+                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[55vh] md:mt-0 max-h-[45vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
                   h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
                   h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90" }, `"${product.tagline}"`),
