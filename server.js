@@ -16,10 +16,10 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 app.post('/create-order', async (req, res) => {
     try {
-        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress } = req.body;
+        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl } = req.body;
         const orderId = 'ORDER_' + Date.now();
 
-        // SAVE THE ORDER TO SUPABASE FIRST (Status: PENDING)
+        // SAVE THE ORDER TO SUPABASE WITH THE EXACT MATH
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -30,7 +30,9 @@ app.post('/create-order', async (req, res) => {
                     customer_email: customerEmail,
                     shipping_address: shippingAddress,
                     total_amount: orderAmount,
-                    payment_status: 'PENDING'
+                    payment_status: 'PENDING',
+                    reward_ml: rewardMl || 0,
+                    claimed_reward_ml: claimedRewardMl || 0
                 }
             ]);
 
@@ -82,7 +84,7 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-// --- THE NEW WEBHOOK LISTENER ---
+// --- THE UPGRADED WEBHOOK ---
 app.post('/webhook', async (req, res) => {
     try {
         const paymentStatus = req.body.data.payment.payment_status;
@@ -97,18 +99,19 @@ app.post('/webhook', async (req, res) => {
             if (!error) {
                 console.log(`[SUCCESS] Order ${orderId} has been marked as PAID!`);
 
-                // --- THE LOYALTY DROP ---
-                // 1. Find the email attached to this order
-                const { data: orderData } = await supabase.from('orders').select('customer_email').eq('order_id', orderId).single();
+                const { data: orderData } = await supabase.from('orders').select('customer_email, reward_ml, claimed_reward_ml').eq('order_id', orderId).single();
 
                 if (orderData && orderData.customer_email) {
-                    // 2. Check their current Loyalty ML
                     const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
 
                     if (profileData) {
-                        // 3. Pour 20ml into the bottle!
-                        await supabase.from('profiles').update({ loyalty_ml: profileData.loyalty_ml + 20 }).eq('email', orderData.customer_email);
-                        console.log(`[LOYALTY] Added 20ml to ${orderData.customer_email}`);
+                        // The Flawless Math: Add what they earned (20 * qty), subtract what they spent (100 if they claimed a bottle)
+                        const earned = orderData.reward_ml || 0;
+                        const spent = orderData.claimed_reward_ml || 0;
+                        const newTotal = profileData.loyalty_ml + earned - spent;
+
+                        await supabase.from('profiles').update({ loyalty_ml: newTotal }).eq('email', orderData.customer_email);
+                        console.log(`[LOYALTY] Updated ${orderData.customer_email}. Earned: ${earned}ML. Spent: ${spent}ML.`);
                     }
                 }
             }
