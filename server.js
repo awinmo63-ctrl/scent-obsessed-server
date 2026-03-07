@@ -16,10 +16,10 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 app.post('/create-order', async (req, res) => {
     try {
-        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl } = req.body;
+        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, itemsSummary } = req.body;
         const orderId = 'ORDER_' + Date.now();
 
-        // SAVE THE ORDER TO SUPABASE WITH THE EXACT MATH
+        // SAVE THE ORDER TO SUPABASE WITH THE EXACT MATH AND ITEMS
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -32,7 +32,8 @@ app.post('/create-order', async (req, res) => {
                     total_amount: orderAmount,
                     payment_status: 'PENDING',
                     reward_ml: rewardMl || 0,
-                    claimed_reward_ml: claimedRewardMl || 0
+                    claimed_reward_ml: claimedRewardMl || 0,
+                    items_summary: itemsSummary || 'No items listed' // NEW: Saves the exact perfumes!
                 }
             ]);
 
@@ -84,7 +85,7 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-// --- THE UPGRADED WEBHOOK ---
+// --- THE WEBHOOK ---
 app.post('/webhook', async (req, res) => {
     try {
         const paymentStatus = req.body.data.payment.payment_status;
@@ -105,7 +106,6 @@ app.post('/webhook', async (req, res) => {
                     const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
 
                     if (profileData) {
-                        // The Flawless Math: Add what they earned (20 * qty), subtract what they spent (100 if they claimed a bottle)
                         const earned = orderData.reward_ml || 0;
                         const spent = orderData.claimed_reward_ml || 0;
                         const newTotal = profileData.loyalty_ml + earned - spent;

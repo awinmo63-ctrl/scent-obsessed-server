@@ -101,7 +101,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, Gift } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -170,7 +170,7 @@
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
       // --- PERMANENT FLOATING LOYALTY WIDGET ---
-      const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaim }) => {
+      const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaimClick }) => {
         if (!user) return null;
         const percentage = Math.min((loyaltyMl / 100) * 100, 100);
         const mlLeft = Math.max(0, 100 - loyaltyMl);
@@ -192,8 +192,30 @@
               h('p', { className: "font-mono text-white text-[10px] tracking-widest mb-1" }, `${loyaltyMl} / 100 ML`),
               mlLeft > 0 
                   ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase group-hover:text-gray-300 transition-colors" }, `${mlLeft} ML to Free Bottle`)
-                  : h('button', { onClick: onClaim, className: "mt-1 px-3 py-1.5 bg-obsessed-gold text-black text-[9px] font-bold uppercase tracking-widest animate-pulse hover:bg-white transition-colors" }, "Claim Free Bottle")
+                  : h('button', { onClick: onClaimClick, className: "mt-1 px-3 py-1.5 bg-obsessed-gold text-black text-[9px] font-bold uppercase tracking-widest animate-pulse hover:bg-white transition-colors flex items-center gap-1" }, h(Gift, {size: 10}), "Claim Free Bottle")
            )
+        );
+      };
+
+      // --- NEW: THE REWARD CHOICE MODAL ---
+      const RewardModal = ({ isOpen, onClose, onSelect, products }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in" },
+            h('div', { className: "relative w-full max-w-3xl bg-[#111] border border-obsessed-gold/40 p-8 shadow-[0_0_50px_rgba(212,175,55,0.15)] rounded-xl" },
+                h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })),
+                h('div', { className: "text-center mb-8" },
+                    h('h2', { className: "font-display text-3xl text-obsessed-gold tracking-widest uppercase mb-2" }, "Choose Your Reward"),
+                    h('p', { className: "font-sans text-xs text-gray-400 tracking-wide" }, "Your vessel is full. Select your complimentary 100ML signature essence.")
+                ),
+                h('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
+                    products.map(p => 
+                        h('div', { key: p.id, onClick: () => onSelect(p), className: "cursor-pointer group flex flex-col items-center border border-gray-800 bg-[#1a1a1a] p-6 rounded hover:border-obsessed-gold hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] transition-all duration-300" },
+                            h('img', { src: p.imageUrl, className: "w-full h-32 object-contain mb-4 grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110" }),
+                            h('h3', { className: "font-display text-[10px] md:text-xs text-white text-center uppercase tracking-widest group-hover:text-obsessed-gold transition-colors" }, p.name)
+                        )
+                    )
+                )
+            )
         );
       };
 
@@ -309,7 +331,9 @@
                       h('span', { className: `text-[9px] uppercase tracking-widest px-2 py-1 rounded ${order.payment_status === 'PAID' ? 'bg-green-900/30 text-green-400' : 'bg-obsessed-gold/20 text-obsessed-gold'}` }, order.payment_status.replace('_', ' '))
                     ),
                     h('p', { className: "text-gray-400 text-xs mb-2" }, new Date(order.created_at).toLocaleDateString()),
-                    h('p', { className: "text-obsessed-gold font-display text-sm" }, formatPrice(order.total_amount))
+                    // Show what they actually ordered!
+                    order.items_summary && h('p', { className: "text-gray-300 text-[10px] mb-2 leading-relaxed" }, order.items_summary),
+                    h('p', { className: "text-obsessed-gold font-display text-sm mt-2 pt-2 border-t border-gray-700" }, formatPrice(order.total_amount))
                   )
                 ))
               )
@@ -422,12 +446,9 @@
         const [cart, setCart] = useState([]);
         const [isCartOpen, setIsCartOpen] = useState(false);
         const [isMenuOpen, setIsMenuOpen] = useState(false);
-        
-        // RESTORED SEARCH VARIABLES
         const [isSearchOpen, setIsSearchOpen] = useState(false);
         const [searchQuery, setSearchQuery] = useState("");
 
-        // RESTORED LEGAL MODAL VARIABLES
         const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
         const [isTermsOpen, setIsTermsOpen] = useState(false);
         const [isRefundOpen, setIsRefundOpen] = useState(false);
@@ -446,6 +467,7 @@
         
         const [mistState, setMistState] = useState('idle'); // 'idle'|'blooming'|'flying'|'claiming_bloom'|'claiming_fly'
         const [showShine, setShowShine] = useState(false);
+        const [showClaimModal, setShowClaimModal] = useState(false); // NEW STATE FOR CHOICE MENU
 
         const observerRefs = useRef([]);
 
@@ -487,7 +509,7 @@
                 }
             };
             fetchProfileData();
-        }, [user, isOrdersOpen, showSuccess]); // Refresh when success closes
+        }, [user, isOrdersOpen, showSuccess]); 
 
         // --- ANIMATIONS ---
         const handleTriggerPurchaseMist = () => {
@@ -497,40 +519,40 @@
             setTimeout(() => {
                 setMistState('idle'); 
                 setShowShine(true); 
-                // DB refresh handles the real math!
                 setTimeout(() => setShowShine(false), 2000);
             }, 1400);
         };
 
-        const handleClaimFreeBottle = () => {
+        const handleClaimClick = () => {
             if (loyaltyMl < 100) return;
+            setShowClaimModal(true); // Open the choice menu!
+        };
+
+        const handleSelectFreeBottle = (selectedProduct) => {
+            setShowClaimModal(false); // Close the choice menu
             
-            // 1. Trigger the cinematic claim animation (flies to the Cart top right)
+            // 1. Trigger the cinematic claim animation
             setMistState('claiming_bloom');
             setTimeout(() => setMistState('claiming_fly'), 200);
 
             setTimeout(() => {
                 setMistState('idle');
                 
-                // 2. Add the free bottle directly to their cart
+                // 2. Add the SPECIFIC free bottle they chose directly to their cart
                 const freeBottle = {
-                    id: 'free-reward-' + Date.now(),
-                    name: 'Free 100ML Essence',
+                    id: 'free-reward-' + selectedProduct.id + '-' + Date.now(),
+                    name: selectedProduct.name + ' (100ML)',
                     tagline: 'Your Loyalty Rewarded',
                     price: "₹ 0", 
                     originalPrice: "₹ 2,499",
-                    colorHex: '#d4af37',
-                    imageUrl: './urban_ember.png',
+                    colorHex: selectedProduct.colorHex,
+                    imageUrl: selectedProduct.imageUrl,
                     qty: 1,
-                    isReward: true // Special tag
+                    isReward: true
                 };
                 
                 setCart(prev => [...prev, freeBottle]);
-                
-                // 3. Pop the cart open to show them the ₹ 0 price!
-                setIsCartOpen(true);
-                
-                // NOTE: We only deduct the 100 ML from the database when they actually COMPLETE the checkout.
+                setIsCartOpen(true); // Pop the cart open
             }, 1400);
         };
 
@@ -552,22 +574,20 @@
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
           const hasReward = cart.some(item => item.isReward);
           
-          // Math: They earn 20 ML for every bottle they PAY for.
           const earnedRewardMl = totalPaidItems * 20; 
-          // Math: If they have a Free Bottle in the cart, we need to subtract 100 ML from their profile.
           const claimedRewardMl = hasReward ? 100 : 0; 
-
           const totalMoney = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+
+          // NEW: Create a beautifully formatted string of exactly what they ordered to send to the database
+          const itemsSummaryString = cart.map(item => `${item.qty}x ${item.name}${item.isReward ? ' (FREE REWARD)' : ''}`).join(', ');
           
-          // Even if the total is ₹ 0 (they are ONLY checking out a free bottle), we can bypass Cashfree
           if (totalMoney === 0) {
              const fakeOrderId = 'ORDER_' + Date.now();
-             // Just save it and trigger success manually
              await supabase.from('orders').insert([{
                   order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email,
-                  shipping_address: formData.address, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl
+                  shipping_address: formData.address, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl,
+                  items_summary: itemsSummaryString // Save the items!
              }]);
-             // Immediately deduct their 100 ML since we bypassed the webhook
              await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
              window.location.href = `/?success=true&order_id=${fakeOrderId}`;
              return;
@@ -583,8 +603,9 @@
                 customerPhone: formData.phone,
                 customerEmail: formData.email,
                 shippingAddress: formData.address,
-                rewardMl: earnedRewardMl,          // Backend saves this
-                claimedRewardMl: claimedRewardMl   // Backend saves this
+                rewardMl: earnedRewardMl,          
+                claimedRewardMl: claimedRewardMl,   
+                itemsSummary: itemsSummaryString // Send the items to the backend!
               })
             });
 
@@ -612,21 +633,23 @@
             className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${
                 mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' :
                 mistState === 'flying' ? 'top-[calc(100vh-100px)] md:top-[calc(100vh-60px)] left-10 md:left-14 w-16 h-16 opacity-80 duration-1000' :
-                mistState === 'claiming_bloom' ? 'bottom-16 left-16 w-40 h-40 opacity-100 duration-500' :
+                mistState === 'claiming_bloom' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-100 duration-500' :
                 mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' :
                 'opacity-0'
             }`
           }),
 
-          // RESTORED MODALS AND SEARCH OVERLAY
+          // MODALS & OVERLAYS
           h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('p', null, "Privacy Policy content here.") ),
           h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('p', null, "Terms and Conditions content here.") ),
           h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('p', null, "Refund policy content here.") ),
           h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('p', null, "Shipping policy content here.") ),
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
-
           h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false) }),
           
+          // THE NEW REWARD CHOICE MODAL
+          h(RewardModal, { isOpen: showClaimModal, onClose: () => setShowClaimModal(false), onSelect: handleSelectFreeBottle, products: PRODUCTS }),
+
           h(Navigation, { 
               onSearchClick: () => setIsSearchOpen(!isSearchOpen),
               onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, 
@@ -640,8 +663,9 @@
           h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart, updateQty, checkout: handleCheckout, formData, setFormData, user }),
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
           
-          // THE PERMANENT WIDGET WITH CLAIM LOGIC
-          h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimFreeBottle }),
+          // THE PERMANENT WIDGET
+          h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaimClick: handleClaimClick }),
+          
           h(VisualsLayer, { products: PRODUCTS, activeIndex: activeSection, is3DMode }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
