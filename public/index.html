@@ -79,7 +79,6 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-      /* Ensure model-viewer takes pointer events when active */
       model-viewer.active {
         pointer-events: auto !important;
       }
@@ -110,18 +109,16 @@
 
       const h = React.createElement;
 
-      // --- SUPABASE INITIALIZATION ---
       const supabaseUrl = 'https://dyfasmiifyhfvuzcbjlp.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZmFzbWlpZnloZnZ1emNiamxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTI3NjAsImV4cCI6MjA4ODEyODc2MH0.0PkXE4FEKUnUtIXVehmyz-NRCNPqQyPMk1Mqdz-GUsA'; 
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // --- FULL PRODUCTS RESTORED ---
       const PRODUCTS = [
         {
           id: 'blue-monarch',
           name: 'Blue Monarch',
           tagline: 'Rule Your Realm',
-          narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.\n\nBlue Monarch: Don't just enter the room—command it.",
+          narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nBlue Monarch: Don't just enter the room—command it.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#0f52ba', 
@@ -134,7 +131,7 @@
           id: 'urban-ember',
           name: 'Urban Ember',
           tagline: 'Ignite Your Presence',
-          narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression. Guaiac Wood and Opoponax provide a warm, resinous glow, while Oakmoss adds an earthy depth that lingers on the skin like a memory.\n\nUrban Ember is not just a scent; it is the warmth of confidence in a cool city night.",
+          narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore.\n\nUrban Ember is not just a scent; it is the warmth of confidence in a cool city night.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#d4af37', 
@@ -147,7 +144,7 @@
           id: 'flora-essence',
           name: 'Flora Essence',
           tagline: 'The Scent of Sunlight',
-          narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin. Flora Essence is not just a perfume; it is an aura of natural elegance.",
+          narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart.\n\nFlora Essence is not just a perfume; it is an aura of natural elegance.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#046307', 
@@ -160,7 +157,7 @@
           id: 'savage-wind',
           name: 'Savage Wind',
           tagline: 'Unleash the Storm',
-          narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness that lingers for hours.\n\nSavage Wind: Fresh enough to wake you up, dark enough to keep them guessing.",
+          narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses.\n\nSavage Wind: Fresh enough to wake you up, dark enough to keep them guessing.",
           price: "₹ 720",
           originalPrice: "₹ 2,499",
           colorHex: '#555555', 
@@ -226,36 +223,15 @@
           safeProducts.map((product, index) => {
             const isActive = index === activeIndex; const isPrev = index === activeIndex - 1; const isNext = index === activeIndex + 1;
             let transformStyle = {}; let opacity = 0; let zIndex = 0; let filter = 'none'; let pointerEvents = 'none';
-            
             if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '45%', left: '50%' }; pointerEvents = is3DMode ? 'auto' : 'none'; } 
             else if (isPrev) { opacity = 0.6; zIndex = 5; transformStyle = { transform: `translate(-50%, 0%) scale(0.15)`, top: 'auto', bottom: '2rem', left: '50%' }; filter = 'grayscale(100%)'; } 
             else if (isNext) { opacity = 0; zIndex = 1; }
-            
             return h('div', { key: product.id, className: `absolute transition-all duration-1000 ease-in-out will-change-transform w-[85vw] h-[50vh] md:w-[60vh] md:h-[80vh]`, style: { ...transformStyle, opacity: opacity, zIndex: zIndex, filter: filter, pointerEvents: pointerEvents } },
               h('div', { className: "relative w-full h-full" },
                 h('div', { className: "absolute inset-0 rounded-full blur-3xl opacity-40 transform scale-75", style: { backgroundColor: product.colorHex } }),
-                
-                h('model-viewer', {
-                    src: product.modelSrc,
-                    orientation: product.orientation,
-                    'auto-rotate': 'true',
-                    'camera-controls': 'true',
-                    'rotation-per-second': '30deg',
-                    'interaction-prompt': 'none',
-                    style: { width: '100%', height: '100%', backgroundColor: 'transparent', position: 'absolute', inset: 0, zIndex: 20 },
-                    className: `w-full h-full ${is3DMode && isActive ? 'active' : 'opacity-0'}`
-                }),
-
-                h('img', { 
-                    src: product.imageUrl, 
-                    alt: product.name, 
-                    className: `w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-opacity duration-500 ${is3DMode && isActive ? 'opacity-0' : 'opacity-100'}`, 
-                    style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' } 
-                }),
-                
-                h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500 ${is3DMode && isActive ? 'opacity-0' : 'opacity-100'}` }, 
-                    h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0])
-                )
+                is3DMode ? h('model-viewer', { src: product.modelSrc, orientation: product.orientation, 'auto-rotate': 'true', 'camera-controls': 'true', 'rotation-per-second': '30deg', 'interaction-prompt': 'none', style: { width: '100%', height: '100%', backgroundColor: 'transparent', position: 'absolute', inset: 0, zIndex: 20 }, className: `w-full h-full ${isActive ? 'active' : 'opacity-0'}` }) 
+                : h('img', { src: product.imageUrl, alt: product.name, className: `w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-opacity duration-500`, style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' } }),
+                !is3DMode && h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500` }, h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0]))
               )
             );
           }),
@@ -289,11 +265,12 @@
             h('nav', { className: "flex flex-col gap-8" },
               links.map(link => h('a', { 
                   key: link.name, 
-                  href: (link.type === 'scroll' || link.type === 'story') ? "#" : `https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, 
-                  target: link.type === 'whatsapp' ? "_blank" : "_self", 
+                  href: "#", 
                   onClick: (e) => { 
-                      if(link.type === 'scroll') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } 
-                      if(link.type === 'story') { e.preventDefault(); onOpenStory(); onClose(); }
+                      e.preventDefault();
+                      if(link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } 
+                      else if(link.type === 'story') { onOpenStory(); onClose(); }
+                      else if(link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); }
                   }, 
                   className: "font-display text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" 
               }, link.name))
@@ -477,6 +454,7 @@
         const observerRefs = useRef([]);
 
         useEffect(() => {
+          console.log("App successfully mounted");
           supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) { setUser(session.user); }
           });
@@ -624,18 +602,23 @@
           } catch (err) { console.error("Checkout Error:", err); alert("Cannot connect to the payment server."); }
         };
 
+        const displayedProducts = useMemo(() => {
+           if (!searchQuery) return PRODUCTS;
+           return PRODUCTS.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.narrative.toLowerCase().includes(searchQuery.toLowerCase()));
+        }, [searchQuery]);
+
         useEffect(() => {
-          observerRefs.current = observerRefs.current.slice(0, PRODUCTS.length);
+          observerRefs.current = observerRefs.current.slice(0, displayedProducts.length);
           const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => { if (entry.isIntersecting) setActiveSection(Number(entry.target.getAttribute('data-index'))); });
           }, { root: null, rootMargin: '-30% 0px -30% 0px', threshold: 0 }); 
           observerRefs.current.forEach((ref) => { if (ref) observer.observe(ref); });
           return () => observer.disconnect();
-        }, []);
+        }, [displayedProducts]);
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
           
-          mistState !== 'idle' && h('div', {
+          mistState !== 'idle' ? h('div', {
             className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${
                 mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' :
                 mistState === 'flying' ? 'top-[calc(100vh-100px)] md:top-[calc(100vh-60px)] left-10 md:left-14 w-16 h-16 opacity-80 duration-1000' :
@@ -643,65 +626,30 @@
                 mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' :
                 'opacity-0'
             }`
-          }),
+          }) : null,
 
           h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
             h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
               h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
               h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."),
               h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."),
-              h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background."),
-              h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room. From the first spark of Urban Ember to the untamed spirit of Savage Wind, every bottle is a result of meticulous craftsmanship and an uncompromising obsession with quality."),
+              h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")),
+              h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."),
               h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.")
             )
           ),
           
           h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, 
-            h('div', null, 
-                h('p', { className: "mb-4" }, "Scent Obsessed is committed to protecting your privacy. This policy outlines how we collect, use, and protect your personal information when you interact with our boutique."),
-                h('p', { className: "mb-4 text-white font-bold" }, "1. Information Collection"),
-                h('p', { className: "mb-4" }, "We only collect information necessary to fulfill your orders, including your name, delivery address, email, and phone number. Payment details are securely processed via Cashfree and are not stored on our servers."),
-                h('p', { className: "mb-4 text-white font-bold" }, "2. Use of Information"),
-                h('p', { className: "mb-4" }, "Your details are used exclusively for shipping logistics, tracking updates, and awarding Loyalty ML to your profile."),
-                h('p', { className: "mb-4 text-white font-bold" }, "3. Data Protection"),
-                h('p', { className: "mb-4" }, "We implement stringent security measures and utilize encrypted databases (Supabase) to ensure your data remains confidential. We do not sell or share your data with third-party marketers.")
-            ) 
+            h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy. We implement stringent security measures and utilize encrypted databases (Supabase) to ensure your data remains confidential.")) 
           ),
-          
           h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, 
-             h('div', null, 
-                h('p', { className: "mb-4" }, "By accessing Scent Obsessed, you agree to comply with the following terms."),
-                h('p', { className: "mb-4 text-white font-bold" }, "1. General Conditions"),
-                h('p', { className: "mb-4" }, "We reserve the right to refuse service to anyone for any reason at any time. Prices for our products are subject to change without notice."),
-                h('p', { className: "mb-4 text-white font-bold" }, "2. The Loyalty Vessel"),
-                h('p', { className: "mb-4" }, "Loyalty ML is earned solely through completed and verified purchases. 20 ML is awarded per purchased bottle. Free reward bottles do not accrue ML. Loyalty ML cannot be exchanged for cash."),
-                h('p', { className: "mb-4 text-white font-bold" }, "3. Accuracy of Billing"),
-                h('p', { className: "mb-4" }, "You agree to provide current, complete, and accurate purchase and account information for all acquisitions made at our store.")
-            ) 
+             h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms. Loyalty ML is earned solely through completed and verified purchases.")) 
           ),
-          
           h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, 
-            h('div', null, 
-                h('p', { className: "mb-4" }, "Due to the intimate and personal nature of fragrances, we maintain a strict hygiene protocol."),
-                h('p', { className: "mb-4 text-white font-bold" }, "1. Returns"),
-                h('p', { className: "mb-4" }, "We accept returns only for completely unopened bottles within 7 days of delivery. The cellophane wrapping must be completely intact. Once opened, fragrances cannot be returned."),
-                h('p', { className: "mb-4 text-white font-bold" }, "2. Damages & Issues"),
-                h('p', { className: "mb-4" }, "If your bottle arrives damaged or broken, you must provide a clear unboxing video within 48 hours of delivery to qualify for an immediate replacement."),
-                h('p', { className: "mb-4 text-white font-bold" }, "3. Refunds"),
-                h('p', { className: "mb-4" }, "Approved refunds will be processed back to your original payment method (via Cashfree) within 5-7 business days.")
-            ) 
+            h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles within 7 days of delivery.")) 
           ),
-          
           h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, 
-             h('div', null, 
-                h('p', { className: "mb-4" }, "We deliver the Scent Obsessed experience directly to your doorstep across India."),
-                h('p', { className: "mb-4 text-white font-bold" }, "1. Processing Time"),
-                h('p', { className: "mb-4" }, "All orders are meticulously packaged and dispatched from our Punjab facility within 24 to 48 hours of order confirmation."),
-                h('p', { className: "mb-4 text-white font-bold" }, "2. Delivery Estimates"),
-                h('p', { className: "mb-4" }, "Standard delivery typically takes 3-7 working days, depending on your pin code. Remote areas may experience slight delays."),
-                h('p', { className: "mb-4 text-white font-bold" }, "3. Tracking"),
-                h('p', { className: "mb-4" }, "Once dispatched, you will receive a tracking link via email/SMS. You can also utilize the 'Track Order' WhatsApp concierge via our main menu.")
-            ) 
+             h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours of order confirmation.")) 
           ),
 
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
@@ -721,13 +669,12 @@
           h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart, updateQty, checkout: handleCheckout, formData, setFormData, user }),
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
           
-          // ---- THIS IS WHERE THE ERROR WAS. IT IS NOW FIXED ----
           h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick }),
           
-          h(VisualsLayer, { products: PRODUCTS, activeIndex: activeSection, is3DMode }),
+          h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
-            PRODUCTS.map((product, index) => (
+            displayedProducts.map((product, index) => (
               h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isCartOpen ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
                 h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[55vh] md:mt-0 max-h-[45vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isCartOpen ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
