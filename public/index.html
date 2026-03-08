@@ -33,6 +33,7 @@
             animation: {
               'float': 'float 6s ease-in-out infinite',
               'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
             keyframes: {
@@ -43,6 +44,10 @@
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
+              },
+              slideDown: {
+                '0%': { transform: 'translate(-50%, -150%)', opacity: '0' },
+                '100%': { transform: 'translate(-50%, 0)', opacity: '1' }
               }
             }
           }
@@ -104,7 +109,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -170,6 +175,16 @@
 
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
+
+      // --- THE NEW LUXURY NOTIFICATION BANNER ---
+      const NotificationBanner = ({ message, onClose }) => {
+        if (!message) return null;
+        return h('div', { className: "fixed top-8 left-1/2 -translate-x-1/2 z-[9999] bg-[#111]/95 backdrop-blur-md border border-obsessed-gold/50 px-6 md:px-8 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex items-center gap-4 md:gap-6 animate-slide-down pointer-events-auto" },
+            h(Sparkles, { size: 16, className: "text-obsessed-gold flex-shrink-0" }),
+            h('span', { className: "font-sans text-[9px] md:text-[10px] tracking-[0.2em] text-white uppercase" }, message),
+            h('button', { onClick: onClose, className: "text-gray-500 hover:text-obsessed-gold transition-colors ml-2 md:ml-4 flex-shrink-0" }, h(X, { size: 16 }))
+        );
+      };
 
       const TrackingModal = ({ isOpen, onClose, order }) => {
         if (!isOpen || !order) return null;
@@ -333,7 +348,8 @@
         );
       };
 
-      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder }) => {
+      // Passed `notify` to OrdersSidebar
+      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder, notify }) => {
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
 
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
@@ -354,7 +370,7 @@
                   h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" },
                       h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode),
                       h('button', { 
-                          onClick: () => { navigator.clipboard.writeText(refCode); alert("Code copied to clipboard!"); }, 
+                          onClick: () => { navigator.clipboard.writeText(refCode); notify("Access code copied to clipboard."); }, 
                           className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" 
                       }, h(Copy, { size: 10 }), "Copy")
                   )
@@ -410,42 +426,47 @@
         );
       };
 
-      const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user }) => {
+      // Passed `notify` to CartSidebar
+      const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user, notify }) => {
         const [promoCode, setPromoCode] = useState('');
         const [appliedDiscount, setAppliedDiscount] = useState(0);
 
-        // --- NEW: THE VAULT SECURITY CHECK ---
         const handleApplyPromo = async () => {
             const code = promoCode.trim().toUpperCase();
             if (!code) return;
 
-            // 1. Check for Funnel 3: Referral Loops
             if (code.startsWith('SO-') && code.length >= 9) {
                 if (user && code === `SO-${user.id.substring(0, 6).toUpperCase()}`) {
-                    alert("You cannot use your own referral code.");
+                    notify("You cannot use your own referral code.");
                     return;
                 }
                 setAppliedDiscount(10);
-                alert("Referral Accepted: 10% Off Applied. Your friend thanks you.");
+                notify("Referral Accepted: 10% Off Applied. Your friend thanks you.");
                 return;
             }
 
-            // 2. Check for Funnel 2: VIP Vault Codes
             const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
             
             if (error || !data) {
-                alert("Invalid Access Code.");
+                notify("Invalid Access Code.");
                 setAppliedDiscount(0);
                 return;
             }
             if (data.is_used) {
-                alert("This Access Code has already been redeemed.");
+                notify("This Access Code has already been redeemed.");
                 setAppliedDiscount(0);
                 return;
             }
 
             setAppliedDiscount(data.discount_percentage || 16);
-            alert(`VIP Access Granted: ${data.discount_percentage}% Off Applied.`);
+            notify(`VIP Access Granted: ${data.discount_percentage}% Off Applied.`);
+        };
+
+        // --- NEW: FUNCTION TO REMOVE THE PROMO ---
+        const handleRemovePromo = () => {
+            setAppliedDiscount(0);
+            setPromoCode('');
+            notify("Access code removed.");
         };
 
         const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
@@ -483,10 +504,17 @@
 
                   cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
                       h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2" }, "Access Code"),
-                      h('div', { className: "flex gap-2" },
-                          h('input', { type: "text", placeholder: "Enter code...", value: promoCode, onChange: (e) => setPromoCode(e.target.value), className: "flex-1 bg-black border border-gray-800 p-2 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none" }),
-                          h('button', { onClick: handleApplyPromo, className: "px-4 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
-                      )
+                      // --- NEW: TOGGLE BETWEEN INPUT BOX AND ACTIVE BADGE ---
+                      appliedDiscount > 0 ? 
+                          h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
+                              h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, promoCode),
+                              h('button', { onClick: handleRemovePromo, className: "text-[9px] text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors" }, h(X, { size: 10 }), "Remove")
+                          )
+                      :
+                          h('div', { className: "flex gap-2" },
+                              h('input', { type: "text", placeholder: "Enter code...", value: promoCode, onChange: (e) => setPromoCode(e.target.value), className: "flex-1 bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
+                              h('button', { onClick: handleApplyPromo, className: "px-6 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
+                          )
                   ),
 
                   cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4" },
@@ -509,7 +537,7 @@
               ),
               h('button', { 
                 onClick: () => {
-                  if (!user) { alert("Please Sign In via the Profile Menu to secure your acquisition and earn Loyalty Rewards."); onClose(); return; }
+                  if (!user) { notify("Please Sign In via the Profile Menu to secure your acquisition and earn Loyalty Rewards."); onClose(); return; }
                   checkout(finalTotal, promoCode.trim().toUpperCase()); 
                 }, 
                 disabled: cart.length === 0, 
@@ -587,6 +615,13 @@
         const [mistState, setMistState] = useState('idle');
         const [showShine, setShowShine] = useState(false);
 
+        // --- NEW TOAST NOTIFICATION STATE ---
+        const [notification, setNotification] = useState(null);
+        const notify = (msg) => {
+            setNotification(msg);
+            setTimeout(() => setNotification(null), 4000);
+        };
+
         const isSidebarActive = isCartOpen || isOrdersOpen;
 
         const observerRefs = useRef([]);
@@ -602,7 +637,7 @@
         }, []);
 
         useEffect(() => {
-          const urlParams = new URLSearchParams(window.location.search);
+          const urlParams = newSearchParams(window.location.search);
           if (urlParams.get('success') === 'true') {
             setShowSuccess(true);
             setSuccessOrderId(urlParams.get('order_id'));
@@ -686,7 +721,10 @@
         const updateQty = (id, delta) => { setCart(prev => prev.map(item => item.id === id && !item.isReward ? { ...item, qty: Math.max(0, item.qty + delta) } : item).filter(item => item.qty > 0 || item.isReward)); };
 
         const handleCheckout = async (finalDiscountedTotal, appliedPromo = '') => {
-          if (!formData.name || !formData.phone || !formData.email || !formData.address) { alert("Please fill out all Delivery Details."); return; }
+          if (!formData.name || !formData.phone || !formData.email || !formData.address) { 
+              notify("Please fill out all Delivery Details."); 
+              return; 
+          }
           
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
           const hasReward = cart.some(item => item.isReward);
@@ -732,8 +770,8 @@
             if (data.payment_session_id) {
                const cashfree = Cashfree({ mode: "sandbox" });
                cashfree.checkout({ paymentSessionId: data.payment_session_id });
-            } else { alert("Error starting checkout. Please check your backend."); }
-          } catch (err) { console.error("Checkout Error:", err); alert("Cannot connect to the payment server."); }
+            } else { notify("Error starting checkout. Please check your backend."); }
+          } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
         };
 
         const displayedProducts = useMemo(() => {
@@ -752,6 +790,9 @@
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
           
+          // --- THE GLOBAL NOTIFICATION SYSTEM ---
+          h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
+
           mistState !== 'idle' ? h('div', {
             className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${
                 mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' :
@@ -794,10 +835,11 @@
           h(OrdersSidebar, { 
               isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, 
               onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); },
-              onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); } 
+              onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); },
+              notify: notify
           }),
           
-          h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart, updateQty, checkout: handleCheckout, formData, setFormData, user }),
+          h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart, updateQty, checkout: handleCheckout, formData, setFormData, user, notify: notify }),
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
           
           h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick }),
