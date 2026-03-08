@@ -104,7 +104,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -170,6 +170,45 @@
 
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
+
+      const TrackingModal = ({ isOpen, onClose, order }) => {
+        if (!isOpen || !order) return null;
+        const statusMap = { 'PREPARING': 1, 'PACKED': 2, 'SHIPPED': 3, 'DELIVERED': 4 };
+        const currentStep = statusMap[order.tracking_status] || 1;
+        const steps = [
+            { num: 1, title: "Secured", desc: "Payment confirmed.", icon: CheckCircle2 },
+            { num: 2, title: "Bottled & Sealed", desc: "Your essence is being prepared.", icon: Package },
+            { num: 3, title: "In Transit", desc: "Out for delivery.", icon: Truck },
+            { num: 4, title: "Delivered", desc: "Arrived safely.", icon: MapPin }
+        ];
+
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
+          h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-8 shadow-[0_0_50px_rgba(212,175,55,0.15)]" },
+            h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
+            h('h2', { className: "font-display text-xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "Dossier Tracking"),
+            h('p', { className: "font-mono text-[10px] text-gray-500 text-center mb-8 tracking-wider" }, order.order_id),
+            
+            h('div', { className: "relative pl-6 space-y-8" },
+               h('div', { className: "absolute top-2 bottom-2 left-[35px] w-px bg-gray-800" }),
+               steps.map((step) => {
+                   const isCompleted = currentStep >= step.num;
+                   const isCurrent = currentStep === step.num;
+                   return h('div', { key: step.num, className: `relative flex gap-6 items-start ${isCompleted ? 'opacity-100' : 'opacity-40'}` },
+                       h('div', { className: `relative z-10 w-8 h-8 rounded-full flex items-center justify-center border ${isCompleted ? 'border-obsessed-gold bg-obsessed-gold/20 text-obsessed-gold' : 'border-gray-700 bg-black text-gray-600'} ${isCurrent ? 'shadow-[0_0_15px_rgba(212,175,55,0.5)]' : ''}` }, h(step.icon, { size: 14 }) ),
+                       h('div', { className: "pt-1" },
+                           h('h4', { className: `font-sans text-[11px] uppercase tracking-widest ${isCompleted ? 'text-white' : 'text-gray-500'}` }, step.title),
+                           h('p', { className: "font-serif text-[10px] text-gray-400 italic mt-1" }, step.desc)
+                       )
+                   )
+               })
+            ),
+            order.awb_code && h('div', { className: "mt-8 p-4 bg-obsessed-gold/5 border border-obsessed-gold/20 text-center" },
+                h('p', { className: "font-sans text-[8px] text-obsessed-gold tracking-[0.2em] uppercase mb-1" }, "Tracking AWB"),
+                h('p', { className: "font-mono text-xs text-white tracking-widest" }, order.awb_code)
+            )
+          )
+        );
+      };
 
       const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaim }) => {
         if (!user) return null;
@@ -294,24 +333,38 @@
         );
       };
 
-      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout }) => {
+      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder }) => {
+        const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
+
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
             h('div', { className: "flex justify-between items-center mb-6" },
               h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white" }, h(X, { size: 24 }))
             ),
             user ? h(React.Fragment, null,
-              h('div', { className: "mb-8 pb-6 border-b border-gray-800" },
+              h('div', { className: "mb-6 pb-6 border-b border-gray-800" },
                 h('p', { className: "text-white font-sans text-sm mb-1" }, user.user_metadata?.full_name || user.email),
                 h('button', { onClick: onLogout, className: "mt-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-white uppercase tracking-widest transition-colors" }, h(LogOut, { size: 12 }), "Sign Out" )
               ),
+
+              h('div', { className: "mb-8 bg-black/40 p-6 border border-obsessed-gold/30 rounded shadow-[0_0_20px_rgba(212,175,55,0.05)] text-center relative overflow-hidden" },
+                  h('div', { className: "absolute top-0 right-0 w-16 h-16 bg-obsessed-gold/10 rounded-full blur-xl" }),
+                  h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2 relative z-10" }, "Invite to the Obsession"),
+                  h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 20 ML will be poured into your Loyalty Vessel."),
+                  h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" },
+                      h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode),
+                      h('button', { 
+                          onClick: () => { navigator.clipboard.writeText(refCode); alert("Code copied to clipboard!"); }, 
+                          className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" 
+                      }, h(Copy, { size: 10 }), "Copy")
+                  )
+              ),
+
               h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"),
               h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-6 no-scrollbar pb-10" },
                 orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") :
                 orders.map(order => (
-                  // --- THE NEW LUXURY RECEIPT CARD ---
                   h('div', { key: order.id, className: "relative bg-black p-5 border border-obsessed-gold/20 flex flex-col gap-3 group hover:border-obsessed-gold/50 transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.5)]" },
-                    // Top Receipt Header
                     h('div', { className: "flex justify-between items-center border-b border-gray-800/60 pb-3" },
                         h('div', { className: "flex flex-col" },
                             h('span', { className: "font-sans text-[8px] tracking-[0.2em] text-gray-500 uppercase" }, "Date"),
@@ -319,12 +372,10 @@
                         ),
                         h('span', { className: `text-[8px] uppercase tracking-widest px-2 py-1 border ${order.payment_status === 'PAID' ? 'border-green-900/50 text-green-400 bg-green-900/10' : 'border-obsessed-gold/30 text-obsessed-gold bg-obsessed-gold/10'}` }, order.payment_status === 'PAID' ? 'Secured' : 'Pending')
                     ),
-                    // Order ID Centered like a receipt number
                     h('div', { className: "text-center py-2" },
                         h('span', { className: "font-sans text-[8px] tracking-[0.3em] text-gray-600 uppercase block mb-1" }, "Dossier No."),
                         h('span', { className: "font-mono text-[9px] text-white tracking-wider" }, order.order_id)
                     ),
-                    // Itemized List
                     order.cart_items && order.cart_items.length > 0 ? 
                     h('div', { className: "pt-2 space-y-2" },
                         order.cart_items.map((item, idx) => (
@@ -339,11 +390,14 @@
                             )
                         ))
                     ) : h('div', { className: "pt-2 text-[9px] text-gray-600 italic font-serif text-center" }, "Archive dossier (details unavailable)"),
-                    // Total Line
                     h('div', { className: "flex justify-between items-center border-t border-gray-800/60 pt-3 mt-1" },
                         h('span', { className: "font-sans text-[9px] tracking-[0.2em] text-white uppercase" }, "Total"),
                         h('span', { className: "font-display text-sm text-obsessed-gold" }, formatPrice(order.total_amount))
-                    )
+                    ),
+                    order.payment_status === 'PAID' && h('button', { 
+                        onClick: () => onTrackOrder(order),
+                        className: "w-full mt-3 py-2 bg-gray-900 border border-gray-700 text-gray-300 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-obsessed-gold hover:text-black hover:border-obsessed-gold transition-colors flex items-center justify-center gap-2" 
+                    }, h(MapPin, { size: 10 }), "Track Dossier")
                   )
                 ))
               )
@@ -357,7 +411,46 @@
       };
 
       const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user }) => {
-        const totalAmount = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+        const [promoCode, setPromoCode] = useState('');
+        const [appliedDiscount, setAppliedDiscount] = useState(0);
+
+        // --- NEW: THE VAULT SECURITY CHECK ---
+        const handleApplyPromo = async () => {
+            const code = promoCode.trim().toUpperCase();
+            if (!code) return;
+
+            // 1. Check for Funnel 3: Referral Loops
+            if (code.startsWith('SO-') && code.length >= 9) {
+                if (user && code === `SO-${user.id.substring(0, 6).toUpperCase()}`) {
+                    alert("You cannot use your own referral code.");
+                    return;
+                }
+                setAppliedDiscount(10);
+                alert("Referral Accepted: 10% Off Applied. Your friend thanks you.");
+                return;
+            }
+
+            // 2. Check for Funnel 2: VIP Vault Codes
+            const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
+            
+            if (error || !data) {
+                alert("Invalid Access Code.");
+                setAppliedDiscount(0);
+                return;
+            }
+            if (data.is_used) {
+                alert("This Access Code has already been redeemed.");
+                setAppliedDiscount(0);
+                return;
+            }
+
+            setAppliedDiscount(data.discount_percentage || 16);
+            alert(`VIP Access Granted: ${data.discount_percentage}% Off Applied.`);
+        };
+
+        const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+        const discountAmount = Math.floor(subtotal * (appliedDiscount / 100));
+        const finalTotal = subtotal - discountAmount;
 
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
@@ -387,6 +480,15 @@
                       )
                     )
                   )),
+
+                  cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
+                      h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2" }, "Access Code"),
+                      h('div', { className: "flex gap-2" },
+                          h('input', { type: "text", placeholder: "Enter code...", value: promoCode, onChange: (e) => setPromoCode(e.target.value), className: "flex-1 bg-black border border-gray-800 p-2 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none" }),
+                          h('button', { onClick: handleApplyPromo, className: "px-4 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
+                      )
+                  ),
+
                   cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4" },
                     h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "Delivery Details"),
                     h('input', { type: "text", placeholder: "Full Name", value: formData.name, onChange: (e) => setFormData({...formData, name: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
@@ -397,14 +499,18 @@
                 )
             ),
             h('div', { className: "mt-4 pt-6 border-t border-obsessed-gold/20" },
+              appliedDiscount > 0 && h(React.Fragment, null,
+                  h('div', { className: "flex justify-between items-end mb-1" }, h('span', { className: "font-sans text-[10px] tracking-widest text-gray-500 uppercase" }, "Subtotal"), h('span', { className: "font-mono text-xs text-gray-500" }, formatPrice(subtotal)) ),
+                  h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `Access Benefit (${appliedDiscount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) )
+              ),
               h('div', { className: "flex justify-between items-end mb-6" },
-                h('span', { className: "font-sans text-xs tracking-widest text-gray-400 uppercase" }, "Total"),
-                h('span', { className: "font-display text-2xl text-white" }, formatPrice(totalAmount))
+                h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Total"),
+                h('span', { className: "font-display text-2xl text-white" }, formatPrice(finalTotal))
               ),
               h('button', { 
                 onClick: () => {
                   if (!user) { alert("Please Sign In via the Profile Menu to secure your acquisition and earn Loyalty Rewards."); onClose(); return; }
-                  checkout();
+                  checkout(finalTotal, promoCode.trim().toUpperCase()); 
                 }, 
                 disabled: cart.length === 0, 
                 className: "w-full py-4 bg-obsessed-gold text-obsessed-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50" 
@@ -469,6 +575,8 @@
         const [loyaltyMl, setLoyaltyMl] = useState(0);
         
         const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+        const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+        const [selectedTrackingOrder, setSelectedTrackingOrder] = useState(null);
 
         const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
         const [is3DMode, setIs3DMode] = useState(false);
@@ -479,7 +587,6 @@
         const [mistState, setMistState] = useState('idle');
         const [showShine, setShowShine] = useState(false);
 
-        // --- NEW: COMBINED SIDEBAR STATE FOR LAYOUT SHIFT ---
         const isSidebarActive = isCartOpen || isOrdersOpen;
 
         const observerRefs = useRef([]);
@@ -578,7 +685,7 @@
 
         const updateQty = (id, delta) => { setCart(prev => prev.map(item => item.id === id && !item.isReward ? { ...item, qty: Math.max(0, item.qty + delta) } : item).filter(item => item.qty > 0 || item.isReward)); };
 
-        const handleCheckout = async () => {
+        const handleCheckout = async (finalDiscountedTotal, appliedPromo = '') => {
           if (!formData.name || !formData.phone || !formData.email || !formData.address) { alert("Please fill out all Delivery Details."); return; }
           
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
@@ -586,14 +693,10 @@
           
           const earnedRewardMl = totalPaidItems * 20; 
           const claimedRewardMl = hasReward ? 100 : 0; 
-          const totalMoney = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+          const totalMoney = finalDiscountedTotal; 
 
           await supabase.from('profiles')
-            .update({ 
-                full_name: formData.name,
-                phone: formData.phone,
-                shipping_address: formData.address 
-            })
+            .update({ full_name: formData.name, phone: formData.phone, shipping_address: formData.address })
             .eq('email', formData.email);
           
           if (totalMoney === 0) {
@@ -601,7 +704,7 @@
              await supabase.from('orders').insert([{
                   order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email,
                   shipping_address: formData.address, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, 
-                  cart_items: cart
+                  cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromo
              }]);
              await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
              window.location.href = `/?success=true&order_id=${fakeOrderId}`;
@@ -620,7 +723,8 @@
                 shippingAddress: formData.address,
                 rewardMl: earnedRewardMl,          
                 claimedRewardMl: claimedRewardMl,
-                cartItems: cart
+                cartItems: cart,
+                appliedPromo: appliedPromo
               })
             });
 
@@ -658,6 +762,7 @@
             }`
           }) : null,
 
+          h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
           h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
             h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
               h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
@@ -668,19 +773,10 @@
               h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.")
             )
           ),
-          
-          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, 
-            h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy. We implement stringent security measures and utilize encrypted databases (Supabase) to ensure your data remains confidential.")) 
-          ),
-          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, 
-             h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms. Loyalty ML is earned solely through completed and verified purchases.")) 
-          ),
-          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, 
-            h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles within 7 days of delivery.")) 
-          ),
-          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, 
-             h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours of order confirmation.")) 
-          ),
+          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy...")) ),
+          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms...")) ),
+          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
+          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
 
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
           h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
@@ -695,18 +791,21 @@
               is3DMode, onToggle3D: () => setIs3DMode(!is3DMode), user: user
           }),
           
-          h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); } }),
+          h(OrdersSidebar, { 
+              isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, 
+              onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); },
+              onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); } 
+          }),
+          
           h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart, updateQty, checkout: handleCheckout, formData, setFormData, user }),
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
           
           h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick }),
           
-          // --- LAYOUT FIX PASSED DOWN HERE ---
           h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
             displayedProducts.map((product, index) => (
-              // --- DYNAMIC SHIFT IS NOW TIED TO isSidebarActive ---
               h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
                 h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[55vh] md:mt-0 max-h-[45vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),

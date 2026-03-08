@@ -16,11 +16,10 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 app.post('/create-order', async (req, res) => {
     try {
-        // WE CATCH THE 'cartItems' FROM THE FRONTEND HERE
-        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems } = req.body;
+        const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
         const orderId = 'ORDER_' + Date.now();
 
-        // SAVE THE ORDER WITH CART ITEMS TO SUPABASE
+        // SAVE THE ORDER TO SUPABASE WITH THE PROMO CODE
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -34,7 +33,9 @@ app.post('/create-order', async (req, res) => {
                     payment_status: 'PENDING',
                     reward_ml: rewardMl || 0,
                     claimed_reward_ml: claimedRewardMl || 0,
-                    cart_items: cartItems || [] // <--- THIS SAVES THE PERFUMES!
+                    cart_items: cartItems || [],
+                    tracking_status: 'PREPARING',
+                    applied_promo: appliedPromo || null // <--- SAVES THE CODE
                 }
             ]);
 
@@ -86,40 +87,56 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-// --- THE WEBHOOK ---
+// --- THE AUTOMATED WEBHOOK ENGINE ---
 app.post('/webhook', async (req, res) => {
     try {
         const paymentStatus = req.body.data.payment.payment_status;
         const orderId = req.body.data.order.order_id;
 
         if (paymentStatus === 'SUCCESS') {
-            const { error } = await supabase
-                .from('orders')
-                .update({ payment_status: 'PAID' })
-                .eq('order_id', orderId);
+            const { error } = await supabase.from('orders').update({ payment_status: 'PAID' }).eq('order_id', orderId);
 
             if (!error) {
-                console.log(`[SUCCESS] Order ${orderId} has been marked as PAID!`);
+                console.log(`[SUCCESS] Order ${orderId} marked as PAID.`);
 
-                const { data: orderData } = await supabase.from('orders').select('customer_email, reward_ml, claimed_reward_ml').eq('order_id', orderId).single();
+                const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
 
                 if (orderData && orderData.customer_email) {
+
+                    // 1. UPDATE THE BUYER'S LOYALTY ML
                     const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
-
                     if (profileData) {
-                        const earned = orderData.reward_ml || 0;
-                        const spent = orderData.claimed_reward_ml || 0;
-                        const newTotal = profileData.loyalty_ml + earned - spent;
-
+                        const newTotal = profileData.loyalty_ml + (orderData.reward_ml || 0) - (orderData.claimed_reward_ml || 0);
                         await supabase.from('profiles').update({ loyalty_ml: newTotal }).eq('email', orderData.customer_email);
-                        console.log(`[LOYALTY] Updated ${orderData.customer_email}. Earned: ${earned}ML. Spent: ${spent}ML.`);
+                    }
+
+                    // 2. PROCESS THE FUNNELS (PROMOS & REFERRALS)
+                    if (orderData.applied_promo) {
+                        const promo = orderData.applied_promo;
+
+                        if (promo.startsWith('SO-')) {
+                            // FUNNEL 3: REFERRAL LOOP
+                            const refIdPart = promo.substring(3); // Grab the unique code
+                            const { data: allProfiles } = await supabase.from('profiles').select('id, email, loyalty_ml');
+                            const refUser = allProfiles?.find(p => p.id.toUpperCase().startsWith(refIdPart));
+
+                            // Give the friend 20 ML (as long as they aren't buying it for themselves)
+                            if (refUser && refUser.email !== orderData.customer_email) {
+                                await supabase.from('profiles').update({ loyalty_ml: refUser.loyalty_ml + 20 }).eq('id', refUser.id);
+                                console.log(`[REFERRAL] 20 ML poured into ${refUser.email}'s vessel!`);
+                            }
+                        } else {
+                            // FUNNEL 2: VIP VAULT BURN
+                            await supabase.from('promo_codes').update({ is_used: true, used_by_email: orderData.customer_email }).eq('code', promo);
+                            console.log(`[VIP BURN] Code ${promo} was successfully used and destroyed.`);
+                        }
                     }
                 }
             }
         }
         res.status(200).send('Webhook Received');
     } catch (error) {
-        console.error("Webhook processing failed:", error.message);
+        console.error("Webhook failed:", error.message);
         res.status(500).send('Webhook Error');
     }
 });
