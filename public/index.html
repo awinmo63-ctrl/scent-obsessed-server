@@ -109,7 +109,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -176,7 +176,7 @@
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
-      // --- THE NEW LUXURY NOTIFICATION BANNER ---
+      // --- LUXURY NOTIFICATION BANNER ---
       const NotificationBanner = ({ message, onClose }) => {
         if (!message) return null;
         return h('div', { className: "fixed top-8 left-1/2 -translate-x-1/2 z-[9999] bg-[#111]/95 backdrop-blur-md border border-obsessed-gold/50 px-6 md:px-8 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex items-center gap-4 md:gap-6 animate-slide-down pointer-events-auto" },
@@ -348,7 +348,7 @@
         );
       };
 
-      // Passed `notify` to OrdersSidebar
+      // ADDED `notify` to props so the button doesn't crash
       const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder, notify }) => {
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
 
@@ -426,7 +426,6 @@
         );
       };
 
-      // Passed `notify` to CartSidebar
       const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user, notify }) => {
         const [promoCode, setPromoCode] = useState('');
         const [appliedDiscount, setAppliedDiscount] = useState(0);
@@ -462,7 +461,6 @@
             notify(`VIP Access Granted: ${data.discount_percentage}% Off Applied.`);
         };
 
-        // --- NEW: FUNCTION TO REMOVE THE PROMO ---
         const handleRemovePromo = () => {
             setAppliedDiscount(0);
             setPromoCode('');
@@ -504,7 +502,6 @@
 
                   cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
                       h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2" }, "Access Code"),
-                      // --- NEW: TOGGLE BETWEEN INPUT BOX AND ACTIVE BADGE ---
                       appliedDiscount > 0 ? 
                           h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
                               h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, promoCode),
@@ -615,7 +612,6 @@
         const [mistState, setMistState] = useState('idle');
         const [showShine, setShowShine] = useState(false);
 
-        // --- NEW TOAST NOTIFICATION STATE ---
         const [notification, setNotification] = useState(null);
         const notify = (msg) => {
             setNotification(msg);
@@ -637,7 +633,8 @@
         }, []);
 
         useEffect(() => {
-          const urlParams = newSearchParams(window.location.search);
+          // --- FIXED THE TYPO HERE ---
+          const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('success') === 'true') {
             setShowSuccess(true);
             setSuccessOrderId(urlParams.get('order_id'));
@@ -790,7 +787,6 @@
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
           
-          // --- THE GLOBAL NOTIFICATION SYSTEM ---
           h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
 
           mistState !== 'idle' ? h('div', {
