@@ -8,10 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// HOST YOUR BEAUTIFUL FRONTEND WEBSITE
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize Supabase Connection
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 app.post('/create-order', async (req, res) => {
@@ -19,7 +17,6 @@ app.post('/create-order', async (req, res) => {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
         const orderId = 'ORDER_' + Date.now();
 
-        // SAVE THE ORDER TO SUPABASE WITH THE PROMO CODE
         const { error: dbError } = await supabase
             .from('orders')
             .insert([
@@ -35,7 +32,7 @@ app.post('/create-order', async (req, res) => {
                     claimed_reward_ml: claimedRewardMl || 0,
                     cart_items: cartItems || [],
                     tracking_status: 'PREPARING',
-                    applied_promo: appliedPromo || null // <--- SAVES THE CODE
+                    applied_promo: appliedPromo || null
                 }
             ]);
 
@@ -44,7 +41,6 @@ app.post('/create-order', async (req, res) => {
             return res.status(500).json({ error: 'Failed to save order to database' });
         }
 
-        // REQUEST PAYMENT SESSION FROM CASHFREE
         const requestBody = {
             order_amount: orderAmount,
             order_currency: "INR",
@@ -56,7 +52,8 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail
             },
             order_meta: {
-                return_url: "https://scent-obsessed-server.onrender.com/?success=true&order_id={order_id}"
+                // FIX: We removed the fake success=true. It now just passes the order ID back.
+                return_url: "https://scent-obsessed-server.onrender.com/?order_id={order_id}"
             }
         };
 
@@ -87,7 +84,25 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-// --- THE AUTOMATED WEBHOOK ENGINE ---
+// --- NEW FIX: VERIFY PAYMENT ENDPOINT ---
+app.get('/api/verify-payment/:orderId', async (req, res) => {
+    try {
+        const response = await fetch(`https://sandbox.cashfree.com/pg/orders/${req.params.orderId}`, {
+            headers: {
+                'accept': 'application/json',
+                'x-client-id': process.env.CASHFREE_APP_ID,
+                'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+                'x-api-version': '2023-08-01'
+            }
+        });
+        const data = await response.json();
+        // This returns the exact real-world status (PAID, ACTIVE, FAILED, etc.)
+        res.json({ status: data.order_status });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to verify payment with bank' });
+    }
+});
+
 app.post('/webhook', async (req, res) => {
     try {
         const paymentStatus = req.body.data.payment.payment_status;
@@ -98,35 +113,34 @@ app.post('/webhook', async (req, res) => {
 
             if (!error) {
                 console.log(`[SUCCESS] Order ${orderId} marked as PAID.`);
-
                 const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
 
                 if (orderData && orderData.customer_email) {
-
-                    // 1. UPDATE THE BUYER'S LOYALTY ML
                     const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                     if (profileData) {
                         const newTotal = profileData.loyalty_ml + (orderData.reward_ml || 0) - (orderData.claimed_reward_ml || 0);
                         await supabase.from('profiles').update({ loyalty_ml: newTotal }).eq('email', orderData.customer_email);
                     }
 
-                    // 2. PROCESS THE FUNNELS (PROMOS & REFERRALS)
                     if (orderData.applied_promo) {
                         const promo = orderData.applied_promo;
 
                         if (promo.startsWith('SO-')) {
-                            // FUNNEL 3: REFERRAL LOOP
-                            const refIdPart = promo.substring(3); // Grab the unique code
+                            const refIdPart = promo.substring(3);
                             const { data: allProfiles } = await supabase.from('profiles').select('id, email, loyalty_ml');
                             const refUser = allProfiles?.find(p => p.id.toUpperCase().startsWith(refIdPart));
 
-                            // Give the friend 20 ML (as long as they aren't buying it for themselves)
                             if (refUser && refUser.email !== orderData.customer_email) {
-                                await supabase.from('profiles').update({ loyalty_ml: refUser.loyalty_ml + 20 }).eq('id', refUser.id);
-                                console.log(`[REFERRAL] 20 ML poured into ${refUser.email}'s vessel!`);
+                                const { data: pastRefOrders } = await supabase
+                                    .from('orders').select('id').eq('customer_email', orderData.customer_email)
+                                    .like('applied_promo', 'SO-%').eq('payment_status', 'PAID').neq('order_id', orderId);
+
+                                if (!pastRefOrders || pastRefOrders.length === 0) {
+                                    await supabase.from('profiles').update({ loyalty_ml: refUser.loyalty_ml + 10 }).eq('id', refUser.id);
+                                    console.log(`[REFERRAL] 10 ML poured into ${refUser.email}'s vessel!`);
+                                }
                             }
                         } else {
-                            // FUNNEL 2: VIP VAULT BURN
                             await supabase.from('promo_codes').update({ is_used: true, used_by_email: orderData.customer_email }).eq('code', promo);
                             console.log(`[VIP BURN] Code ${promo} was successfully used and destroyed.`);
                         }
