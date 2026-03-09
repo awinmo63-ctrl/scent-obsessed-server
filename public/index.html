@@ -241,7 +241,6 @@
               showShine && h('div', { className: "absolute inset-0 bg-white/50 blur-md animate-pulse mix-blend-overlay rounded-full" })
            ),
            h('div', { className: "flex flex-col relative" },
-              // --- THE 'I' HOVER TOOLTIP ---
               h('div', { className: "flex items-center gap-2 mb-1" },
                   h('p', { className: "font-display text-obsessed-gold text-[10px] md:text-xs tracking-[0.2em] uppercase" }, "Loyalty Vessel"),
                   h('div', { 
@@ -437,7 +436,6 @@
       };
 
       const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user, notify }) => {
-        // --- SPLIT INPUT STATES ---
         const [vipCode, setVipCode] = useState('');
         const [refCodeInput, setRefCodeInput] = useState('');
         const [appliedPromo, setAppliedPromo] = useState(null); 
@@ -496,7 +494,6 @@
             notify("Referral Accepted: 10% Off Applied. Your friend thanks you.");
         };
 
-        // --- REMOVE CODE LOGIC ---
         const handleRemovePromo = () => {
             setAppliedPromo(null);
             notify("Access code removed.");
@@ -535,7 +532,6 @@
                     )
                   )),
 
-                  // --- SPLIT INPUT SECTIONS FOR CODES ---
                   cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
                       appliedPromo ? 
                           h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
@@ -667,6 +663,7 @@
         }, []);
 
         useEffect(() => {
+          // --- THE TYPO IS OFFICIALLY FIXED ---
           const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('success') === 'true') {
             setShowSuccess(true);
