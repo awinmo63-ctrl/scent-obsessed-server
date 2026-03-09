@@ -260,7 +260,105 @@
         );
       };
 
-      // --- NEW ORDERS SIDEBAR: CONTAINS THE REFERRAL SYSTEM ---
+      const RewardModal = ({ isOpen, onClose, onSelect }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
+          h('div', { className: "relative w-full max-w-4xl bg-[#111] border border-obsessed-gold/40 p-8 shadow-[0_0_50px_rgba(212,175,55,0.2)]" },
+            h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
+            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "Select Your Reward"),
+            h('p', { className: "font-sans text-xs text-gray-400 text-center mb-8" }, "Choose your complimentary 100ML essence."),
+            h('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
+              PRODUCTS.map(p => 
+                h('div', { key: p.id, onClick: () => onSelect(p), className: "cursor-pointer group flex flex-col items-center p-6 border border-gray-800 hover:border-obsessed-gold bg-black/50 hover:bg-obsessed-gold/5 transition-all" },
+                  h('img', { src: p.imageUrl, className: "w-24 h-32 object-cover mb-4 group-hover:scale-105 transition-transform border border-white/10" }),
+                  h('h3', { className: "font-display text-sm text-white text-center tracking-wider" }, p.name),
+                  h('span', { className: "text-[9px] text-obsessed-gold uppercase tracking-widest mt-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "Select")
+                )
+              )
+            )
+          )
+        );
+      };
+
+      const VisualsLayer = ({ products, activeIndex, is3DMode, isSidebarActive }) => {
+        const safeProducts = products.length > 0 ? products : [];
+        return h('div', { className: "fixed inset-0 z-0 pointer-events-none overflow-hidden bg-obsessed-black transition-colors duration-1000 ease-in-out" },
+          safeProducts.length > 0 && h('div', { className: "absolute inset-0 opacity-20 transition-all duration-1000", style: { background: `radial-gradient(circle at 50% 50%, ${safeProducts[activeIndex]?.colorHex || '#1a1a1a'} 0%, transparent 70%)` } }),
+          safeProducts.map((product, index) => {
+            const isActive = index === activeIndex; const isPrev = index === activeIndex - 1; const isNext = index === activeIndex + 1;
+            let transformStyle = {}; let opacity = 0; let zIndex = 0; let filter = 'none'; let pointerEvents = 'none';
+            if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '45%', left: '50%' }; pointerEvents = is3DMode ? 'auto' : 'none'; } 
+            else if (isPrev) { opacity = 0.6; zIndex = 5; transformStyle = { transform: `translate(-50%, 0%) scale(0.15)`, top: 'auto', bottom: '2rem', left: '50%' }; filter = 'grayscale(100%)'; } 
+            else if (isNext) { opacity = 0; zIndex = 1; }
+            return h('div', { key: product.id, className: `absolute transition-all duration-1000 ease-in-out will-change-transform w-[85vw] h-[50vh] md:w-[60vh] md:h-[80vh]`, style: { ...transformStyle, opacity: opacity, zIndex: zIndex, filter: filter, pointerEvents: pointerEvents } },
+              h('div', { className: "relative w-full h-full" },
+                h('div', { className: "absolute inset-0 rounded-full blur-3xl opacity-40 transform scale-75", style: { backgroundColor: product.colorHex } }),
+                is3DMode ? h('model-viewer', { src: product.modelSrc, orientation: product.orientation, 'auto-rotate': 'true', 'camera-controls': 'true', 'rotation-per-second': '30deg', 'interaction-prompt': 'none', style: { width: '100%', height: '100%', backgroundColor: 'transparent', position: 'absolute', inset: 0, zIndex: 20 }, className: `w-full h-full ${isActive && !isSidebarActive ? 'active' : 'opacity-0'}` }) 
+                : h('img', { src: product.imageUrl, alt: product.name, className: `w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-opacity duration-500`, style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' } }),
+                !is3DMode && h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500` }, h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0]))
+              )
+            );
+          }),
+          activeIndex > 0 && h('div', { className: "absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-sans tracking-[0.3em] text-obsessed-gold opacity-50 z-20 pointer-events-none" }, "PREVIOUS SCENTS")
+        );
+      };
+
+      const SearchOverlay = ({ isOpen, onClose, searchQuery, onSearch }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed top-0 left-0 right-0 z-50 p-6 bg-obsessed-black/95 backdrop-blur-xl border-b border-obsessed-gold/20 animate-fade-in" },
+           h('div', { className: "max-w-4xl mx-auto flex items-center gap-4" },
+             h(Search, { className: "text-obsessed-gold", size: 24 }),
+             h('input', { autoFocus: true, type: "text", placeholder: "Search...", value: searchQuery, onChange: (e) => onSearch(e.target.value), className: "w-full bg-transparent border-none outline-none font-display text-2xl text-white placeholder-gray-600 tracking-wider uppercase" }),
+             h('button', { onClick: onClose, className: "text-gray-400 hover:text-white" }, h(X, { size: 24 }))
+           )
+        );
+      };
+
+      const MobileMenu = ({ isOpen, onClose, onOpenStory }) => {
+        const links = [
+          { name: 'The Collection', type: 'scroll' }, 
+          { name: 'Our Story', type: 'story' },
+          { name: 'Track Order', type: 'whatsapp', message: 'Hello, I would like to track my Scent Obsessed order.' }, 
+          { name: 'Contact Concierge', type: 'whatsapp', message: 'Hello Scent Obsessed, I need some assistance finding my signature scent.' }
+        ];
+        return h('div', { className: `fixed inset-y-0 left-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
+          h('div', { className: "flex flex-col h-full p-8" },
+            h('div', { className: "flex justify-between items-center mb-20" },
+              h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
+            ),
+            h('nav', { className: "flex flex-col gap-8" },
+              links.map(link => h('a', { 
+                  key: link.name, 
+                  href: "#", 
+                  onClick: (e) => { 
+                      e.preventDefault();
+                      if(link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } 
+                      else if(link.type === 'story') { onOpenStory(); onClose(); }
+                      else if(link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); }
+                  }, 
+                  className: "font-display text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" 
+              }, link.name))
+            ),
+            h('div', { className: "mt-auto opacity-50" },
+                h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", className: "font-sans text-xs tracking-[0.3em] text-white hover:text-obsessed-gold transition-colors uppercase block mb-8" }, "Follow the Obsession"),
+                h('p', { className: "font-sans text-xs tracking-[0.3em] text-obsessed-gold mb-2" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[10px] text-gray-400" }, "EST. 2026")
+            )
+          )
+        );
+      };
+
+      // --- LEGAL MODAL RESTORED ---
+      const LegalModal = ({ isOpen, onClose, title, children }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" },
+          h('div', { className: "relative w-full max-w-2xl max-h-[80vh] bg-[#111] border border-obsessed-gold/30 p-8 md:p-12 overflow-y-auto shadow-2xl" },
+            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })),
+            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title),
+            h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
+          )
+        );
+      };
+
       const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder, notify, hasUsedReferral, onApplyReferral }) => {
         const [refInput, setRefInput] = useState('');
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
@@ -289,7 +387,6 @@
                   )
               ),
 
-              // --- THE REFERRAL CLAIM SECTION ---
               !hasUsedReferral && h('div', { className: "mb-8 bg-obsessed-gold/5 p-5 border border-obsessed-gold/20" },
                   h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-1 flex items-center gap-2" }, "Redeem Invitation", h(Sparkles, { size: 10 }) ),
                   h('p', { className: "text-[8px] font-sans text-gray-400 mb-3 uppercase tracking-widest" }, "Available for your first acquisition only."),
@@ -547,7 +644,6 @@
           return () => subscription.unsubscribe();
         }, []);
 
-        // --- NEW PAYMENT VERIFICATION LOGIC ---
         useEffect(() => {
           const urlParams = new URLSearchParams(window.location.search);
           const orderId = urlParams.get('order_id');
@@ -650,7 +746,6 @@
 
         const updateQty = (id, delta) => { setCart(prev => prev.map(item => item.id === id && !item.isReward ? { ...item, qty: Math.max(0, item.qty + delta) } : item).filter(item => item.qty > 0 || item.isReward)); };
 
-        // --- NEW CENTRALIZED REFERRAL LOGIC ---
         const handleApplyReferral = (code) => {
             const upperCode = code.trim().toUpperCase();
             if (!upperCode) return;
@@ -756,7 +851,6 @@
             }`
           }) : null,
 
-          h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
           h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
             h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
               h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
@@ -772,6 +866,7 @@
           h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
           h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
 
+          h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
           h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
           h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
