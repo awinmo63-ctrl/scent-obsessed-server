@@ -176,7 +176,6 @@
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
-      // --- LUXURY NOTIFICATION BANNER ---
       const NotificationBanner = ({ message, onClose }) => {
         if (!message) return null;
         return h('div', { className: "fixed top-8 left-1/2 -translate-x-1/2 z-[9999] bg-[#111]/95 backdrop-blur-md border border-obsessed-gold/50 px-6 md:px-8 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex items-center gap-4 md:gap-6 animate-slide-down pointer-events-auto" },
@@ -226,6 +225,7 @@
       };
 
       const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaim }) => {
+        const [showTooltip, setShowTooltip] = useState(false);
         if (!user) return null;
         const percentage = Math.min((loyaltyMl / 100) * 100, 100);
         const mlLeft = Math.max(0, 100 - loyaltyMl);
@@ -240,11 +240,22 @@
               }),
               showShine && h('div', { className: "absolute inset-0 bg-white/50 blur-md animate-pulse mix-blend-overlay rounded-full" })
            ),
-           h('div', { className: "flex flex-col" },
-              h('p', { className: "font-display text-obsessed-gold text-[10px] md:text-xs tracking-[0.2em] uppercase mb-1" }, "Loyalty Vessel"),
+           h('div', { className: "flex flex-col relative" },
+              // --- THE 'I' HOVER TOOLTIP ---
+              h('div', { className: "flex items-center gap-2 mb-1" },
+                  h('p', { className: "font-display text-obsessed-gold text-[10px] md:text-xs tracking-[0.2em] uppercase" }, "Loyalty Vessel"),
+                  h('div', { 
+                      onMouseEnter: () => setShowTooltip(true),
+                      onMouseLeave: () => setShowTooltip(false),
+                      className: "w-3 h-3 rounded-full border border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:text-obsessed-gold hover:border-obsessed-gold text-[8px] font-sans transition-colors relative" 
+                  }, "i"),
+                  showTooltip && h('div', { className: "absolute bottom-full left-0 mb-3 w-56 p-4 bg-[#111] border border-obsessed-gold/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] z-[100] animate-fade-in pointer-events-none" },
+                      h('p', { className: "font-sans text-[9px] text-gray-300 leading-loose tracking-wider uppercase" }, "Earn 20 ML for every bottle secured. Reach 100 ML to extract a complimentary 100ML signature essence of your choice.")
+                  )
+              ),
               h('p', { className: "font-mono text-white text-[10px] tracking-widest mb-1" }, `${loyaltyMl} / 100 ML`),
               mlLeft > 0 
-                  ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase group-hover:text-gray-300 transition-colors" }, `${mlLeft} ML to Free Bottle`)
+                  ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase transition-colors" }, `${mlLeft} ML to Free Bottle`)
                   : h('button', { onClick: onClaim, className: "mt-1 px-3 py-1.5 bg-obsessed-gold text-black text-[9px] font-bold uppercase tracking-widest animate-pulse hover:bg-white transition-colors" }, "Claim Free Bottle")
            )
         );
@@ -348,7 +359,6 @@
         );
       };
 
-      // ADDED `notify` to props so the button doesn't crash
       const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder, notify }) => {
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
 
@@ -366,7 +376,7 @@
               h('div', { className: "mb-8 bg-black/40 p-6 border border-obsessed-gold/30 rounded shadow-[0_0_20px_rgba(212,175,55,0.05)] text-center relative overflow-hidden" },
                   h('div', { className: "absolute top-0 right-0 w-16 h-16 bg-obsessed-gold/10 rounded-full blur-xl" }),
                   h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2 relative z-10" }, "Invite to the Obsession"),
-                  h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 20 ML will be poured into your Loyalty Vessel."),
+                  h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 10 ML will be poured into your Loyalty Vessel."),
                   h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" },
                       h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode),
                       h('button', { 
@@ -427,48 +437,73 @@
       };
 
       const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, user, notify }) => {
-        const [promoCode, setPromoCode] = useState('');
-        const [appliedDiscount, setAppliedDiscount] = useState(0);
+        // --- SPLIT INPUT STATES ---
+        const [vipCode, setVipCode] = useState('');
+        const [refCodeInput, setRefCodeInput] = useState('');
+        const [appliedPromo, setAppliedPromo] = useState(null); 
 
-        const handleApplyPromo = async () => {
-            const code = promoCode.trim().toUpperCase();
+        const handleApplyVIP = async () => {
+            const code = vipCode.trim().toUpperCase();
             if (!code) return;
-
-            if (code.startsWith('SO-') && code.length >= 9) {
-                if (user && code === `SO-${user.id.substring(0, 6).toUpperCase()}`) {
-                    notify("You cannot use your own referral code.");
-                    return;
-                }
-                setAppliedDiscount(10);
-                notify("Referral Accepted: 10% Off Applied. Your friend thanks you.");
-                return;
-            }
 
             const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
             
             if (error || !data) {
-                notify("Invalid Access Code.");
-                setAppliedDiscount(0);
+                notify("Invalid VIP Vault Code.");
                 return;
             }
             if (data.is_used) {
-                notify("This Access Code has already been redeemed.");
-                setAppliedDiscount(0);
+                notify("This VIP Code has already been redeemed.");
                 return;
             }
 
-            setAppliedDiscount(data.discount_percentage || 16);
-            notify(`VIP Access Granted: ${data.discount_percentage}% Off Applied.`);
+            setAppliedPromo({ code: code, type: 'VIP', discount: data.discount_percentage || 16 });
+            setVipCode('');
+            notify(`VIP Access Granted: ${data.discount_percentage || 16}% Off Applied.`);
         };
 
+        const handleApplyRef = async () => {
+            const code = refCodeInput.trim().toUpperCase();
+            if (!code) return;
+
+            if (!code.startsWith('SO-') || code.length < 9) {
+                notify("Invalid Referral Code format.");
+                return;
+            }
+            if (!user) {
+                notify("Please Sign In to apply a Referral Code.");
+                return;
+            }
+            if (code === `SO-${user.id.substring(0, 6).toUpperCase()}`) {
+                notify("You cannot use your own referral code.");
+                return;
+            }
+
+            const { data: pastOrders } = await supabase
+                .from('orders')
+                .select('id')
+                .eq('customer_email', user.email)
+                .like('applied_promo', 'SO-%')
+                .eq('payment_status', 'PAID');
+
+            if (pastOrders && pastOrders.length > 0) {
+                notify("Limit reached: Only one referral code may be used per account.");
+                return;
+            }
+
+            setAppliedPromo({ code: code, type: 'REF', discount: 10 });
+            setRefCodeInput('');
+            notify("Referral Accepted: 10% Off Applied. Your friend thanks you.");
+        };
+
+        // --- REMOVE CODE LOGIC ---
         const handleRemovePromo = () => {
-            setAppliedDiscount(0);
-            setPromoCode('');
+            setAppliedPromo(null);
             notify("Access code removed.");
         };
 
         const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
-        const discountAmount = Math.floor(subtotal * (appliedDiscount / 100));
+        const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
         const finalTotal = subtotal - discountAmount;
 
         return h('div', { className: `fixed inset-y-0 right-0 z-50 w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
@@ -500,17 +535,32 @@
                     )
                   )),
 
+                  // --- SPLIT INPUT SECTIONS FOR CODES ---
                   cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
-                      h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2" }, "Access Code"),
-                      appliedDiscount > 0 ? 
+                      appliedPromo ? 
                           h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
-                              h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, promoCode),
+                              h('div', { className: "flex flex-col gap-1" },
+                                  h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest" }, appliedPromo.type === 'VIP' ? "VIP Access Active" : "Referral Active"),
+                                  h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, appliedPromo.code)
+                              ),
                               h('button', { onClick: handleRemovePromo, className: "text-[9px] text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors" }, h(X, { size: 10 }), "Remove")
                           )
                       :
-                          h('div', { className: "flex gap-2" },
-                              h('input', { type: "text", placeholder: "Enter code...", value: promoCode, onChange: (e) => setPromoCode(e.target.value), className: "flex-1 bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                              h('button', { onClick: handleApplyPromo, className: "px-6 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
+                          h('div', { className: "flex flex-col gap-5" },
+                              h('div', null,
+                                  h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2" }, "VIP Vault Code"),
+                                  h('div', { className: "flex gap-2" },
+                                      h('input', { type: "text", placeholder: "Enter VIP Code...", value: vipCode, onChange: (e) => setVipCode(e.target.value), className: "flex-1 bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
+                                      h('button', { onClick: handleApplyVIP, className: "px-5 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
+                                  )
+                              ),
+                              h('div', null,
+                                  h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2 flex items-center gap-2" }, "Referral Invitation", h(Sparkles, { size: 10, className: "text-obsessed-gold" })),
+                                  h('div', { className: "flex gap-2" },
+                                      h('input', { type: "text", placeholder: "Enter SO- Code...", value: refCodeInput, onChange: (e) => setRefCodeInput(e.target.value), className: "flex-1 bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
+                                      h('button', { onClick: handleApplyRef, className: "px-5 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
+                                  )
+                              )
                           )
                   ),
 
@@ -524,9 +574,9 @@
                 )
             ),
             h('div', { className: "mt-4 pt-6 border-t border-obsessed-gold/20" },
-              appliedDiscount > 0 && h(React.Fragment, null,
+              appliedPromo && h(React.Fragment, null,
                   h('div', { className: "flex justify-between items-end mb-1" }, h('span', { className: "font-sans text-[10px] tracking-widest text-gray-500 uppercase" }, "Subtotal"), h('span', { className: "font-mono text-xs text-gray-500" }, formatPrice(subtotal)) ),
-                  h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `Access Benefit (${appliedDiscount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) )
+                  h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `${appliedPromo.type === 'VIP' ? 'VIP' : 'Referral'} Benefit (${appliedPromo.discount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) )
               ),
               h('div', { className: "flex justify-between items-end mb-6" },
                 h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Total"),
@@ -534,8 +584,8 @@
               ),
               h('button', { 
                 onClick: () => {
-                  if (!user) { notify("Please Sign In via the Profile Menu to secure your acquisition and earn Loyalty Rewards."); onClose(); return; }
-                  checkout(finalTotal, promoCode.trim().toUpperCase()); 
+                  if (!user) { notify("Please Sign In via the Profile Menu to secure your acquisition."); onClose(); return; }
+                  checkout(finalTotal, appliedPromo ? appliedPromo.code : ''); 
                 }, 
                 disabled: cart.length === 0, 
                 className: "w-full py-4 bg-obsessed-gold text-obsessed-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50" 
@@ -561,21 +611,6 @@
             h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors" }, h(Search, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute -top-2 -right-2 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount) )
-          )
-        );
-      };
-
-      const SuccessModal = ({ isOpen, onTriggerMist, orderId }) => {
-        if (!isOpen) return null;
-        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
-          h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-10 text-center shadow-[0_0_50px_rgba(212,175,55,0.1)] flex flex-col items-center" },
-            h('div', { className: "w-20 h-20 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/40 animate-pulse-fast" },
-              h(Droplet, { size: 40, className: "text-obsessed-gold" })
-            ),
-            h('h2', { className: "font-display text-3xl text-obsessed-gold tracking-widest uppercase mb-4" }, "Acquisition Complete"),
-            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. Your earned ML has been poured into your vessel."),
-            orderId && h('p', { className: "font-mono text-[10px] text-obsessed-gold mb-8 bg-black px-4 py-2 border border-obsessed-gold/30 tracking-widest" }, `ID: ${orderId}`),
-            h('button', { onClick: onTriggerMist, className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)]" }, "Extract Golden Essence")
           )
         );
       };
@@ -619,7 +654,6 @@
         };
 
         const isSidebarActive = isCartOpen || isOrdersOpen;
-
         const observerRefs = useRef([]);
 
         useEffect(() => {
@@ -633,7 +667,6 @@
         }, []);
 
         useEffect(() => {
-          // --- FIXED THE TYPO HERE ---
           const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('success') === 'true') {
             setShowSuccess(true);
