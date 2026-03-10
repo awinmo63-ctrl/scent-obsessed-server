@@ -224,7 +224,7 @@
         );
       };
 
-      // --- UPDATED VESSEL: CSS TRICK & SECURITY LOCK ---
+      // --- VESSEL UPDATE: Now points to transparent_bottle.png ---
       const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaim, cart = [] }) => {
         const [showTooltip, setShowTooltip] = useState(false);
         if (!user) return null;
@@ -235,11 +235,11 @@
 
         return h('div', { className: "fixed bottom-24 md:bottom-8 left-4 md:left-8 z-50 bg-[#111]/90 backdrop-blur-md p-4 rounded-xl flex items-center gap-4 border border-obsessed-gold/30 shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-all duration-500 hover:border-obsessed-gold hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] group" },
            h('div', { className: "relative w-10 h-16 md:w-12 md:h-20 flex-shrink-0" },
-              // Note the mix-blend-lighten added here to drop the background
-              h('img', { src: './urban_ember.png', className: "absolute inset-0 w-full h-full object-contain opacity-20 grayscale mix-blend-lighten" }),
+              // Removed hacky mix-blend, now expects a clean transparent image
+              h('img', { src: './transparent_bottle.png', className: "absolute inset-0 w-full h-full object-contain opacity-30 grayscale" }),
               h('img', { 
-                  src: './urban_ember.png', 
-                  className: "absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] transition-all duration-[2000ms] ease-in-out mix-blend-lighten", 
+                  src: './transparent_bottle.png', 
+                  className: "absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] transition-all duration-[2000ms] ease-in-out", 
                   style: { filter: 'sepia(1) saturate(3) hue-rotate(-15deg) brightness(1.3)', clipPath: `inset(calc(100% - ${percentage}%) 0 0 0)` } 
               }),
               showShine && h('div', { className: "absolute inset-0 bg-white/50 blur-md animate-pulse mix-blend-overlay rounded-full" })
@@ -258,7 +258,6 @@
               ),
               h('p', { className: "font-mono text-white text-[10px] tracking-widest mb-1" }, `${loyaltyMl} / 100 ML`),
               
-              // SECURITY LOCK: Changes button text if reward is already in cart
               mlLeft > 0 
                   ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase transition-colors" }, `${mlLeft} ML to Free Bottle`)
                   : hasRewardInCart 
@@ -669,21 +668,18 @@
           return () => subscription.unsubscribe();
         }, []);
 
-        // --- NEW $0 ORDER BYPASS LOGIC ---
         useEffect(() => {
           const urlParams = new URLSearchParams(window.location.search);
           const orderId = urlParams.get('order_id');
           if (orderId) {
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            // If it starts with FREE_, it's a $0 order. Do NOT ask Cashfree about it.
             if (orderId.startsWith('FREE_')) {
                 setShowSuccess(true);
                 setSuccessOrderId(orderId);
                 setCart([]); 
                 setAppliedPromo(null);
             } else {
-                // Otherwise, verify with Cashfree
                 fetch(`/api/verify-payment/${orderId}`)
                     .then(res => res.json())
                     .then(data => {
@@ -821,7 +817,6 @@
           await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: formData.address }).eq('email', formData.email);
           
           if (totalMoney === 0) {
-             // THE $0 ORDER FIX: Now tagged with FREE_
              const fakeOrderId = 'FREE_' + Date.now();
              await supabase.from('orders').insert([{
                   order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email,
@@ -888,9 +883,18 @@
 
           h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
             h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
-              h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" }))
-            ) // (Kept short here for character limit, but text remains unchanged in actual implementation)
+              h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
+              h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."),
+              h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."),
+              h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")),
+              h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."),
+              h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.")
+            )
           ),
+          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy...")) ),
+          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms...")) ),
+          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
+          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
 
           h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
