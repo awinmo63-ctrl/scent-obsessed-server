@@ -12,12 +12,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// --- NEW HELPER: THE SHIPROCKET DISPATCHER ---
+// --- SHIPROCKET DISPATCHER ---
 async function pushToShiprocket(orderRecord) {
     try {
         console.log(`[SHIPROCKET] Initiating dispatch for Order ${orderRecord.order_id}...`);
 
-        // 1. Generate Security Token using your Email/Password
+        // 1. Generate Security Token
         const authRes = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -29,59 +29,68 @@ async function pushToShiprocket(orderRecord) {
         const authData = await authRes.json();
 
         if (!authData.token) {
-            throw new Error("Shiprocket Authentication Failed. Check your API Email/Password in Render.");
+            console.error("[SHIPROCKET] Auth Failed. Check your API Email/Password in Render.");
+            return;
         }
 
-        // 2. Parse the separated address JSON we sent from the frontend
-        let addressObj = {};
+        // 2. Safely Parse Address
+        let addressObj = { street: 'Address not provided', city: 'Unknown', state: 'Unknown', pincode: '000000' };
         try {
-            addressObj = JSON.parse(orderRecord.shipping_address);
+            const parsed = JSON.parse(orderRecord.shipping_address);
+            if (parsed.street) addressObj = parsed;
         } catch (e) {
-            console.error("[SHIPROCKET] Address format error. Falling back.");
-            addressObj = { street: orderRecord.shipping_address, city: 'Unknown', state: 'Unknown', pincode: '000000' };
+            console.warn("[SHIPROCKET] Falling back to raw address string.");
+            addressObj.street = orderRecord.shipping_address;
         }
 
-        // 3. Format the cart items for the Courier
+        // 3. Format Cart Items securely
         const srItems = orderRecord.cart_items.map(item => ({
             name: item.name,
             sku: item.id,
             units: item.qty,
             selling_price: parseInt(item.price.replace(/[^0-9]/g, ''), 10) || 0,
-            discount: "",
-            tax: "",
+            discount: "0",
+            tax: "0",
             hsn: ""
         }));
 
-        // 4. Get today's date formatted for Shiprocket (YYYY-MM-DD)
+        // 4. Sanitize Customer Data
+        const nameParts = (orderRecord.customer_name || 'Customer').trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ".";
+
+        let cleanPhone = (orderRecord.customer_phone || "0000000000").replace(/\D/g, '');
+        if (cleanPhone.length < 10) cleanPhone = "9999999999";
+
         const date = new Date();
         const dateString = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
 
-        // 5. Construct the master payload
+        // 5. Master Payload
         const payload = {
             order_id: orderRecord.order_id,
             order_date: dateString,
-            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary", // Uses your Render variable
-            billing_customer_name: orderRecord.customer_name,
-            billing_last_name: "", // Shiprocket requires this field to exist, even if blank
+            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "warehouse",
+            billing_customer_name: firstName,
+            billing_last_name: lastName,
             billing_address: addressObj.street,
             billing_city: addressObj.city,
             billing_pincode: addressObj.pincode,
             billing_state: addressObj.state,
             billing_country: "India",
-            billing_email: orderRecord.customer_email,
-            billing_phone: orderRecord.customer_phone,
+            billing_email: orderRecord.customer_email || "no-reply@scentobsessed.in",
+            billing_phone: cleanPhone,
             shipping_is_billing: true,
             order_items: srItems,
             payment_method: "Prepaid",
             sub_total: orderRecord.total_amount,
-            length: 15, // Standard perfume box volumetric data (in cm)
+            length: 15,
             breadth: 15,
             height: 10,
-            weight: 0.5 // 500 grams default weight
+            weight: 0.5
         };
 
-        // 6. Send the order to the couriers!
-        const createRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/ad-hoc', {
+        // 6. Send to Shiprocket (URL TYPO FIXED HERE: adhoc instead of ad-hoc)
+        const createRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -95,7 +104,7 @@ async function pushToShiprocket(orderRecord) {
         if (createData.order_id) {
             console.log(`[SHIPROCKET] Success! Manifest generated. Shiprocket ID: ${createData.order_id}`);
         } else {
-            console.error("[SHIPROCKET] Failed to create manifest:", createData);
+            console.error("[SHIPROCKET] Failed to create manifest:", JSON.stringify(createData, null, 2));
         }
 
     } catch (err) {
@@ -116,7 +125,7 @@ app.post('/create-order', async (req, res) => {
                     customer_name: customerName,
                     customer_phone: customerPhone,
                     customer_email: customerEmail,
-                    shipping_address: shippingAddress, // Now saves the JSON string seamlessly
+                    shipping_address: shippingAddress,
                     total_amount: orderAmount,
                     payment_status: 'PENDING',
                     reward_ml: rewardMl || 0,
