@@ -231,8 +231,7 @@
         const hasRewardInCart = cart.some(item => item.isReward);
         const mlLeft = Math.max(0, 100 - loyaltyMl);
         
-        // --- VISUAL PHYSICS UPDATE ---
-        // If ML is 0, it's 0. Otherwise, visually map 1-100 ML to start ABOVE the glass base (20%) and stop below the cap (90%).
+        // VISUAL PHYSICS UPDATE
         const visualPercentage = loyaltyMl === 0 ? 0 : 20 + (loyaltyMl * 0.70);
 
         return h('div', { className: "fixed bottom-6 md:bottom-8 left-4 md:left-8 z-[55] bg-[#111]/95 backdrop-blur-md p-3 md:p-4 rounded-xl flex items-center gap-3 md:gap-4 border border-obsessed-gold/40 shadow-[0_0_20px_rgba(0,0,0,0.9)] transition-all duration-500 hover:border-obsessed-gold scale-90 md:scale-100 origin-bottom-left pointer-events-auto" },
@@ -381,7 +380,6 @@
         const [refInput, setRefInput] = useState('');
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
 
-        // --- NEW: REVERSE MATH FOR ESSENCE LEDGER ---
         const earnedFromPurchases = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.reward_ml || 0), 0);
         const totalClaimed = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.claimed_reward_ml || 0), 0);
         const earnedFromReferrals = Math.max(0, loyaltyMl - earnedFromPurchases + totalClaimed);
@@ -414,7 +412,6 @@
                   )
               ),
 
-              // --- NEW: THE ESSENCE LEDGER UI ---
               h('div', { className: "bg-[#111] p-5 border border-obsessed-gold/20 mb-6 relative overflow-hidden" },
                   h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4 flex items-center gap-2" }, h(Droplet, { size: 10 }), "Essence Ledger"),
                   h('div', { className: "space-y-3 font-sans text-[9px] tracking-widest uppercase text-gray-400 relative z-10" },
@@ -863,7 +860,13 @@
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
             displayedProducts.map((product, index) => (
               h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
-                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[55vh] md:mt-0 max-h-[45vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
+                
+                // --- THE PHYSICS FIX IS HERE ---
+                // mt-[45vh] makes it start higher on the screen
+                // max-h-[55vh] gives it more room to be read without scrolling the whole page
+                // pb-24 ensures the button isn't hidden at the bottom
+                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[45vh] md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
+                  
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
                   h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
                   h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90" }, `"${product.tagline}"`),
