@@ -109,7 +109,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -524,8 +524,6 @@
                             )
                         )
                 ),
-
-                // --- NEW ADDRESS UI: FOUR SEPARATE BOXES ---
                 cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4 pb-10" },
                   h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "Delivery Details"),
                   h('input', { type: "text", placeholder: "Full Name", value: formData.name, onChange: (e) => setFormData({...formData, name: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
@@ -581,6 +579,35 @@
         );
       };
 
+      const SuccessModal = ({ isOpen, onTriggerMist, orderId }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
+          h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-10 text-center shadow-[0_0_50px_rgba(212,175,55,0.1)] flex flex-col items-center" },
+            h('div', { className: "w-20 h-20 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/40 animate-pulse-fast" },
+              h(Droplet, { size: 40, className: "text-obsessed-gold" })
+            ),
+            h('h2', { className: "font-display text-3xl text-obsessed-gold tracking-widest uppercase mb-4" }, "Acquisition Complete"),
+            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. Your earned ML has been poured into your vessel."),
+            orderId && h('p', { className: "font-mono text-[10px] text-obsessed-gold mb-8 bg-black px-4 py-2 border border-obsessed-gold/30 tracking-widest" }, `ID: ${orderId}`),
+            h('button', { onClick: onTriggerMist, className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)]" }, "Extract Golden Essence")
+          )
+        );
+      };
+
+      const FailedModal = ({ isOpen, onClose }) => {
+        if (!isOpen) return null;
+        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
+          h('div', { className: "relative w-full max-w-md bg-[#111] border border-red-900/50 p-10 text-center shadow-[0_0_50px_rgba(220,38,38,0.1)] flex flex-col items-center" },
+            h('div', { className: "w-20 h-20 rounded-full bg-red-900/10 flex items-center justify-center mb-6 border border-red-900/40 animate-pulse-fast" },
+              h(AlertCircle, { size: 40, className: "text-red-500" })
+            ),
+            h('h2', { className: "font-display text-2xl text-red-500 tracking-widest uppercase mb-4" }, "Acquisition Failed"),
+            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-8" }, "Your payment session was abandoned or unsuccessful. Your vessel remains intact. Please attempt to secure your collection again."),
+            h('button', { onClick: onClose, className: "w-full py-4 bg-gray-900 text-white font-sans font-bold uppercase tracking-[0.2em] border border-gray-700 hover:border-white hover:bg-white hover:text-black transition-colors" }, "Return to Vessel")
+          )
+        );
+      };
+
       const App = () => {
         const [activeSection, setActiveSection] = useState(0);
         const [cart, setCart] = useState([]);
@@ -604,7 +631,6 @@
         const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
         const [selectedTrackingOrder, setSelectedTrackingOrder] = useState(null);
 
-        // --- NEW STATE: Separated address fields ---
         const [formData, setFormData] = useState({ name: '', phone: '', email: '', street: '', city: '', state: '', pincode: '' });
         const [is3DMode, setIs3DMode] = useState(false);
         
@@ -662,15 +688,12 @@
                     setLoyaltyMl(0); setFormData(prev => ({...prev, email: user.email}));
                 } else {
                     setLoyaltyMl(profileData.loyalty_ml);
-                    
-                    // Attempt to parse old address data if it exists, otherwise just load what we have
                     let streetData = profileData.shipping_address || '';
                     let c = '', s = '', p = '';
                     try {
                         const parsed = JSON.parse(profileData.shipping_address);
                         if(parsed.street) { streetData = parsed.street; c = parsed.city; s = parsed.state; p = parsed.pincode; }
                     } catch(e) {}
-
                     setFormData({
                         email: user.email, name: profileData.full_name || user.user_metadata?.full_name || '',
                         phone: profileData.phone || '', street: streetData, city: c, state: s, pincode: p
@@ -730,7 +753,6 @@
           const claimedRewardMl = hasReward ? 100 : 0; 
           const totalMoney = finalDiscountedTotal; 
 
-          // Save address as JSON string for Shiprocket parsing later
           const addressString = JSON.stringify({ street: formData.street, city: formData.city, state: formData.state, pincode: formData.pincode });
           await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: addressString }).eq('email', formData.email);
           
@@ -751,8 +773,7 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 orderAmount: totalMoney, customerName: formData.name, customerPhone: formData.phone, customerEmail: formData.email,
-                shippingAddress: addressString, // Pass the JSON string
-                rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode
+                shippingAddress: addressString, rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode
               })
             });
 
