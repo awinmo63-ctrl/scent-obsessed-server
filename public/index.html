@@ -109,7 +109,7 @@
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
       import * as d3 from 'd3';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -228,9 +228,12 @@
         const [showTooltip, setShowTooltip] = useState(false);
         if (!user) return null;
         
-        const percentage = Math.min((loyaltyMl / 100) * 100, 100);
-        const mlLeft = Math.max(0, 100 - loyaltyMl);
         const hasRewardInCart = cart.some(item => item.isReward);
+        const mlLeft = Math.max(0, 100 - loyaltyMl);
+        
+        // --- VISUAL PHYSICS UPDATE ---
+        // If ML is 0, it's 0. Otherwise, visually map 1-100 ML to start ABOVE the glass base (20%) and stop below the cap (90%).
+        const visualPercentage = loyaltyMl === 0 ? 0 : 20 + (loyaltyMl * 0.70);
 
         return h('div', { className: "fixed bottom-6 md:bottom-8 left-4 md:left-8 z-[55] bg-[#111]/95 backdrop-blur-md p-3 md:p-4 rounded-xl flex items-center gap-3 md:gap-4 border border-obsessed-gold/40 shadow-[0_0_20px_rgba(0,0,0,0.9)] transition-all duration-500 hover:border-obsessed-gold scale-90 md:scale-100 origin-bottom-left pointer-events-auto" },
            h('div', { className: "relative w-10 h-16 md:w-12 md:h-20 flex-shrink-0" },
@@ -238,7 +241,7 @@
               h('img', { 
                   src: './transparent_bottle.png', 
                   className: "absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] transition-all duration-[2000ms] ease-in-out", 
-                  style: { filter: 'sepia(1) saturate(3) hue-rotate(-15deg) brightness(1.3)', clipPath: `inset(calc(100% - ${percentage}%) 0 0 0)` } 
+                  style: { filter: 'sepia(1) saturate(3) hue-rotate(-15deg) brightness(1.3)', clipPath: `inset(calc(100% - ${visualPercentage}%) 0 0 0)` } 
               }),
               showShine && h('div', { className: "absolute inset-0 bg-white/50 blur-md animate-pulse mix-blend-overlay rounded-full" })
            ),
@@ -374,9 +377,14 @@
         );
       };
 
-      const OrdersSidebar = ({ isOpen, onClose, user, orders, onLogout, onTrackOrder, notify, hasUsedReferral, onApplyReferral }) => {
+      const OrdersSidebar = ({ isOpen, onClose, user, loyaltyMl, orders, onLogout, onTrackOrder, notify, hasUsedReferral, onApplyReferral }) => {
         const [refInput, setRefInput] = useState('');
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
+
+        // --- NEW: REVERSE MATH FOR ESSENCE LEDGER ---
+        const earnedFromPurchases = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.reward_ml || 0), 0);
+        const totalClaimed = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.claimed_reward_ml || 0), 0);
+        const earnedFromReferrals = Math.max(0, loyaltyMl - earnedFromPurchases + totalClaimed);
 
         return h('div', { className: `fixed inset-y-0 right-0 z-[70] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
           h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
@@ -405,6 +413,18 @@
                       h('button', { onClick: () => { onApplyReferral(refInput); setRefInput(''); }, className: "px-4 bg-gray-800 text-white text-[9px] uppercase tracking-widest hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
                   )
               ),
+
+              // --- NEW: THE ESSENCE LEDGER UI ---
+              h('div', { className: "bg-[#111] p-5 border border-obsessed-gold/20 mb-6 relative overflow-hidden" },
+                  h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4 flex items-center gap-2" }, h(Droplet, { size: 10 }), "Essence Ledger"),
+                  h('div', { className: "space-y-3 font-sans text-[9px] tracking-widest uppercase text-gray-400 relative z-10" },
+                      h('div', { className: "flex justify-between" }, h('span', null, "Current Volume"), h('span', { className: "text-white font-mono" }, `${loyaltyMl} ML`)),
+                      h('div', { className: "flex justify-between" }, h('span', null, "From Acquisitions"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromPurchases} ML`)),
+                      h('div', { className: "flex justify-between" }, h('span', null, "From Network (Referrals)"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromReferrals} ML`)),
+                      totalClaimed > 0 && h('div', { className: "flex justify-between border-t border-gray-800 pt-3 mt-1" }, h('span', null, "Extracted (Rewards)"), h('span', { className: "text-obsessed-gold font-mono" }, `- ${totalClaimed} ML`))
+                  )
+              ),
+
               h('div', { className: "pt-4" }, 
                 h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"),
                 h('div', { className: "space-y-6" },
@@ -832,7 +852,7 @@
           h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
           h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
           
-          h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
+          h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
           h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart: cart, updateQty: updateQty, checkout: handleCheckout, formData: formData, setFormData: setFormData, notify: notify, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo }),
 
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
