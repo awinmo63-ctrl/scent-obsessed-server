@@ -266,8 +266,6 @@
         );
       };
 
-      // --- NEW FLOATING 3D TOGGLE ---
-      // This gets the 3D button out of the crowded top navigation!
       const Floating3DToggle = ({ is3DMode, onToggle3D }) => {
         return h('button', {
             onClick: onToggle3D,
@@ -381,32 +379,24 @@
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
 
         return h('div', { className: `fixed inset-y-0 right-0 z-[70] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
-          
           h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
             h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
           ),
-          
           h('div', { className: "flex-1 overflow-y-auto px-8 pb-10 no-scrollbar space-y-6" },
             user ? h(React.Fragment, null,
-              
               h('div', { className: "pb-6 border-b border-gray-800" },
                 h('p', { className: "text-white font-sans text-sm mb-1" }, user.user_metadata?.full_name || user.email),
                 h('button', { onClick: onLogout, className: "mt-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-white uppercase tracking-widest transition-colors" }, h(LogOut, { size: 12 }), "Sign Out" )
               ),
-
               h('div', { className: "bg-black/40 p-6 border border-obsessed-gold/30 rounded shadow-[0_0_20px_rgba(212,175,55,0.05)] text-center relative overflow-hidden" },
                   h('div', { className: "absolute top-0 right-0 w-16 h-16 bg-obsessed-gold/10 rounded-full blur-xl" }),
                   h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2 relative z-10" }, "Invite to the Obsession"),
                   h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 10 ML will be poured into your Loyalty Vessel."),
                   h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" },
                       h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode),
-                      h('button', { 
-                          onClick: () => { navigator.clipboard.writeText(refCode); notify("Access code copied to clipboard."); }, 
-                          className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" 
-                      }, h(Copy, { size: 10 }), "Copy")
+                      h('button', { onClick: () => { navigator.clipboard.writeText(refCode); notify("Access code copied to clipboard."); }, className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" }, h(Copy, { size: 10 }), "Copy")
                   )
               ),
-
               !hasUsedReferral && h('div', { className: "bg-obsessed-gold/5 p-5 border border-obsessed-gold/20" },
                   h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-1 flex items-center gap-2" }, "Redeem Invitation", h(Sparkles, { size: 10 }) ),
                   h('p', { className: "text-[8px] font-sans text-gray-400 mb-3 uppercase tracking-widest" }, "Available for your first acquisition only."),
@@ -415,7 +405,6 @@
                       h('button', { onClick: () => { onApplyReferral(refInput); setRefInput(''); }, className: "px-4 bg-gray-800 text-white text-[9px] uppercase tracking-widest hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
                   )
               ),
-
               h('div', { className: "pt-4" }, 
                 h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"),
                 h('div', { className: "space-y-6" },
@@ -451,10 +440,7 @@
                           h('span', { className: "font-sans text-[9px] tracking-[0.2em] text-white uppercase" }, "Total"),
                           h('span', { className: "font-display text-sm text-obsessed-gold" }, formatPrice(order.total_amount))
                       ),
-                      order.payment_status === 'PAID' && h('button', { 
-                          onClick: () => onTrackOrder(order),
-                          className: "w-full mt-3 py-2 bg-gray-900 border border-gray-700 text-gray-300 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-obsessed-gold hover:text-black hover:border-obsessed-gold transition-colors flex items-center justify-center gap-2" 
-                      }, h(MapPin, { size: 10 }), "Track Dossier")
+                      order.payment_status === 'PAID' && h('button', { onClick: () => onTrackOrder(order), className: "w-full mt-3 py-2 bg-gray-900 border border-gray-700 text-gray-300 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-obsessed-gold hover:text-black hover:border-obsessed-gold transition-colors flex items-center justify-center gap-2" }, h(MapPin, { size: 10 }), "Track Dossier")
                     )
                   ))
                 )
@@ -474,11 +460,9 @@
         const handleApplyVIP = async () => {
             const code = vipCode.trim().toUpperCase();
             if (!code) return;
-
             const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
             if (error || !data) { notify("Invalid VIP Vault Code."); return; }
             if (data.is_used) { notify("This VIP Code has already been redeemed."); return; }
-
             setAppliedPromo({ code: code, type: 'VIP', discount: data.discount_percentage || 16 });
             setVipCode('');
             notify(`VIP Access Granted: ${data.discount_percentage || 16}% Off Applied.`);
@@ -520,7 +504,6 @@
                     )
                   )
                 )),
-
                 cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
                     appliedPromo ? 
                         h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
@@ -542,16 +525,22 @@
                         )
                 ),
 
-                cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4" },
+                // --- NEW ADDRESS UI: FOUR SEPARATE BOXES ---
+                cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4 pb-10" },
                   h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "Delivery Details"),
                   h('input', { type: "text", placeholder: "Full Name", value: formData.name, onChange: (e) => setFormData({...formData, name: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
                   h('input', { type: "tel", placeholder: "Phone Number (e.g., 9876543210)", value: formData.phone, onChange: (e) => setFormData({...formData, phone: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
                   h('input', { type: "email", placeholder: "Email Address", value: formData.email, onChange: (e) => setFormData({...formData, email: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                  h('textarea', { placeholder: "Complete Shipping Address with PIN Code", value: formData.address, onChange: (e) => setFormData({...formData, address: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors resize-none h-20" })
+                  h('input', { type: "text", placeholder: "Street Address (House No, Area)", value: formData.street, onChange: (e) => setFormData({...formData, street: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
+                  h('div', { className: "flex gap-4" },
+                      h('input', { type: "text", placeholder: "City", value: formData.city, onChange: (e) => setFormData({...formData, city: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
+                      h('input', { type: "text", placeholder: "State", value: formData.state, onChange: (e) => setFormData({...formData, state: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" })
+                  ),
+                  h('input', { type: "text", placeholder: "6-Digit PIN Code", value: formData.pincode, onChange: (e) => setFormData({...formData, pincode: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" })
                 )
               )
           ),
-          h('div', { className: "p-8 pt-6 border-t border-obsessed-gold/20 flex-shrink-0" },
+          h('div', { className: "p-8 pt-6 border-t border-obsessed-gold/20 flex-shrink-0 bg-[#111]" },
             appliedPromo && h(React.Fragment, null,
                 h('div', { className: "flex justify-between items-end mb-1" }, h('span', { className: "font-sans text-[10px] tracking-widest text-gray-500 uppercase" }, "Subtotal"), h('span', { className: "font-mono text-xs text-gray-500" }, formatPrice(subtotal)) ),
                 h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `${appliedPromo.type === 'VIP' ? 'VIP' : 'Referral'} Benefit (${appliedPromo.discount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) )
@@ -562,7 +551,10 @@
             ),
             h('button', { 
               onClick: () => {
-                if (!formData.name || !formData.email) { notify("Please fill out Delivery Details to secure your acquisition."); return; }
+                if (!formData.name || !formData.email || !formData.street || !formData.city || !formData.state || !formData.pincode) { 
+                    notify("Please fill out all Delivery Details to secure your acquisition."); 
+                    return; 
+                }
                 checkout(finalTotal, appliedPromo ? appliedPromo.code : ''); 
               }, 
               disabled: cart.length === 0, 
@@ -574,54 +566,17 @@
         );
       };
 
-      // --- MOBILE NAVIGATION FIX (Grid layout prevents overlap) ---
       const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
         return h('nav', { className: "fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
-          // Left Zone
-          h('div', { className: "flex-1 flex justify-start pointer-events-auto" },
-             h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) )
-          ),
-          
-          // Center Zone
+          h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ) ),
           h('div', { className: "flex-[2] text-center pointer-events-none flex flex-col items-center justify-center select-none" }, 
             h('h1', { className: "font-display text-[1.1rem] sm:text-lg md:text-2xl tracking-[0.2em] md:tracking-[0.3em] font-bold text-obsessed-gold whitespace-nowrap" }, "SCENT OBSESSED"), 
             h('p', { className: "font-sans text-[0.45rem] sm:text-[0.5rem] md:text-[0.6rem] tracking-[0.4em] md:tracking-[0.5em] mt-1 text-white uppercase opacity-70 hidden sm:block" }, "EAU DE PARFUM") 
           ),
-          
-          // Right Zone
           h('div', { className: "flex-1 flex justify-end gap-1 sm:gap-2 md:gap-4 pointer-events-auto items-center relative z-10" },
             h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors p-2" }, h(Search, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors p-2 ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 }) ),
             h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative p-2 -mr-2" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute top-0 right-0 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount) )
-          )
-        );
-      };
-
-      const SuccessModal = ({ isOpen, onTriggerMist, orderId }) => {
-        if (!isOpen) return null;
-        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
-          h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-10 text-center shadow-[0_0_50px_rgba(212,175,55,0.1)] flex flex-col items-center" },
-            h('div', { className: "w-20 h-20 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/40 animate-pulse-fast" },
-              h(Droplet, { size: 40, className: "text-obsessed-gold" })
-            ),
-            h('h2', { className: "font-display text-3xl text-obsessed-gold tracking-widest uppercase mb-4" }, "Acquisition Complete"),
-            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. Your earned ML has been poured into your vessel."),
-            orderId && h('p', { className: "font-mono text-[10px] text-obsessed-gold mb-8 bg-black px-4 py-2 border border-obsessed-gold/30 tracking-widest" }, `ID: ${orderId}`),
-            h('button', { onClick: onTriggerMist, className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)]" }, "Extract Golden Essence")
-          )
-        );
-      };
-
-      const FailedModal = ({ isOpen, onClose }) => {
-        if (!isOpen) return null;
-        return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
-          h('div', { className: "relative w-full max-w-md bg-[#111] border border-red-900/50 p-10 text-center shadow-[0_0_50px_rgba(220,38,38,0.1)] flex flex-col items-center" },
-            h('div', { className: "w-20 h-20 rounded-full bg-red-900/10 flex items-center justify-center mb-6 border border-red-900/40 animate-pulse-fast" },
-              h(AlertCircle, { size: 40, className: "text-red-500" })
-            ),
-            h('h2', { className: "font-display text-2xl text-red-500 tracking-widest uppercase mb-4" }, "Acquisition Failed"),
-            h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-8" }, "Your payment session was abandoned or unsuccessful. Your vessel remains intact. Please attempt to secure your collection again."),
-            h('button', { onClick: onClose, className: "w-full py-4 bg-gray-900 text-white font-sans font-bold uppercase tracking-[0.2em] border border-gray-700 hover:border-white hover:bg-white hover:text-black transition-colors" }, "Return to Vessel")
           )
         );
       };
@@ -649,7 +604,8 @@
         const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
         const [selectedTrackingOrder, setSelectedTrackingOrder] = useState(null);
 
-        const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
+        // --- NEW STATE: Separated address fields ---
+        const [formData, setFormData] = useState({ name: '', phone: '', email: '', street: '', city: '', state: '', pincode: '' });
         const [is3DMode, setIs3DMode] = useState(false);
         
         const [showSuccess, setShowSuccess] = useState(false);
@@ -660,13 +616,8 @@
         const [showShine, setShowShine] = useState(false);
 
         const [notification, setNotification] = useState(null);
-        const notify = (msg) => {
-            setNotification(msg);
-            setTimeout(() => setNotification(null), 4000);
-        };
-
+        const notify = (msg) => { setNotification(msg); setTimeout(() => setNotification(null), 4000); };
         const [appliedPromo, setAppliedPromo] = useState(null);
-
         const isSidebarActive = isCartOpen || isOrdersOpen;
         const observerRefs = useRef([]);
 
@@ -675,12 +626,8 @@
         }, [myOrders]);
 
         useEffect(() => {
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) { setUser(session.user); }
-          });
-          const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-          });
+          supabase.auth.getSession().then(({ data: { session } }) => { if (session?.user) { setUser(session.user); } });
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setUser(session?.user ?? null); });
           return () => subscription.unsubscribe();
         }, []);
 
@@ -689,31 +636,16 @@
           const orderId = urlParams.get('order_id');
           if (orderId) {
             window.history.replaceState({}, document.title, window.location.pathname);
-            
             if (orderId.startsWith('FREE_')) {
-                setShowSuccess(true);
-                setSuccessOrderId(orderId);
-                setCart([]); 
-                setAppliedPromo(null);
+                setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null);
             } else {
                 fetch(`/api/verify-payment/${orderId}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'PAID' || data.status === 'SUCCESS') {
-                            setShowSuccess(true);
-                            setSuccessOrderId(orderId);
-                            setCart([]); 
-                            setAppliedPromo(null);
-                        } else {
-                            setShowFailed(true);
-                            setIsCartOpen(true); 
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Verification error:", err);
-                        setShowFailed(true);
-                        setIsCartOpen(true);
-                    });
+                            setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null);
+                        } else { setShowFailed(true); setIsCartOpen(true); }
+                    }).catch(err => { console.error("Verification error:", err); setShowFailed(true); setIsCartOpen(true); });
             }
           }
         }, []);
@@ -725,18 +657,23 @@
                 if (ordersData) setMyOrders(ordersData);
 
                 const { data: profileData } = await supabase.from('profiles').select('*').eq('email', user.email).single();
-                
                 if (!profileData) {
                     await supabase.from('profiles').insert([{ id: user.id, email: user.email, loyalty_ml: 0 }]);
-                    setLoyaltyMl(0);
-                    setFormData(prev => ({...prev, email: user.email}));
+                    setLoyaltyMl(0); setFormData(prev => ({...prev, email: user.email}));
                 } else {
                     setLoyaltyMl(profileData.loyalty_ml);
+                    
+                    // Attempt to parse old address data if it exists, otherwise just load what we have
+                    let streetData = profileData.shipping_address || '';
+                    let c = '', s = '', p = '';
+                    try {
+                        const parsed = JSON.parse(profileData.shipping_address);
+                        if(parsed.street) { streetData = parsed.street; c = parsed.city; s = parsed.state; p = parsed.pincode; }
+                    } catch(e) {}
+
                     setFormData({
-                        email: user.email,
-                        name: profileData.full_name || user.user_metadata?.full_name || '',
-                        phone: profileData.phone || '',
-                        address: profileData.shipping_address || ''
+                        email: user.email, name: profileData.full_name || user.user_metadata?.full_name || '',
+                        phone: profileData.phone || '', street: streetData, city: c, state: s, pincode: p
                     });
                 }
             };
@@ -744,40 +681,18 @@
         }, [user, isOrdersOpen, showSuccess]);
 
         const handleTriggerPurchaseMist = () => {
-            setShowSuccess(false);
-            setMistState('blooming'); 
-            setTimeout(() => setMistState('flying'), 200);
-            setTimeout(() => {
-                setMistState('idle'); setShowShine(true); 
-                setTimeout(() => setShowShine(false), 2000);
-            }, 1400);
+            setShowSuccess(false); setMistState('blooming'); setTimeout(() => setMistState('flying'), 200);
+            setTimeout(() => { setMistState('idle'); setShowShine(true); setTimeout(() => setShowShine(false), 2000); }, 1400);
         };
 
-        const handleClaimClick = () => {
-            if (loyaltyMl < 100) return;
-            setIsRewardModalOpen(true);
-        };
+        const handleClaimClick = () => { if (loyaltyMl < 100) return; setIsRewardModalOpen(true); };
 
         const handleRewardSelection = (product) => {
-            setIsRewardModalOpen(false); 
-            setMistState('claiming_bloom');
-            setTimeout(() => setMistState('claiming_fly'), 200);
-
+            setIsRewardModalOpen(false); setMistState('claiming_bloom'); setTimeout(() => setMistState('claiming_fly'), 200);
             setTimeout(() => {
                 setMistState('idle');
-                const freeBottle = {
-                    id: 'free-reward-' + product.id + '-' + Date.now(),
-                    name: 'Free ' + product.name,
-                    tagline: product.tagline,
-                    price: "₹ 0", 
-                    originalPrice: "₹ 2,499",
-                    colorHex: product.colorHex,
-                    imageUrl: product.imageUrl,
-                    qty: 1,
-                    isReward: true 
-                };
-                setCart(prev => [...prev, freeBottle]);
-                setIsCartOpen(true); 
+                const freeBottle = { id: 'free-reward-' + product.id + '-' + Date.now(), name: 'Free ' + product.name, tagline: product.tagline, price: "₹ 0", originalPrice: "₹ 2,499", colorHex: product.colorHex, imageUrl: product.imageUrl, qty: 1, isReward: true };
+                setCart(prev => [...prev, freeBottle]); setIsCartOpen(true); 
             }, 1400);
         };
 
@@ -795,32 +710,17 @@
         const handleApplyReferral = (code) => {
             const upperCode = code.trim().toUpperCase();
             if (!upperCode) return;
-            if (!upperCode.startsWith('SO-') || upperCode.length < 9) {
-                notify("Invalid Referral Code format.");
-                return;
-            }
-            if (!user) {
-                notify("Please log in to redeem an invitation.");
-                return;
-            }
-            if (upperCode === `SO-${user.id.substring(0, 6).toUpperCase()}`) {
-                notify("You cannot use your own referral code.");
-                return;
-            }
+            if (!upperCode.startsWith('SO-') || upperCode.length < 9) { notify("Invalid Referral Code format."); return; }
+            if (!user) { notify("Please log in to redeem an invitation."); return; }
+            if (upperCode === `SO-${user.id.substring(0, 6).toUpperCase()}`) { notify("You cannot use your own referral code."); return; }
             setAppliedPromo({ code: upperCode, type: 'REF', discount: 10 });
-            notify("Referral Accepted: 10% Off Applied to your collection.");
-            setIsOrdersOpen(false);
-            setIsCartOpen(true); 
+            notify("Referral Accepted: 10% Off Applied to your collection."); setIsOrdersOpen(false); setIsCartOpen(true); 
         };
 
         const handleCheckout = async (finalDiscountedTotal, appliedPromoCode = '') => {
-          if (!user) {
-              notify("Please log in via the profile menu to secure your checkout.");
-              return;
-          }
-          if (!formData.name || !formData.phone || !formData.email || !formData.address) { 
-              notify("Please fill out all Delivery Details."); 
-              return; 
+          if (!user) { notify("Please log in via the profile menu to secure your checkout."); return; }
+          if (!formData.name || !formData.phone || !formData.email || !formData.street || !formData.city || !formData.state || !formData.pincode) { 
+              notify("Please fill out all Delivery Details."); return; 
           }
           
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
@@ -830,18 +730,19 @@
           const claimedRewardMl = hasReward ? 100 : 0; 
           const totalMoney = finalDiscountedTotal; 
 
-          await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: formData.address }).eq('email', formData.email);
+          // Save address as JSON string for Shiprocket parsing later
+          const addressString = JSON.stringify({ street: formData.street, city: formData.city, state: formData.state, pincode: formData.pincode });
+          await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: addressString }).eq('email', formData.email);
           
           if (totalMoney === 0) {
              const fakeOrderId = 'FREE_' + Date.now();
              await supabase.from('orders').insert([{
                   order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email,
-                  shipping_address: formData.address, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, 
+                  shipping_address: addressString, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, 
                   cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromoCode
              }]);
              await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
-             window.location.href = `/?order_id=${fakeOrderId}`;
-             return;
+             window.location.href = `/?order_id=${fakeOrderId}`; return;
           }
 
           try {
@@ -849,22 +750,15 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                orderAmount: totalMoney,
-                customerName: formData.name, 
-                customerPhone: formData.phone,
-                customerEmail: formData.email,
-                shippingAddress: formData.address,
-                rewardMl: earnedRewardMl,          
-                claimedRewardMl: claimedRewardMl,
-                cartItems: cart,
-                appliedPromo: appliedPromoCode
+                orderAmount: totalMoney, customerName: formData.name, customerPhone: formData.phone, customerEmail: formData.email,
+                shippingAddress: addressString, // Pass the JSON string
+                rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode
               })
             });
 
             const data = await response.json();
             if (data.payment_session_id) {
-               const cashfree = Cashfree({ mode: "sandbox" });
-               cashfree.checkout({ paymentSessionId: data.payment_session_id });
+               const cashfree = Cashfree({ mode: "sandbox" }); cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify("Error starting checkout. Please check your backend."); }
           } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
         };
@@ -884,16 +778,13 @@
         }, [displayedProducts]);
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
-          
           h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
-
           mistState !== 'idle' ? h('div', {
             className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${
                 mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' :
                 mistState === 'flying' ? 'top-[calc(100vh-100px)] md:top-[calc(100vh-60px)] left-10 md:left-14 w-16 h-16 opacity-80 duration-1000' :
                 mistState === 'claiming_bloom' ? 'bottom-16 left-16 w-40 h-40 opacity-100 duration-500' :
-                mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' :
-                'opacity-0'
+                mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' : 'opacity-0'
             }`
           }) : null,
 
@@ -917,37 +808,15 @@
           h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
           h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
           
-          // MOVED 3D OUT OF TOP NAV
-          h(Navigation, { 
-              onSearchClick: () => setIsSearchOpen(!isSearchOpen),
-              onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, 
-              onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); },
-              onMenuClick: () => setIsMenuOpen(true), 
-              cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), 
-              user: user
-          }),
-
-          // ADDED FLOATING 3D ICON
+          h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
           h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
           
-          h(OrdersSidebar, { 
-              isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, 
-              onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); },
-              onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); },
-              notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral
-          }),
-          
-          h(CartSidebar, { 
-              isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart: cart, updateQty: updateQty, 
-              checkout: handleCheckout, formData: formData, setFormData: setFormData, notify: notify, 
-              appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo 
-          }),
+          h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
+          h(CartSidebar, { isOpen: isCartOpen, onClose: () => setIsCartOpen(false), cart: cart, updateQty: updateQty, checkout: handleCheckout, formData: formData, setFormData: setFormData, notify: notify, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo }),
 
           h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
           h(FailedModal, { isOpen: showFailed, onClose: () => setShowFailed(false) }),
-          
           h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
-          
           h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive }),
 
           h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },

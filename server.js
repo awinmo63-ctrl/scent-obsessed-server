@@ -12,6 +12,97 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+// --- NEW HELPER: THE SHIPROCKET DISPATCHER ---
+async function pushToShiprocket(orderRecord) {
+    try {
+        console.log(`[SHIPROCKET] Initiating dispatch for Order ${orderRecord.order_id}...`);
+
+        // 1. Generate Security Token using your Email/Password
+        const authRes = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: process.env.SHIPROCKET_EMAIL,
+                password: process.env.SHIPROCKET_PASSWORD
+            })
+        });
+        const authData = await authRes.json();
+
+        if (!authData.token) {
+            throw new Error("Shiprocket Authentication Failed. Check your API Email/Password in Render.");
+        }
+
+        // 2. Parse the separated address JSON we sent from the frontend
+        let addressObj = {};
+        try {
+            addressObj = JSON.parse(orderRecord.shipping_address);
+        } catch (e) {
+            console.error("[SHIPROCKET] Address format error. Falling back.");
+            addressObj = { street: orderRecord.shipping_address, city: 'Unknown', state: 'Unknown', pincode: '000000' };
+        }
+
+        // 3. Format the cart items for the Courier
+        const srItems = orderRecord.cart_items.map(item => ({
+            name: item.name,
+            sku: item.id,
+            units: item.qty,
+            selling_price: parseInt(item.price.replace(/[^0-9]/g, ''), 10) || 0,
+            discount: "",
+            tax: "",
+            hsn: ""
+        }));
+
+        // 4. Get today's date formatted for Shiprocket (YYYY-MM-DD)
+        const date = new Date();
+        const dateString = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+
+        // 5. Construct the master payload
+        const payload = {
+            order_id: orderRecord.order_id,
+            order_date: dateString,
+            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary", // Uses your Render variable
+            billing_customer_name: orderRecord.customer_name,
+            billing_last_name: "", // Shiprocket requires this field to exist, even if blank
+            billing_address: addressObj.street,
+            billing_city: addressObj.city,
+            billing_pincode: addressObj.pincode,
+            billing_state: addressObj.state,
+            billing_country: "India",
+            billing_email: orderRecord.customer_email,
+            billing_phone: orderRecord.customer_phone,
+            shipping_is_billing: true,
+            order_items: srItems,
+            payment_method: "Prepaid",
+            sub_total: orderRecord.total_amount,
+            length: 15, // Standard perfume box volumetric data (in cm)
+            breadth: 15,
+            height: 10,
+            weight: 0.5 // 500 grams default weight
+        };
+
+        // 6. Send the order to the couriers!
+        const createRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/ad-hoc', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authData.token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const createData = await createRes.json();
+
+        if (createData.order_id) {
+            console.log(`[SHIPROCKET] Success! Manifest generated. Shiprocket ID: ${createData.order_id}`);
+        } else {
+            console.error("[SHIPROCKET] Failed to create manifest:", createData);
+        }
+
+    } catch (err) {
+        console.error("[SHIPROCKET] Fatal Error:", err.message);
+    }
+}
+
 app.post('/create-order', async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
@@ -25,7 +116,7 @@ app.post('/create-order', async (req, res) => {
                     customer_name: customerName,
                     customer_phone: customerPhone,
                     customer_email: customerEmail,
-                    shipping_address: shippingAddress,
+                    shipping_address: shippingAddress, // Now saves the JSON string seamlessly
                     total_amount: orderAmount,
                     payment_status: 'PENDING',
                     reward_ml: rewardMl || 0,
@@ -52,7 +143,6 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail
             },
             order_meta: {
-                // FIX: We removed the fake success=true. It now just passes the order ID back.
                 return_url: "https://scent-obsessed-server.onrender.com/?order_id={order_id}"
             }
         };
@@ -84,7 +174,6 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-// --- NEW FIX: VERIFY PAYMENT ENDPOINT ---
 app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
         const response = await fetch(`https://sandbox.cashfree.com/pg/orders/${req.params.orderId}`, {
@@ -96,7 +185,6 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
             }
         });
         const data = await response.json();
-        // This returns the exact real-world status (PAID, ACTIVE, FAILED, etc.)
         res.json({ status: data.order_status });
     } catch (error) {
         res.status(500).json({ error: 'Failed to verify payment with bank' });
@@ -116,6 +204,10 @@ app.post('/webhook', async (req, res) => {
                 const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
 
                 if (orderData && orderData.customer_email) {
+
+                    // Trigger Shiprocket Automation
+                    await pushToShiprocket(orderData);
+
                     const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                     if (profileData) {
                         const newTotal = profileData.loyalty_ml + (orderData.reward_ml || 0) - (orderData.claimed_reward_ml || 0);
