@@ -231,7 +231,6 @@
         const hasRewardInCart = cart.some(item => item.isReward);
         const mlLeft = Math.max(0, 100 - loyaltyMl);
         
-        // VISUAL PHYSICS UPDATE
         const visualPercentage = loyaltyMl === 0 ? 0 : 20 + (loyaltyMl * 0.70);
 
         return h('div', { className: "fixed bottom-6 md:bottom-8 left-4 md:left-8 z-[55] bg-[#111]/95 backdrop-blur-md p-3 md:p-4 rounded-xl flex items-center gap-3 md:gap-4 border border-obsessed-gold/40 shadow-[0_0_20px_rgba(0,0,0,0.9)] transition-all duration-500 hover:border-obsessed-gold scale-90 md:scale-100 origin-bottom-left pointer-events-auto" },
@@ -305,7 +304,8 @@
           safeProducts.map((product, index) => {
             const isActive = index === activeIndex; const isPrev = index === activeIndex - 1; const isNext = index === activeIndex + 1;
             let transformStyle = {}; let opacity = 0; let zIndex = 0; let filter = 'none'; let pointerEvents = 'none';
-            if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '45%', left: '50%' }; pointerEvents = is3DMode ? 'auto' : 'none'; } 
+            // --- ELEVATION FIX: Shifted top from 45% to 42% for better spacing on mobile ---
+            if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '42%', left: '50%' }; pointerEvents = is3DMode ? 'auto' : 'none'; } 
             else if (isPrev) { opacity = 0.6; zIndex = 5; transformStyle = { transform: `translate(-50%, 0%) scale(0.15)`, top: 'auto', bottom: '2rem', left: '50%' }; filter = 'grayscale(100%)'; } 
             else if (isNext) { opacity = 0; zIndex = 1; }
             return h('div', { key: product.id, className: `absolute transition-all duration-1000 ease-in-out will-change-transform w-[85vw] h-[50vh] md:w-[60vh] md:h-[80vh]`, style: { ...transformStyle, opacity: opacity, zIndex: zIndex, filter: filter, pointerEvents: pointerEvents } },
@@ -861,11 +861,9 @@
             displayedProducts.map((product, index) => (
               h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
                 
-                // --- THE PHYSICS FIX IS HERE ---
-                // mt-[45vh] makes it start higher on the screen
-                // max-h-[55vh] gives it more room to be read without scrolling the whole page
-                // pb-24 ensures the button isn't hidden at the bottom
-                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent mt-[45vh] md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
+                // --- THE HERO DROP FIX IS HERE ---
+                // We use ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} so only the first product sits beautifully lower on page load!
+                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                   
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
                   h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
