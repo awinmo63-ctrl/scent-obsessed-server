@@ -35,6 +35,7 @@
               'fade-in': 'fadeIn 0.3s ease-out forwards',
               'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'marquee': 'marquee 30s linear infinite',
             },
             keyframes: {
               float: {
@@ -48,6 +49,10 @@
               slideDown: {
                 '0%': { transform: 'translate(-50%, -150%)', opacity: '0' },
                 '100%': { transform: 'translate(-50%, 0)', opacity: '1' }
+              },
+              marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-50%)' }
               }
             }
           }
@@ -176,9 +181,23 @@
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
+      // --- THE MOVING ANNOUNCEMENT BAR ---
+      const AnnouncementBar = () => {
+        const announcementText = "✦ GRAND LAUNCH: USE CODE VIP16 FOR 16% OFF ✦ SECURE YOUR SIGNATURE SCENT TODAY ✦ EARN 20ML PER BOTTLE FOR YOUR LOYALTY VESSEL ";
+        return h('div', { className: "fixed top-0 left-0 right-0 z-[80] bg-obsessed-gold text-black py-1.5 md:py-2 overflow-hidden flex whitespace-nowrap shadow-[0_2px_10px_rgba(212,175,55,0.2)]" },
+            h('div', { className: "animate-marquee flex whitespace-nowrap items-center font-sans text-[8px] md:text-[9.5px] tracking-[0.2em] font-bold uppercase" },
+                h('span', null, announcementText),
+                h('span', null, announcementText),
+                h('span', null, announcementText),
+                h('span', null, announcementText),
+                h('span', null, announcementText)
+            )
+        );
+      };
+
       const NotificationBanner = ({ message, onClose }) => {
         if (!message) return null;
-        return h('div', { className: "fixed top-8 left-1/2 -translate-x-1/2 z-[9999] bg-[#111]/95 backdrop-blur-md border border-obsessed-gold/50 px-6 md:px-8 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex items-center gap-4 md:gap-6 animate-slide-down pointer-events-auto" },
+        return h('div', { className: "fixed top-12 left-1/2 -translate-x-1/2 z-[9999] bg-[#111]/95 backdrop-blur-md border border-obsessed-gold/50 px-6 md:px-8 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex items-center gap-4 md:gap-6 animate-slide-down pointer-events-auto" },
             h(Sparkles, { size: 16, className: "text-obsessed-gold flex-shrink-0" }),
             h('span', { className: "font-sans text-[9px] md:text-[10px] tracking-[0.2em] text-white uppercase" }, message),
             h('button', { onClick: onClose, className: "text-gray-500 hover:text-obsessed-gold transition-colors ml-2 md:ml-4 flex-shrink-0" }, h(X, { size: 16 }))
@@ -304,7 +323,6 @@
           safeProducts.map((product, index) => {
             const isActive = index === activeIndex; const isPrev = index === activeIndex - 1; const isNext = index === activeIndex + 1;
             let transformStyle = {}; let opacity = 0; let zIndex = 0; let filter = 'none'; let pointerEvents = 'none';
-            // --- ELEVATION FIX: Shifted top from 45% to 42% for better spacing on mobile ---
             if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '42%', left: '50%' }; pointerEvents = is3DMode ? 'auto' : 'none'; } 
             else if (isPrev) { opacity = 0.6; zIndex = 5; transformStyle = { transform: `translate(-50%, 0%) scale(0.15)`, top: 'auto', bottom: '2rem', left: '50%' }; filter = 'grayscale(100%)'; } 
             else if (isNext) { opacity = 0; zIndex = 1; }
@@ -339,7 +357,7 @@
           { name: 'Track Order', type: 'whatsapp', message: 'Hello, I would like to track my Scent Obsessed order.' }, 
           { name: 'Contact Concierge', type: 'whatsapp', message: 'Hello Scent Obsessed, I need some assistance finding my signature scent.' }
         ];
-        return h('div', { className: `fixed inset-y-0 left-0 z-[70] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
+        return h('div', { className: `fixed inset-y-0 left-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
             h('div', { className: "flex justify-between items-center mb-20" },
               h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
@@ -384,7 +402,7 @@
         const totalClaimed = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.claimed_reward_ml || 0), 0);
         const earnedFromReferrals = Math.max(0, loyaltyMl - earnedFromPurchases + totalClaimed);
 
-        return h('div', { className: `fixed inset-y-0 right-0 z-[70] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
+        return h('div', { className: `fixed inset-y-0 right-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
           h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
             h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
           ),
@@ -494,7 +512,7 @@
         const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
         const finalTotal = subtotal - discountAmount;
 
-        return h('div', { className: `fixed inset-y-0 right-0 z-[70] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
+        return h('div', { className: `fixed inset-y-0 right-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
           h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
             h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-[0.2em]" }, "YOUR COLLECTION"),
             h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
@@ -581,8 +599,9 @@
         );
       };
 
+      // --- NUDGED NAVIGATION DOWN TO FIT THE BAR ---
       const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
-        return h('nav', { className: "fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
+        return h('nav', { className: "fixed top-[26px] md:top-[34px] left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
           h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ) ),
           h('div', { className: "flex-[2] text-center pointer-events-none flex flex-col items-center justify-center select-none" }, 
             h('h1', { className: "font-display text-[1.1rem] sm:text-lg md:text-2xl tracking-[0.2em] md:tracking-[0.3em] font-bold text-obsessed-gold whitespace-nowrap" }, "SCENT OBSESSED"), 
@@ -796,7 +815,9 @@
 
             const data = await response.json();
             if (data.payment_session_id) {
-               const cashfree = Cashfree({ mode: "production" }); cashfree.checkout({ paymentSessionId: data.payment_session_id });
+               // --- CRUCIAL FIX: SET TO PRODUCTION ---
+               const cashfree = Cashfree({ mode: "production" }); 
+               cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify("Error starting checkout. Please check your backend."); }
           } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
         };
@@ -816,6 +837,7 @@
         }, [displayedProducts]);
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
+          h(AnnouncementBar),
           h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
           mistState !== 'idle' ? h('div', {
             className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${
@@ -861,8 +883,6 @@
             displayedProducts.map((product, index) => (
               h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
                 
-                // --- THE HERO DROP FIX IS HERE ---
-                // We use ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} so only the first product sits beautifully lower on page load!
                 h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                   
                   h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
