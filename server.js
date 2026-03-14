@@ -152,11 +152,11 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail
             },
             order_meta: {
-                return_url: "https://scent-obsessed-server.onrender.com/?order_id={order_id}"
+                return_url: "https://scentobsessed.in/?order_id={order_id}"
             }
         };
 
-        const response = await fetch('https://sandbox.cashfree.com/pg/orders', {
+        const response = await fetch('https://api.cashfree.com/pg/orders', {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -185,7 +185,7 @@ app.post('/create-order', async (req, res) => {
 
 app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
-        const response = await fetch(`https://sandbox.cashfree.com/pg/orders/${req.params.orderId}`, {
+        const response = await fetch(`https://api.cashfree.com/pg/orders/${req.params.orderId}`, {
             headers: {
                 'accept': 'application/json',
                 'x-client-id': process.env.CASHFREE_APP_ID,

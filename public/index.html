@@ -796,7 +796,7 @@
 
             const data = await response.json();
             if (data.payment_session_id) {
-               const cashfree = Cashfree({ mode: "sandbox" }); cashfree.checkout({ paymentSessionId: data.payment_session_id });
+               const cashfree = Cashfree({ mode: "production" }); cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify("Error starting checkout. Please check your backend."); }
           } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
         };
