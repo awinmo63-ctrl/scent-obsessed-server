@@ -98,7 +98,6 @@
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
-    "d3": "https://esm.sh/d3@^7.9.0",
     "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.3"
   }
@@ -113,7 +112,6 @@
     <script type="module">
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
-      import * as d3 from 'd3';
       import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
@@ -181,7 +179,6 @@
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
       const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
-      // --- THE MOVING ANNOUNCEMENT BAR ---
       const AnnouncementBar = () => {
         const announcementText = "✦ GRAND LAUNCH OFFER LIVE TILL 31ST MARCH ✦ ACQUIRE YOUR SIGNATURE SCENT FOR JUST ₹ 720 (ORIGINALLY ₹ 2,499) ✦ EARN 20ML PER BOTTLE FOR YOUR LOYALTY VESSEL ";
         return h('div', { className: "fixed top-0 left-0 right-0 z-[80] bg-obsessed-gold text-black py-1.5 md:py-2 overflow-hidden flex whitespace-nowrap shadow-[0_2px_10px_rgba(212,175,55,0.2)]" },
@@ -599,7 +596,6 @@
         );
       };
 
-      // --- NUDGED NAVIGATION DOWN TO FIT THE BAR ---
       const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
         return h('nav', { className: "fixed top-[26px] md:top-[34px] left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
           h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ) ),
@@ -815,7 +811,6 @@
 
             const data = await response.json();
             if (data.payment_session_id) {
-               // --- CRUCIAL FIX: SET TO PRODUCTION ---
                const cashfree = Cashfree({ mode: "production" }); 
                cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify("Error starting checkout. Please check your backend."); }
