@@ -16,82 +16,38 @@
           extend: {
             colors: {
               obsessed: {
-                black: '#1a1a1a',
-                charcoal: '#242424',
-                cream: '#f5f5f0',
-                gold: '#d4af37',
-                sapphire: '#0f52ba',
-                emerald: '#046307',
-                'gold-dim': '#aa8c2c'
+                black: '#1a1a1a', charcoal: '#242424', cream: '#f5f5f0', gold: '#d4af37',
+                sapphire: '#0f52ba', emerald: '#046307', 'gold-dim': '#aa8c2c'
               }
             },
             fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              display: ['"Cinzel"', 'serif'],
-              sans: ['"Montserrat"', 'sans-serif'],
+              serif: ['"Playfair Display"', 'serif'], display: ['"Cinzel"', 'serif'], sans: ['"Montserrat"', 'sans-serif'],
             },
             animation: {
-              'float': 'float 6s ease-in-out infinite',
-              'fade-in': 'fadeIn 0.3s ease-out forwards',
-              'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards', 'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'marquee': 'marquee 30s linear infinite',
             },
             keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              slideDown: {
-                '0%': { transform: 'translate(-50%, -150%)', opacity: '0' },
-                '100%': { transform: 'translate(-50%, 0)', opacity: '1' }
-              },
-              marquee: {
-                '0%': { transform: 'translateX(0%)' },
-                '100%': { transform: 'translateX(-50%)' }
-              }
+              float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              slideDown: { '0%': { transform: 'translate(-50%, -150%)', opacity: '0' }, '100%': { transform: 'translate(-50%, 0)', opacity: '1' } },
+              marquee: { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-50%)' } }
             }
           }
         }
       }
     </script>
     <style>
-      body {
-        background-color: #1a1a1a;
-        color: #f5f5f0;
-        overflow-x: hidden;
-      }
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1a1a1a; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #333; 
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #d4af37; 
-      }
-      .glass-panel {
-        background: rgba(26, 26, 26, 0.95);
-        backdrop-filter: blur(12px);
-        border-left: 1px solid rgba(212, 175, 55, 0.2);
-      }
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      model-viewer.active {
-        pointer-events: auto !important;
-      }
+      body { background-color: #1a1a1a; color: #f5f5f0; overflow-x: hidden; }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #1a1a1a; }
+      ::-webkit-scrollbar-thumb { background: #333; }
+      ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+      .glass-panel { background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(12px); border-left: 1px solid rgba(212, 175, 55, 0.2); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      model-viewer.active { pointer-events: auto !important; }
     </style>
   <script type="importmap">
 {
@@ -112,7 +68,7 @@
     <script type="module">
       import React, { useState, useEffect, useRef, useMemo } from 'react';
       import ReactDOM from 'react-dom/client';
-      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle } from 'lucide-react';
+      import { Menu, Search, ShoppingBag, ArrowDown, X, Plus, Minus, MessageCircle, Box, User, LogOut, Droplet, Sparkles, MapPin, Truck, Package, CheckCircle2, Copy, AlertCircle, ArrowLeft, Lock } from 'lucide-react';
       import { createClient } from '@supabase/supabase-js';
 
       const h = React.createElement;
@@ -122,58 +78,10 @@
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       const PRODUCTS = [
-        {
-          id: 'blue-monarch',
-          name: 'Blue Monarch',
-          tagline: 'Rule Your Realm',
-          narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.",
-          price: "₹ 720",
-          originalPrice: "₹ 2,499",
-          colorHex: '#0f52ba', 
-          imageUrl: './blue_monarch.png', 
-          bottleColor: 'sapphire',
-          modelSrc: './blue_monarch.glb',
-          orientation: '0deg -90deg 0deg'
-        },
-        {
-          id: 'urban-ember',
-          name: 'Urban Ember',
-          tagline: 'Ignite Your Presence',
-          narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.",
-          price: "₹ 720",
-          originalPrice: "₹ 2,499",
-          colorHex: '#d4af37', 
-          imageUrl: './urban_ember.png',
-          bottleColor: 'white',
-          modelSrc: './urban_ember.glb',
-          orientation: '0deg -90deg 0deg'
-        },
-        {
-          id: 'flora-essence',
-          name: 'Flora Essence',
-          tagline: 'The Scent of Sunlight',
-          narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.",
-          price: "₹ 720",
-          originalPrice: "₹ 2,499",
-          colorHex: '#046307', 
-          imageUrl: './flora_essence.jpeg', 
-          bottleColor: 'emerald',
-          modelSrc: './flora_essence.glb',
-          orientation: '0deg 0deg 0deg'
-        },
-        {
-          id: 'savage-wind',
-          name: 'Savage Wind',
-          tagline: 'Unleash the Storm',
-          narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.",
-          price: "₹ 720",
-          originalPrice: "₹ 2,499",
-          colorHex: '#555555', 
-          imageUrl: './savage_wind.png', 
-          bottleColor: 'black',
-          modelSrc: './savage_wind.glb',
-          orientation: '0deg 0deg 0deg'
-        }
+        { id: 'blue-monarch', name: 'Blue Monarch', tagline: 'Rule Your Realm', narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#0f52ba', imageUrl: './blue_monarch.png', bottleColor: 'sapphire', modelSrc: './blue_monarch.glb', orientation: '0deg -90deg 0deg' },
+        { id: 'urban-ember', name: 'Urban Ember', tagline: 'Ignite Your Presence', narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#d4af37', imageUrl: './urban_ember.png', bottleColor: 'white', modelSrc: './urban_ember.glb', orientation: '0deg -90deg 0deg' },
+        { id: 'flora-essence', name: 'Flora Essence', tagline: 'The Scent of Sunlight', narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#046307', imageUrl: './flora_essence.jpeg', bottleColor: 'emerald', modelSrc: './flora_essence.glb', orientation: '0deg 0deg 0deg' },
+        { id: 'savage-wind', name: 'Savage Wind', tagline: 'Unleash the Storm', narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#555555', imageUrl: './savage_wind.png', bottleColor: 'black', modelSrc: './savage_wind.glb', orientation: '0deg 0deg 0deg' }
       ];
 
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
@@ -183,11 +91,7 @@
         const announcementText = "✦ GRAND LAUNCH OFFER LIVE TILL 31ST MARCH ✦ ACQUIRE YOUR SIGNATURE SCENT FOR JUST ₹ 720 (ORIGINALLY ₹ 2,499) ✦ EARN 20ML PER BOTTLE FOR YOUR LOYALTY VESSEL ";
         return h('div', { className: "fixed top-0 left-0 right-0 z-[80] bg-obsessed-gold text-black py-1.5 md:py-2 overflow-hidden flex whitespace-nowrap shadow-[0_2px_10px_rgba(212,175,55,0.2)]" },
             h('div', { className: "animate-marquee flex whitespace-nowrap items-center font-sans text-[8px] md:text-[9.5px] tracking-[0.2em] font-bold uppercase" },
-                h('span', null, announcementText),
-                h('span', null, announcementText),
-                h('span', null, announcementText),
-                h('span', null, announcementText),
-                h('span', null, announcementText)
+                h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText)
             )
         );
       };
@@ -217,7 +121,6 @@
             h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
             h('h2', { className: "font-display text-xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "Dossier Tracking"),
             h('p', { className: "font-mono text-[10px] text-gray-500 text-center mb-8 tracking-wider" }, order.order_id),
-            
             h('div', { className: "relative pl-6 space-y-8" },
                h('div', { className: "absolute top-2 bottom-2 left-[35px] w-px bg-gray-800" }),
                steps.map((step) => {
@@ -243,53 +146,33 @@
       const FloatingLoyaltyVessel = ({ user, loyaltyMl, showShine, onClaim, cart = [] }) => {
         const [showTooltip, setShowTooltip] = useState(false);
         if (!user) return null;
-        
         const hasRewardInCart = cart.some(item => item.isReward);
         const mlLeft = Math.max(0, 100 - loyaltyMl);
-        
         const visualPercentage = loyaltyMl === 0 ? 0 : 20 + (loyaltyMl * 0.70);
 
         return h('div', { className: "fixed bottom-6 md:bottom-8 left-4 md:left-8 z-[55] bg-[#111]/95 backdrop-blur-md p-3 md:p-4 rounded-xl flex items-center gap-3 md:gap-4 border border-obsessed-gold/40 shadow-[0_0_20px_rgba(0,0,0,0.9)] transition-all duration-500 hover:border-obsessed-gold scale-90 md:scale-100 origin-bottom-left pointer-events-auto" },
            h('div', { className: "relative w-10 h-16 md:w-12 md:h-20 flex-shrink-0" },
               h('img', { src: './transparent_bottle.png', className: "absolute inset-0 w-full h-full object-contain opacity-30 grayscale" }),
-              h('img', { 
-                  src: './transparent_bottle.png', 
-                  className: "absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] transition-all duration-[2000ms] ease-in-out", 
-                  style: { filter: 'sepia(1) saturate(3) hue-rotate(-15deg) brightness(1.3)', clipPath: `inset(calc(100% - ${visualPercentage}%) 0 0 0)` } 
-              }),
+              h('img', { src: './transparent_bottle.png', className: "absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] transition-all duration-[2000ms] ease-in-out", style: { filter: 'sepia(1) saturate(3) hue-rotate(-15deg) brightness(1.3)', clipPath: `inset(calc(100% - ${visualPercentage}%) 0 0 0)` } }),
               showShine && h('div', { className: "absolute inset-0 bg-white/50 blur-md animate-pulse mix-blend-overlay rounded-full" })
            ),
            h('div', { className: "flex flex-col relative" },
               h('div', { className: "flex items-center gap-2 mb-1" },
                   h('p', { className: "font-display text-obsessed-gold text-[10px] md:text-xs tracking-[0.2em] uppercase" }, "Loyalty Vessel"),
-                  h('div', { 
-                      onMouseEnter: () => setShowTooltip(true),
-                      onMouseLeave: () => setShowTooltip(false),
-                      onTouchStart: () => setShowTooltip(!showTooltip),
-                      className: "w-3 h-3 rounded-full border border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:text-obsessed-gold hover:border-obsessed-gold text-[8px] font-sans transition-colors relative" 
-                  }, "i"),
-                  showTooltip && h('div', { className: "absolute bottom-full left-0 mb-3 w-56 p-4 bg-[#111] border border-obsessed-gold/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] z-[100] animate-fade-in pointer-events-none" },
-                      h('p', { className: "font-sans text-[9px] text-gray-300 leading-loose tracking-wider uppercase" }, "Earn 20 ML for every bottle secured. Reach 100 ML to extract a complimentary 100ML signature essence of your choice.")
-                  )
+                  h('div', { onMouseEnter: () => setShowTooltip(true), onMouseLeave: () => setShowTooltip(false), onTouchStart: () => setShowTooltip(!showTooltip), className: "w-3 h-3 rounded-full border border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:text-obsessed-gold hover:border-obsessed-gold text-[8px] font-sans transition-colors relative" }, "i"),
+                  showTooltip && h('div', { className: "absolute bottom-full left-0 mb-3 w-56 p-4 bg-[#111] border border-obsessed-gold/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] z-[100] animate-fade-in pointer-events-none" }, h('p', { className: "font-sans text-[9px] text-gray-300 leading-loose tracking-wider uppercase" }, "Earn 20 ML for every bottle secured. Reach 100 ML to extract a complimentary 100ML signature essence of your choice."))
               ),
               h('p', { className: "font-mono text-white text-[10px] tracking-widest mb-1" }, `${loyaltyMl} / 100 ML`),
-              
-              mlLeft > 0 
-                  ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase transition-colors" }, `${mlLeft} ML to Free Bottle`)
-                  : hasRewardInCart 
-                      ? h('span', { className: "mt-1 px-3 py-1.5 bg-obsessed-gold/10 text-obsessed-gold border border-obsessed-gold/30 text-[8px] font-bold uppercase tracking-widest inline-block text-center" }, "Reward in Vessel")
-                      : h('button', { onClick: onClaim, className: "mt-1 px-3 py-1.5 bg-obsessed-gold text-black text-[9px] font-bold uppercase tracking-widest animate-pulse hover:bg-white transition-colors" }, "Claim Free Bottle")
+              mlLeft > 0 ? h('p', { className: "font-sans text-gray-500 text-[8px] md:text-[9px] tracking-[0.1em] uppercase transition-colors" }, `${mlLeft} ML to Free Bottle`)
+                  : hasRewardInCart ? h('span', { className: "mt-1 px-3 py-1.5 bg-obsessed-gold/10 text-obsessed-gold border border-obsessed-gold/30 text-[8px] font-bold uppercase tracking-widest inline-block text-center" }, "Reward in Vessel")
+                  : h('button', { onClick: onClaim, className: "mt-1 px-3 py-1.5 bg-obsessed-gold text-black text-[9px] font-bold uppercase tracking-widest animate-pulse hover:bg-white transition-colors" }, "Claim Free Bottle")
            )
         );
       };
 
       const Floating3DToggle = ({ is3DMode, onToggle3D }) => {
-        return h('button', {
-            onClick: onToggle3D,
-            className: `fixed bottom-6 md:bottom-8 right-4 md:right-8 z-[55] flex items-center gap-2 border px-3 py-2 md:px-4 md:py-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.9)] pointer-events-auto scale-90 md:scale-100 origin-bottom-right ${is3DMode ? 'border-obsessed-gold text-obsessed-gold bg-obsessed-gold/10' : 'border-gray-500 text-gray-300 bg-[#111]/80 hover:border-obsessed-gold hover:text-obsessed-gold'}`
-        },
-            h(Box, { size: 16 }),
-            h('span', { className: "text-[9px] md:text-[10px] font-sans tracking-widest uppercase font-bold" }, is3DMode ? "3D Active" : "View 3D")
+        return h('button', { onClick: onToggle3D, className: `fixed bottom-6 md:bottom-8 right-4 md:right-8 z-[55] flex items-center gap-2 border px-3 py-2 md:px-4 md:py-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.9)] pointer-events-auto scale-90 md:scale-100 origin-bottom-right ${is3DMode ? 'border-obsessed-gold text-obsessed-gold bg-obsessed-gold/10' : 'border-gray-500 text-gray-300 bg-[#111]/80 hover:border-obsessed-gold hover:text-obsessed-gold'}` },
+            h(Box, { size: 16 }), h('span', { className: "text-[9px] md:text-[10px] font-sans tracking-widest uppercase font-bold" }, is3DMode ? "3D Active" : "View 3D")
         );
       };
 
@@ -300,15 +183,11 @@
             h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
             h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "Select Your Reward"),
             h('p', { className: "font-sans text-xs text-gray-400 text-center mb-8" }, "Choose your complimentary 100ML essence."),
-            h('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
-              PRODUCTS.map(p => 
+            h('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" }, PRODUCTS.map(p => 
                 h('div', { key: p.id, onClick: () => onSelect(p), className: "cursor-pointer group flex flex-col items-center p-6 border border-gray-800 hover:border-obsessed-gold bg-black/50 hover:bg-obsessed-gold/5 transition-all" },
-                  h('img', { src: p.imageUrl, className: "w-24 h-32 object-cover mb-4 group-hover:scale-105 transition-transform border border-white/10" }),
-                  h('h3', { className: "font-display text-sm text-white text-center tracking-wider" }, p.name),
-                  h('span', { className: "text-[9px] text-obsessed-gold uppercase tracking-widest mt-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "Select")
+                  h('img', { src: p.imageUrl, className: "w-24 h-32 object-cover mb-4 group-hover:scale-105 transition-transform border border-white/10" }), h('h3', { className: "font-display text-sm text-white text-center tracking-wider" }, p.name), h('span', { className: "text-[9px] text-obsessed-gold uppercase tracking-widest mt-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "Select")
                 )
-              )
-            )
+            ))
           )
         );
       };
@@ -349,33 +228,15 @@
 
       const MobileMenu = ({ isOpen, onClose, onOpenStory }) => {
         const links = [
-          { name: 'The Collection', type: 'scroll' }, 
-          { name: 'Our Story', type: 'story' },
+          { name: 'The Collection', type: 'scroll' }, { name: 'Our Story', type: 'story' },
           { name: 'Track Order', type: 'whatsapp', message: 'Hello, I would like to track my Scent Obsessed order.' }, 
           { name: 'Contact Concierge', type: 'whatsapp', message: 'Hello Scent Obsessed, I need some assistance finding my signature scent.' }
         ];
         return h('div', { className: `fixed inset-y-0 left-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
           h('div', { className: "flex flex-col h-full p-8" },
-            h('div', { className: "flex justify-between items-center mb-20" },
-              h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
-            ),
-            h('nav', { className: "flex flex-col gap-8" },
-              links.map(link => h('a', { 
-                  key: link.name, 
-                  href: "#", 
-                  onClick: (e) => { 
-                      e.preventDefault();
-                      if(link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } 
-                      else if(link.type === 'story') { onOpenStory(); onClose(); }
-                      else if(link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); }
-                  }, 
-                  className: "font-display text-2xl md:text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" 
-              }, link.name))
-            ),
-            h('div', { className: "mt-auto opacity-50" },
-                h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", className: "font-sans text-xs tracking-[0.3em] text-white hover:text-obsessed-gold transition-colors uppercase block mb-8" }, "Follow the Obsession"),
-                h('p', { className: "font-sans text-xs tracking-[0.3em] text-obsessed-gold mb-2" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[10px] text-gray-400" }, "EST. 2026")
-            )
+            h('div', { className: "flex justify-between items-center mb-20" }, h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })) ),
+            h('nav', { className: "flex flex-col gap-8" }, links.map(link => h('a', { key: link.name, href: "#", onClick: (e) => { e.preventDefault(); if(link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } else if(link.type === 'story') { onOpenStory(); onClose(); } else if(link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); } }, className: "font-display text-2xl md:text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" }, link.name))),
+            h('div', { className: "mt-auto opacity-50" }, h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", className: "font-sans text-xs tracking-[0.3em] text-white hover:text-obsessed-gold transition-colors uppercase block mb-8" }, "Follow the Obsession"), h('p', { className: "font-sans text-xs tracking-[0.3em] text-obsessed-gold mb-2" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[10px] text-gray-400" }, "EST. 2026") )
           )
         );
       };
@@ -384,9 +245,7 @@
         if (!isOpen) return null;
         return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" },
           h('div', { className: "relative w-full max-w-2xl max-h-[80vh] bg-[#111] border border-obsessed-gold/30 p-8 md:p-12 overflow-y-auto shadow-2xl" },
-            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })),
-            h('h2', { className: "font-display text-xl md:text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title),
-            h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
+            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })), h('h2', { className: "font-display text-xl md:text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title), h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
           )
         );
       };
@@ -394,101 +253,26 @@
       const OrdersSidebar = ({ isOpen, onClose, user, loyaltyMl, orders, onLogout, onTrackOrder, notify, hasUsedReferral, onApplyReferral }) => {
         const [refInput, setRefInput] = useState('');
         const refCode = user ? `SO-${user.id.substring(0, 6).toUpperCase()}` : '';
-
         const earnedFromPurchases = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.reward_ml || 0), 0);
         const totalClaimed = orders.filter(o => o.payment_status === 'PAID' || o.payment_status === 'SUCCESS').reduce((sum, o) => sum + (o.claimed_reward_ml || 0), 0);
         const earnedFromReferrals = Math.max(0, loyaltyMl - earnedFromPurchases + totalClaimed);
 
         return h('div', { className: `fixed inset-y-0 right-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
-          h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
-            h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
-          ),
+          h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" }, h('h2', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MY PROFILE"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })) ),
           h('div', { className: "flex-1 overflow-y-auto px-8 pb-10 no-scrollbar space-y-6" },
             user ? h(React.Fragment, null,
-              h('div', { className: "pb-6 border-b border-gray-800" },
-                h('p', { className: "text-white font-sans text-sm mb-1" }, user.user_metadata?.full_name || user.email),
-                h('button', { onClick: onLogout, className: "mt-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-white uppercase tracking-widest transition-colors" }, h(LogOut, { size: 12 }), "Sign Out" )
-              ),
-              h('div', { className: "bg-black/40 p-6 border border-obsessed-gold/30 rounded shadow-[0_0_20px_rgba(212,175,55,0.05)] text-center relative overflow-hidden" },
-                  h('div', { className: "absolute top-0 right-0 w-16 h-16 bg-obsessed-gold/10 rounded-full blur-xl" }),
-                  h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2 relative z-10" }, "Invite to the Obsession"),
-                  h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 10 ML will be poured into your Loyalty Vessel."),
-                  h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" },
-                      h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode),
-                      h('button', { onClick: () => { navigator.clipboard.writeText(refCode); notify("Access code copied to clipboard."); }, className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" }, h(Copy, { size: 10 }), "Copy")
-                  )
-              ),
-              !hasUsedReferral && h('div', { className: "bg-obsessed-gold/5 p-5 border border-obsessed-gold/20" },
-                  h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-1 flex items-center gap-2" }, "Redeem Invitation", h(Sparkles, { size: 10 }) ),
-                  h('p', { className: "text-[8px] font-sans text-gray-400 mb-3 uppercase tracking-widest" }, "Available for your first acquisition only."),
-                  h('div', { className: "flex gap-2" },
-                      h('input', { type: "text", value: refInput, onChange: (e) => setRefInput(e.target.value), placeholder: "ENTER SO- CODE", className: "flex-1 w-full bg-black border border-gray-800 p-2 text-[10px] text-white uppercase outline-none focus:border-obsessed-gold" }),
-                      h('button', { onClick: () => { onApplyReferral(refInput); setRefInput(''); }, className: "px-4 bg-gray-800 text-white text-[9px] uppercase tracking-widest hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
-                  )
-              ),
-
-              h('div', { className: "bg-[#111] p-5 border border-obsessed-gold/20 mb-6 relative overflow-hidden" },
-                  h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4 flex items-center gap-2" }, h(Droplet, { size: 10 }), "Essence Ledger"),
-                  h('div', { className: "space-y-3 font-sans text-[9px] tracking-widest uppercase text-gray-400 relative z-10" },
-                      h('div', { className: "flex justify-between" }, h('span', null, "Current Volume"), h('span', { className: "text-white font-mono" }, `${loyaltyMl} ML`)),
-                      h('div', { className: "flex justify-between" }, h('span', null, "From Acquisitions"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromPurchases} ML`)),
-                      h('div', { className: "flex justify-between" }, h('span', null, "From Network (Referrals)"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromReferrals} ML`)),
-                      totalClaimed > 0 && h('div', { className: "flex justify-between border-t border-gray-800 pt-3 mt-1" }, h('span', null, "Extracted (Rewards)"), h('span', { className: "text-obsessed-gold font-mono" }, `- ${totalClaimed} ML`))
-                  )
-              ),
-
-              h('div', { className: "pt-4" }, 
-                h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"),
-                h('div', { className: "space-y-6" },
-                  orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") :
-                  orders.map(order => (
-                    h('div', { key: order.id, className: "relative bg-black p-5 border border-obsessed-gold/20 flex flex-col gap-3 group hover:border-obsessed-gold/50 transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.5)]" },
-                      h('div', { className: "flex justify-between items-center border-b border-gray-800/60 pb-3" },
-                          h('div', { className: "flex flex-col" },
-                              h('span', { className: "font-sans text-[8px] tracking-[0.2em] text-gray-500 uppercase" }, "Date"),
-                              h('span', { className: "font-mono text-[10px] text-obsessed-gold mt-0.5" }, new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase())
-                          ),
-                          h('span', { className: `text-[8px] uppercase tracking-widest px-2 py-1 border ${order.payment_status === 'PAID' ? 'border-green-900/50 text-green-400 bg-green-900/10' : 'border-obsessed-gold/30 text-obsessed-gold bg-obsessed-gold/10'}` }, order.payment_status === 'PAID' ? 'Secured' : 'Pending')
-                      ),
-                      h('div', { className: "text-center py-2" },
-                          h('span', { className: "font-sans text-[8px] tracking-[0.3em] text-gray-600 uppercase block mb-1" }, "Dossier No."),
-                          h('span', { className: "font-mono text-[9px] text-white tracking-wider" }, order.order_id)
-                      ),
-                      order.cart_items && order.cart_items.length > 0 ? 
-                      h('div', { className: "pt-2 space-y-2" },
-                          order.cart_items.map((item, idx) => (
-                              h('div', { key: idx, className: "flex justify-between items-baseline text-[10px] font-sans" },
-                                  h('div', { className: "flex items-baseline gap-2" },
-                                      h('span', { className: "text-obsessed-gold font-mono text-[9px]" }, `0${item.qty}`),
-                                      h('span', { className: "text-gray-300 tracking-wider uppercase text-[9px]" }, item.name)
-                                  ),
-                                  item.isReward 
-                                      ? h('span', { className: "text-obsessed-gold font-serif italic text-[10px]" }, "Complimentary") 
-                                      : h('span', { className: "text-gray-400 font-mono text-[9px]" }, item.price)
-                              )
-                          ))
-                      ) : h('div', { className: "pt-2 text-[9px] text-gray-600 italic font-serif text-center" }, "Archive dossier (details unavailable)"),
-                      h('div', { className: "flex justify-between items-center border-t border-gray-800/60 pt-3 mt-1" },
-                          h('span', { className: "font-sans text-[9px] tracking-[0.2em] text-white uppercase" }, "Total"),
-                          h('span', { className: "font-display text-sm text-obsessed-gold" }, formatPrice(order.total_amount))
-                      ),
-                      order.payment_status === 'PAID' && h('button', { onClick: () => onTrackOrder(order), className: "w-full mt-3 py-2 bg-gray-900 border border-gray-700 text-gray-300 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-obsessed-gold hover:text-black hover:border-obsessed-gold transition-colors flex items-center justify-center gap-2" }, h(MapPin, { size: 10 }), "Track Dossier")
-                    )
-                  ))
-                )
-              )
-            ) : h('div', { className: "flex flex-col items-center justify-center h-full text-center mt-20" },
-                h(User, { size: 48, className: "text-gray-600 mb-4" }),
-                h('p', { className: "text-gray-400 font-serif italic mb-8" }, "Sign in to view your collection, track your acquisitions, and earn loyalty rewards."),
-                h('button', { onClick: async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }, className: "w-full py-3 bg-white text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors flex items-center justify-center gap-2" }, "Log in with Google" )
-            )
+              h('div', { className: "pb-6 border-b border-gray-800" }, h('p', { className: "text-white font-sans text-sm mb-1" }, user.user_metadata?.full_name || user.email), h('button', { onClick: onLogout, className: "mt-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-white uppercase tracking-widest transition-colors" }, h(LogOut, { size: 12 }), "Sign Out" ) ),
+              h('div', { className: "bg-black/40 p-6 border border-obsessed-gold/30 rounded shadow-[0_0_20px_rgba(212,175,55,0.05)] text-center relative overflow-hidden" }, h('div', { className: "absolute top-0 right-0 w-16 h-16 bg-obsessed-gold/10 rounded-full blur-xl" }), h('h3', { className: "font-display text-xs tracking-[0.2em] text-obsessed-gold uppercase mb-2 relative z-10" }, "Invite to the Obsession"), h('p', { className: "text-[10px] font-sans text-gray-400 mb-4 leading-relaxed relative z-10" }, "Gift a friend 10% off their first acquisition. When they secure it, 10 ML will be poured into your Loyalty Vessel."), h('div', { className: "flex items-center justify-between bg-black border border-gray-800 p-3 relative z-10" }, h('span', { className: "font-mono text-white text-xs tracking-widest" }, refCode), h('button', { onClick: () => { navigator.clipboard.writeText(refCode); notify("Access code copied to clipboard."); }, className: "flex items-center gap-1 text-[9px] text-obsessed-gold uppercase tracking-widest hover:text-white transition-colors" }, h(Copy, { size: 10 }), "Copy") ) ),
+              !hasUsedReferral && h('div', { className: "bg-obsessed-gold/5 p-5 border border-obsessed-gold/20" }, h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-1 flex items-center gap-2" }, "Redeem Invitation", h(Sparkles, { size: 10 }) ), h('p', { className: "text-[8px] font-sans text-gray-400 mb-3 uppercase tracking-widest" }, "Available for your first acquisition only."), h('div', { className: "flex gap-2" }, h('input', { type: "text", value: refInput, onChange: (e) => setRefInput(e.target.value), placeholder: "ENTER SO- CODE", className: "flex-1 w-full bg-black border border-gray-800 p-2 text-[10px] text-white uppercase outline-none focus:border-obsessed-gold" }), h('button', { onClick: () => { onApplyReferral(refInput); setRefInput(''); }, className: "px-4 bg-gray-800 text-white text-[9px] uppercase tracking-widest hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply") ) ),
+              h('div', { className: "bg-[#111] p-5 border border-obsessed-gold/20 mb-6 relative overflow-hidden" }, h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4 flex items-center gap-2" }, h(Droplet, { size: 10 }), "Essence Ledger"), h('div', { className: "space-y-3 font-sans text-[9px] tracking-widest uppercase text-gray-400 relative z-10" }, h('div', { className: "flex justify-between" }, h('span', null, "Current Volume"), h('span', { className: "text-white font-mono" }, `${loyaltyMl} ML`)), h('div', { className: "flex justify-between" }, h('span', null, "From Acquisitions"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromPurchases} ML`)), h('div', { className: "flex justify-between" }, h('span', null, "From Network (Referrals)"), h('span', { className: "text-white font-mono" }, `+ ${earnedFromReferrals} ML`)), totalClaimed > 0 && h('div', { className: "flex justify-between border-t border-gray-800 pt-3 mt-1" }, h('span', null, "Extracted (Rewards)"), h('span', { className: "text-obsessed-gold font-mono" }, `- ${totalClaimed} ML`)) ) ),
+              h('div', { className: "pt-4" }, h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-4" }, "Acquisition Dossiers"), h('div', { className: "space-y-6" }, orders.length === 0 ? h('div', { className: "text-gray-500 font-serif italic text-sm" }, "No past acquisitions found.") : orders.map(order => h('div', { key: order.id, className: "relative bg-black p-5 border border-obsessed-gold/20 flex flex-col gap-3 group hover:border-obsessed-gold/50 transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.5)]" }, h('div', { className: "flex justify-between items-center border-b border-gray-800/60 pb-3" }, h('div', { className: "flex flex-col" }, h('span', { className: "font-sans text-[8px] tracking-[0.2em] text-gray-500 uppercase" }, "Date"), h('span', { className: "font-mono text-[10px] text-obsessed-gold mt-0.5" }, new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()) ), h('span', { className: `text-[8px] uppercase tracking-widest px-2 py-1 border ${order.payment_status === 'PAID' ? 'border-green-900/50 text-green-400 bg-green-900/10' : 'border-obsessed-gold/30 text-obsessed-gold bg-obsessed-gold/10'}` }, order.payment_status === 'PAID' ? 'Secured' : 'Pending') ), h('div', { className: "text-center py-2" }, h('span', { className: "font-sans text-[8px] tracking-[0.3em] text-gray-600 uppercase block mb-1" }, "Dossier No."), h('span', { className: "font-mono text-[9px] text-white tracking-wider" }, order.order_id) ), order.cart_items && order.cart_items.length > 0 ? h('div', { className: "pt-2 space-y-2" }, order.cart_items.map((item, idx) => h('div', { key: idx, className: "flex justify-between items-baseline text-[10px] font-sans" }, h('div', { className: "flex items-baseline gap-2" }, h('span', { className: "text-obsessed-gold font-mono text-[9px]" }, `0${item.qty}`), h('span', { className: "text-gray-300 tracking-wider uppercase text-[9px]" }, item.name) ), item.isReward ? h('span', { className: "text-obsessed-gold font-serif italic text-[10px]" }, "Complimentary") : h('span', { className: "text-gray-400 font-mono text-[9px]" }, item.price) )) ) : h('div', { className: "pt-2 text-[9px] text-gray-600 italic font-serif text-center" }, "Archive dossier (details unavailable)"), h('div', { className: "flex justify-between items-center border-t border-gray-800/60 pt-3 mt-1" }, h('span', { className: "font-sans text-[9px] tracking-[0.2em] text-white uppercase" }, "Total"), h('span', { className: "font-display text-sm text-obsessed-gold" }, formatPrice(order.total_amount)) ), order.payment_status === 'PAID' && h('button', { onClick: () => onTrackOrder(order), className: "w-full mt-3 py-2 bg-gray-900 border border-gray-700 text-gray-300 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-obsessed-gold hover:text-black hover:border-obsessed-gold transition-colors flex items-center justify-center gap-2" }, h(MapPin, { size: 10 }), "Track Dossier") )) ) )
+            ) : h('div', { className: "flex flex-col items-center justify-center h-full text-center mt-20" }, h(User, { size: 48, className: "text-gray-600 mb-4" }), h('p', { className: "text-gray-400 font-serif italic mb-8" }, "Sign in to view your collection, track your acquisitions, and earn loyalty rewards."), h('button', { onClick: async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }, className: "w-full py-3 bg-white text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors flex items-center justify-center gap-2" }, "Log in with Google" ) )
           )
         );
       };
 
-      const CartSidebar = ({ isOpen, onClose, cart, updateQty, checkout, formData, setFormData, notify, appliedPromo, setAppliedPromo }) => {
+      const CartSidebar = ({ isOpen, onClose, cart, updateQty, proceedToCheckout, formData, setFormData, notify, appliedPromo, setAppliedPromo }) => {
         const [vipCode, setVipCode] = useState('');
-
         const handleApplyVIP = async () => {
             const code = vipCode.trim().toUpperCase();
             if (!code) return;
@@ -496,117 +280,27 @@
             if (error || !data) { notify("Invalid VIP Vault Code."); return; }
             if (data.is_used) { notify("This VIP Code has already been redeemed."); return; }
             setAppliedPromo({ code: code, type: 'VIP', discount: data.discount_percentage || 16 });
-            setVipCode('');
-            notify(`VIP Access Granted: ${data.discount_percentage || 16}% Off Applied.`);
+            setVipCode(''); notify(`VIP Access Granted: ${data.discount_percentage || 16}% Off Applied.`);
         };
-
-        const handleRemovePromo = () => {
-            setAppliedPromo(null);
-            notify("Access code removed.");
-        };
+        const handleRemovePromo = () => { setAppliedPromo(null); notify("Access code removed."); };
 
         const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
         const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
         const finalTotal = subtotal - discountAmount;
 
         return h('div', { className: `fixed inset-y-0 right-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
-          h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" },
-            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-[0.2em]" }, "YOUR COLLECTION"),
-            h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))
-          ),
+          h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" }, h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-[0.2em]" }, "YOUR COLLECTION"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })) ),
           h('div', { className: "flex-1 overflow-y-auto px-8 no-scrollbar space-y-6" },
             cart.length === 0 ? h('div', { className: "h-full flex items-center justify-center text-gray-500 font-serif italic pb-20" }, "Your vessel is empty.") :
-              h(React.Fragment, null, 
-                cart.map(item => (
-                  h('div', { key: item.id, className: "flex items-start gap-4 border-b border-gray-800 pb-4" },
-                    h('img', { src: item.imageUrl, className: "w-16 h-20 object-cover rounded border border-gray-800" }),
-                    h('div', { className: "flex-1" },
-                      h('h4', { className: "font-display text-sm text-white mb-1" }, item.name),
-                      h('div', { className: "flex items-baseline gap-2 mb-2" },
-                        h('p', { className: `text-xs ${item.isReward ? 'text-green-400 font-bold' : 'text-obsessed-gold'}` }, item.price),
-                        item.originalPrice ? h('p', { className: "text-gray-600 text-[10px] line-through" }, item.originalPrice) : null
-                      ),
-                      item.isReward 
-                          ? h('span', { className: "text-[9px] font-sans text-obsessed-gold uppercase tracking-widest bg-obsessed-gold/10 px-2 py-1 border border-obsessed-gold/30 rounded" }, "Loyalty Reward") 
-                          : h('div', { className: "flex items-center gap-3" },
-                            h('button', { onClick: () => updateQty(item.id, -1), className: "p-2 hover:bg-gray-800 rounded" }, h(Minus, { size: 12 })),
-                            h('span', { className: "text-xs font-mono" }, item.qty),
-                            h('button', { onClick: () => updateQty(item.id, 1), className: "p-2 hover:bg-gray-800 rounded" }, h(Plus, { size: 12 }))
-                          )
-                    )
-                  )
-                )),
-                cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" },
-                    appliedPromo ? 
-                        h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" },
-                            h('div', { className: "flex flex-col gap-1" },
-                                h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest" }, appliedPromo.type === 'VIP' ? "VIP Access Active" : "Referral Active"),
-                                h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, appliedPromo.code)
-                            ),
-                            h('button', { onClick: handleRemovePromo, className: "text-[9px] text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors" }, h(X, { size: 10 }), "Remove")
-                        )
-                    :
-                        h('div', { className: "flex flex-col gap-5" },
-                            h('div', null,
-                                h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2 flex items-center gap-2" }, "VIP Vault Code"),
-                                h('div', { className: "flex gap-2" },
-                                    h('input', { type: "text", placeholder: "Enter VIP Code...", value: vipCode, onChange: (e) => setVipCode(e.target.value), className: "flex-1 w-full bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                                    h('button', { onClick: handleApplyVIP, className: "px-5 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply")
-                                )
-                            )
-                        )
-                ),
-                cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4 pb-10" },
-                  h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "Delivery Details"),
-                  h('input', { type: "text", placeholder: "Full Name", value: formData.name, onChange: (e) => setFormData({...formData, name: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                  h('input', { type: "tel", placeholder: "Phone Number (e.g., 9876543210)", value: formData.phone, onChange: (e) => setFormData({...formData, phone: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                  h('input', { type: "email", placeholder: "Email Address", value: formData.email, onChange: (e) => setFormData({...formData, email: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                  h('input', { type: "text", placeholder: "Street Address (House No, Area)", value: formData.street, onChange: (e) => setFormData({...formData, street: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                  h('div', { className: "flex gap-4" },
-                      h('input', { type: "text", placeholder: "City", value: formData.city, onChange: (e) => setFormData({...formData, city: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }),
-                      h('input', { type: "text", placeholder: "State", value: formData.state, onChange: (e) => setFormData({...formData, state: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" })
-                  ),
-                  h('input', { type: "text", placeholder: "6-Digit PIN Code", value: formData.pincode, onChange: (e) => setFormData({...formData, pincode: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" })
-                )
+              h(React.Fragment, null, cart.map(item => h('div', { key: item.id, className: "flex items-start gap-4 border-b border-gray-800 pb-4" }, h('img', { src: item.imageUrl, className: "w-16 h-20 object-cover rounded border border-gray-800" }), h('div', { className: "flex-1" }, h('h4', { className: "font-display text-sm text-white mb-1" }, item.name), h('div', { className: "flex items-baseline gap-2 mb-2" }, h('p', { className: `text-xs ${item.isReward ? 'text-green-400 font-bold' : 'text-obsessed-gold'}` }, item.price), item.originalPrice ? h('p', { className: "text-gray-600 text-[10px] line-through" }, item.originalPrice) : null ), item.isReward ? h('span', { className: "text-[9px] font-sans text-obsessed-gold uppercase tracking-widest bg-obsessed-gold/10 px-2 py-1 border border-obsessed-gold/30 rounded" }, "Loyalty Reward") : h('div', { className: "flex items-center gap-3" }, h('button', { onClick: () => updateQty(item.id, -1), className: "p-2 hover:bg-gray-800 rounded" }, h(Minus, { size: 12 })), h('span', { className: "text-xs font-mono" }, item.qty), h('button', { onClick: () => updateQty(item.id, 1), className: "p-2 hover:bg-gray-800 rounded" }, h(Plus, { size: 12 })) ) ) )),
+                cart.length > 0 && h('div', { className: "mt-4 pt-4 border-t border-gray-800" }, appliedPromo ? h('div', { className: "flex justify-between items-center bg-obsessed-gold/10 border border-obsessed-gold/30 p-3" }, h('div', { className: "flex flex-col gap-1" }, h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest" }, appliedPromo.type === 'VIP' ? "VIP Access Active" : "Referral Active"), h('span', { className: "font-mono text-xs text-obsessed-gold tracking-widest uppercase" }, appliedPromo.code) ), h('button', { onClick: handleRemovePromo, className: "text-[9px] text-gray-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors" }, h(X, { size: 10 }), "Remove") ) : h('div', { className: "flex flex-col gap-5" }, h('div', null, h('h3', { className: "font-sans text-[9px] tracking-[0.2em] text-gray-400 uppercase mb-2 flex items-center gap-2" }, "VIP Vault Code"), h('div', { className: "flex gap-2" }, h('input', { type: "text", placeholder: "Enter VIP Code...", value: vipCode, onChange: (e) => setVipCode(e.target.value), className: "flex-1 w-full bg-black border border-gray-800 p-3 text-xs text-white uppercase placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('button', { onClick: handleApplyVIP, className: "px-5 bg-gray-800 text-white text-[9px] tracking-widest uppercase hover:bg-obsessed-gold hover:text-black transition-colors" }, "Apply") ) ) ) ),
+                cart.length > 0 && h('div', { className: "mt-6 border-t border-gray-800 pt-6 space-y-4 pb-10" }, h('h3', { className: "font-sans text-[10px] tracking-[0.2em] text-obsessed-gold uppercase mb-2" }, "Delivery Details"), h('input', { type: "text", placeholder: "Full Name", value: formData.name, onChange: (e) => setFormData({...formData, name: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('input', { type: "tel", placeholder: "Phone Number (e.g., 9876543210)", value: formData.phone, onChange: (e) => setFormData({...formData, phone: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('input', { type: "email", placeholder: "Email Address", value: formData.email, onChange: (e) => setFormData({...formData, email: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('input', { type: "text", placeholder: "Street Address (House No, Area)", value: formData.street, onChange: (e) => setFormData({...formData, street: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('div', { className: "flex gap-4" }, h('input', { type: "text", placeholder: "City", value: formData.city, onChange: (e) => setFormData({...formData, city: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }), h('input', { type: "text", placeholder: "State", value: formData.state, onChange: (e) => setFormData({...formData, state: e.target.value}), className: "w-1/2 bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }) ), h('input', { type: "text", placeholder: "6-Digit PIN Code", value: formData.pincode, onChange: (e) => setFormData({...formData, pincode: e.target.value}), className: "w-full bg-transparent border border-gray-800 rounded p-3 text-sm text-white placeholder-gray-600 focus:border-obsessed-gold outline-none transition-colors" }) )
               )
           ),
           h('div', { className: "p-8 pt-6 border-t border-obsessed-gold/20 flex-shrink-0 bg-[#111]" },
-            appliedPromo && h(React.Fragment, null,
-                h('div', { className: "flex justify-between items-end mb-1" }, h('span', { className: "font-sans text-[10px] tracking-widest text-gray-500 uppercase" }, "Subtotal"), h('span', { className: "font-mono text-xs text-gray-500" }, formatPrice(subtotal)) ),
-                h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `${appliedPromo.type === 'VIP' ? 'VIP' : 'Referral'} Benefit (${appliedPromo.discount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) )
-            ),
-            h('div', { className: "flex justify-between items-end mb-6" },
-              h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Total"),
-              h('span', { className: "font-display text-2xl text-white" }, formatPrice(finalTotal))
-            ),
-            h('button', { 
-              onClick: () => {
-                if (!formData.name || !formData.email || !formData.street || !formData.city || !formData.state || !formData.pincode) { 
-                    notify("Please fill out all Delivery Details to secure your acquisition."); 
-                    return; 
-                }
-                checkout(finalTotal, appliedPromo ? appliedPromo.code : ''); 
-              }, 
-              disabled: cart.length === 0, 
-              className: "w-full py-4 bg-obsessed-gold text-obsessed-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50" 
-            },
-              h(Box, { size: 18 }), "Secure Checkout"
-            )
-          )
-        );
-      };
-
-      const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
-        return h('nav', { className: "fixed top-[26px] md:top-[34px] left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
-          h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ) ),
-          h('div', { className: "flex-[2] text-center pointer-events-none flex flex-col items-center justify-center select-none" }, 
-            h('h1', { className: "font-display text-[1.1rem] sm:text-lg md:text-2xl tracking-[0.2em] md:tracking-[0.3em] font-bold text-obsessed-gold whitespace-nowrap" }, "SCENT OBSESSED"), 
-            h('p', { className: "font-sans text-[0.45rem] sm:text-[0.5rem] md:text-[0.6rem] tracking-[0.4em] md:tracking-[0.5em] mt-1 text-white uppercase opacity-70 hidden sm:block" }, "EAU DE PARFUM") 
-          ),
-          h('div', { className: "flex-1 flex justify-end gap-1 sm:gap-2 md:gap-4 pointer-events-auto items-center relative z-10" },
-            h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors p-2" }, h(Search, { size: 20, strokeWidth: 1 }) ),
-            h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors p-2 ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 }) ),
-            h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative p-2 -mr-2" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute top-0 right-0 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount) )
+            appliedPromo && h(React.Fragment, null, h('div', { className: "flex justify-between items-end mb-1" }, h('span', { className: "font-sans text-[10px] tracking-widest text-gray-500 uppercase" }, "Subtotal"), h('span', { className: "font-mono text-xs text-gray-500" }, formatPrice(subtotal)) ), h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, `${appliedPromo.type === 'VIP' ? 'VIP' : 'Referral'} Benefit (${appliedPromo.discount}%)`), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`) ) ),
+            h('div', { className: "flex justify-between items-end mb-6" }, h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Total"), h('span', { className: "font-display text-2xl text-white" }, formatPrice(finalTotal)) ),
+            h('button', { onClick: () => { if (!formData.name || !formData.email || !formData.street || !formData.city || !formData.state || !formData.pincode) { notify("Please fill out all Delivery Details before proceeding."); return; } proceedToCheckout(); }, disabled: cart.length === 0, className: "w-full py-4 bg-obsessed-gold text-obsessed-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50" }, h(Box, { size: 18 }), "Secure Checkout" )
           )
         );
       };
@@ -615,9 +309,7 @@
         if (!isOpen) return null;
         return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
           h('div', { className: "relative w-full max-w-md bg-[#111] border border-obsessed-gold/40 p-10 text-center shadow-[0_0_50px_rgba(212,175,55,0.1)] flex flex-col items-center" },
-            h('div', { className: "w-20 h-20 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/40 animate-pulse-fast" },
-              h(Droplet, { size: 40, className: "text-obsessed-gold" })
-            ),
+            h('div', { className: "w-20 h-20 rounded-full bg-obsessed-gold/10 flex items-center justify-center mb-6 border border-obsessed-gold/40 animate-pulse-fast" }, h(Droplet, { size: 40, className: "text-obsessed-gold" }) ),
             h('h2', { className: "font-display text-3xl text-obsessed-gold tracking-widest uppercase mb-4" }, "Acquisition Complete"),
             h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6" }, "Your essence is being prepared. Your earned ML has been poured into your vessel."),
             orderId && h('p', { className: "font-mono text-[10px] text-obsessed-gold mb-8 bg-black px-4 py-2 border border-obsessed-gold/30 tracking-widest" }, `ID: ${orderId}`),
@@ -630,9 +322,7 @@
         if (!isOpen) return null;
         return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
           h('div', { className: "relative w-full max-w-md bg-[#111] border border-red-900/50 p-10 text-center shadow-[0_0_50px_rgba(220,38,38,0.1)] flex flex-col items-center" },
-            h('div', { className: "w-20 h-20 rounded-full bg-red-900/10 flex items-center justify-center mb-6 border border-red-900/40 animate-pulse-fast" },
-              h(AlertCircle, { size: 40, className: "text-red-500" })
-            ),
+            h('div', { className: "w-20 h-20 rounded-full bg-red-900/10 flex items-center justify-center mb-6 border border-red-900/40 animate-pulse-fast" }, h(AlertCircle, { size: 40, className: "text-red-500" }) ),
             h('h2', { className: "font-display text-2xl text-red-500 tracking-widest uppercase mb-4" }, "Acquisition Failed"),
             h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-8" }, "Your payment session was abandoned or unsuccessful. Your vessel remains intact. Please attempt to secure your collection again."),
             h('button', { onClick: onClose, className: "w-full py-4 bg-gray-900 text-white font-sans font-bold uppercase tracking-[0.2em] border border-gray-700 hover:border-white hover:bg-white hover:text-black transition-colors" }, "Return to Vessel")
@@ -649,100 +339,54 @@
         if (!isOpen) return null;
 
         const spinWheel = async () => {
-          if (phone.length < 10) {
-            notify("Please enter a valid 10-digit mobile number to spin.");
-            return;
-          }
-          
+          if (phone.length < 10) { notify("Please enter a valid 10-digit mobile number to spin."); return; }
           setStep(1);
           
           try {
-              await supabase.from('wheel_leads').insert([{ phone: phone }]);
-          } catch (error) {
-              console.error("Error saving lead:", error);
-          }
+              const { error } = await supabase.from('wheel_leads').insert([{ phone: phone }]);
+              if (error) console.error("Database connection error for lead:", error);
+          } catch (err) { console.error("Network error saving lead:", err); }
 
           const rand = Math.floor(Math.random() * 100) + 1;
-          let targetOffset = 0;
-          let prizeData = null;
+          let targetOffset = 0; let prizeData = null;
 
-          if (rand <= 50) {
-            targetOffset = 315; 
-            prizeData = { text: "Item @ ₹1,499", desc: "VIP Price Unlocked! Add any item and use code VIP1499", code: "VIP1499" };
-          } else if (rand <= 75) {
-            targetOffset = 225; 
-            prizeData = { text: "50% OFF", desc: "Half price unlocked! Use code HALF50", code: "HALF50" };
-          } else if (rand <= 99) {
-            targetOffset = 135; 
-            prizeData = { text: "Item @ ₹720", desc: "Steal Deal! Use code VIP720", code: "VIP720" };
-          } else {
-            targetOffset = 45;  
-            prizeData = { text: "Better Luck Next Time", desc: "No prize this time, but the vault is still open.", code: null };
-          }
+          if (rand <= 50) { targetOffset = 315; prizeData = { text: "Item @ ₹1,499", desc: "VIP Price Unlocked! Add any item and use code VIP1499", code: "VIP1499" }; } 
+          else if (rand <= 75) { targetOffset = 225; prizeData = { text: "50% OFF", desc: "Half price unlocked! Use code HALF50", code: "HALF50" }; } 
+          else if (rand <= 99) { targetOffset = 135; prizeData = { text: "Item @ ₹720", desc: "Steal Deal! Use code VIP720", code: "VIP720" }; } 
+          else { targetOffset = 45; prizeData = { text: "Better Luck Next Time", desc: "No prize this time, but the vault is still open.", code: null }; }
 
-          const totalRotation = 1800 + targetOffset; 
-          setRotation(totalRotation);
-
-          setTimeout(() => {
-            setResult(prizeData);
-          }, 4000); 
+          setRotation(1800 + targetOffset);
+          setTimeout(() => { setResult(prizeData); }, 4000); 
         };
 
         return h('div', { className: "fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
           h('div', { className: "relative w-full max-w-lg bg-[#111] border border-obsessed-gold/40 p-8 text-center shadow-[0_0_50px_rgba(212,175,55,0.15)] flex flex-col md:flex-row items-center gap-8 rounded-lg overflow-hidden" },
             h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20" }, h(X, { size: 24 })),
-            
             h('div', { className: "flex-1 flex flex-col items-center md:items-start text-center md:text-left relative z-10" },
               h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-2" }, "Launch Sale Live"),
               h('p', { className: "font-sans text-[10px] text-gray-400 uppercase tracking-widest mb-6" }, "Spin for a Surprise Gift"),
-              
               step === 0 ? h(React.Fragment, null,
                   h('div', { className: "flex w-full bg-black border border-gray-700 rounded-sm mb-4" },
-                      h('span', { className: "p-3 text-gray-400 text-xs border-r border-gray-700 bg-gray-900/50" }, "+91"),
-                      h('input', { type: "tel", placeholder: "Mobile Number", value: phone, onChange: (e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)), className: "w-full bg-transparent p-3 text-xs text-white outline-none focus:bg-gray-900/30" })
+                      h('span', { className: "p-3 text-gray-400 text-xs border-r border-gray-700 bg-gray-900/50" }, "+91"), h('input', { type: "tel", placeholder: "Mobile Number", value: phone, onChange: (e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)), className: "w-full bg-transparent p-3 text-xs text-white outline-none focus:bg-gray-900/30" })
                   ),
-                  h('button', { onClick: spinWheel, className: "w-full py-3 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors rounded-sm" }, "SPIN"),
-                  h('p', { className: "font-sans text-[8px] text-gray-500 uppercase tracking-wider mt-3" }, "Chance to win exclusive discounts")
+                  h('button', { onClick: spinWheel, className: "w-full py-3 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors rounded-sm" }, "SPIN"), h('p', { className: "font-sans text-[8px] text-gray-500 uppercase tracking-wider mt-3" }, "Chance to win exclusive discounts")
               ) : h(React.Fragment, null,
                   result ? h('div', { className: "w-full flex flex-col items-center md:items-start animate-fade-in" },
-                      h('h3', { className: "font-display text-xl text-white mb-2" }, result.text),
-                      h('p', { className: "font-sans text-xs text-gray-400 mb-4 leading-relaxed" }, result.desc),
-                      result.code && h('div', { className: "bg-black border border-dashed border-obsessed-gold p-3 mb-4 text-center w-full" },
-                          h('span', { className: "font-mono text-lg text-obsessed-gold tracking-widest font-bold" }, result.code)
-                      ),
-                      result.code 
-                          ? h('button', { onClick: () => { navigator.clipboard.writeText(result.code); notify(`Code ${result.code} copied!`); onClose(); }, className: "w-full py-3 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors rounded-sm text-[10px]" }, "Copy Code & Continue")
-                          : h('button', { onClick: onClose, className: "w-full py-3 bg-transparent border border-gray-600 text-gray-400 font-sans font-bold uppercase tracking-[0.2em] hover:text-white transition-colors rounded-sm text-[10px]" }, "Continue to Store")
-                  ) : h('div', { className: "w-full flex flex-col items-center justify-center py-10" },
-                      h('div', { className: "w-6 h-6 border-2 border-obsessed-gold border-t-transparent rounded-full animate-spin mb-4" }),
-                      h('p', { className: "font-sans text-xs text-obsessed-gold uppercase tracking-widest animate-pulse" }, "Decrypting Vault...")
-                  )
+                      h('h3', { className: "font-display text-xl text-white mb-2" }, result.text), h('p', { className: "font-sans text-xs text-gray-400 mb-4 leading-relaxed" }, result.desc),
+                      result.code && h('div', { className: "bg-black border border-dashed border-obsessed-gold p-3 mb-4 text-center w-full" }, h('span', { className: "font-mono text-lg text-obsessed-gold tracking-widest font-bold" }, result.code) ),
+                      result.code ? h('button', { onClick: () => { navigator.clipboard.writeText(result.code); notify(`Code ${result.code} copied!`); onClose(); }, className: "w-full py-3 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors rounded-sm text-[10px]" }, "Copy Code & Continue") : h('button', { onClick: onClose, className: "w-full py-3 bg-transparent border border-gray-600 text-gray-400 font-sans font-bold uppercase tracking-[0.2em] hover:text-white transition-colors rounded-sm text-[10px]" }, "Continue to Store")
+                  ) : h('div', { className: "w-full flex flex-col items-center justify-center py-10" }, h('div', { className: "w-6 h-6 border-2 border-obsessed-gold border-t-transparent rounded-full animate-spin mb-4" }), h('p', { className: "font-sans text-xs text-obsessed-gold uppercase tracking-widest animate-pulse" }, "Decrypting Vault...") )
               )
             ),
-
             h('div', { className: "relative w-48 h-48 md:w-56 md:h-56 flex-shrink-0" },
               h('div', { className: "absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-r-[10px] border-t-[20px] border-l-transparent border-r-transparent border-t-white z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" }),
-              h('div', { 
-                  className: "w-full h-full rounded-full overflow-hidden border-4 border-obsessed-gold shadow-[0_0_30px_rgba(212,175,55,0.2)] relative",
-                  style: { 
-                      transition: 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)', 
-                      transform: `rotate(${rotation}deg)` 
-                  }
-              },
+              h('div', { className: "w-full h-full rounded-full overflow-hidden border-4 border-obsessed-gold shadow-[0_0_30px_rgba(212,175,55,0.2)] relative", style: { transition: 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)', transform: `rotate(${rotation}deg)` } },
                   h('div', { className: "absolute inset-0", style: { background: 'conic-gradient(#d4af37 0deg 90deg, #111 90deg 180deg, #222 180deg 270deg, #111 270deg 360deg)' } }),
                   h('div', { className: "absolute inset-0 flex items-center justify-center" },
-                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(45deg)' } }, 
-                          h('span', { className: "font-display text-[9px] font-bold text-black uppercase tracking-wider block w-16 text-center leading-tight" }, "Item @ ₹1499")
-                      ),
-                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(135deg)' } }, 
-                          h('span', { className: "font-display text-[9px] font-bold text-obsessed-gold uppercase tracking-wider block w-16 text-center leading-tight" }, "50% OFF")
-                      ),
-                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(225deg)' } }, 
-                          h('span', { className: "font-display text-[9px] font-bold text-gray-400 uppercase tracking-wider block w-16 text-center leading-tight" }, "Item @ ₹720")
-                      ),
-                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(315deg)' } }, 
-                          h('span', { className: "font-display text-[9px] font-bold text-obsessed-gold uppercase tracking-wider block w-16 text-center leading-tight" }, "No Luck")
-                      )
+                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(45deg)' } }, h('span', { className: "font-display text-[9px] font-bold text-black uppercase tracking-wider block w-16 text-center leading-tight" }, "Item @ ₹1499") ),
+                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(135deg)' } }, h('span', { className: "font-display text-[9px] font-bold text-obsessed-gold uppercase tracking-wider block w-16 text-center leading-tight" }, "50% OFF") ),
+                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(225deg)' } }, h('span', { className: "font-display text-[9px] font-bold text-gray-400 uppercase tracking-wider block w-16 text-center leading-tight" }, "Item @ ₹720") ),
+                      h('div', { className: "absolute w-full h-full flex items-start justify-center pt-4", style: { transform: 'rotate(315deg)' } }, h('span', { className: "font-display text-[9px] font-bold text-obsessed-gold uppercase tracking-wider block w-16 text-center leading-tight" }, "No Luck") )
                   ),
                   h('div', { className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-black rounded-full border-2 border-obsessed-gold z-10 shadow-inner" })
               )
@@ -753,43 +397,21 @@
 
       const ExitIntentModal = ({ isOpen, onClose, onApplyDiscount }) => {
         const [step, setStep] = useState(1);
-
         useEffect(() => { if (isOpen) setStep(1); }, [isOpen]);
-
         if (!isOpen) return null;
-
-        const handleSurveyClick = () => {
-            setTimeout(() => setStep(2), 400);
-        };
+        const handleSurveyClick = () => { setTimeout(() => setStep(2), 400); };
 
         return h('div', { className: "fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
             h('div', { className: "relative w-full max-w-md bg-[#1a1a1a] border border-obsessed-gold/40 p-8 text-left shadow-[0_0_50px_rgba(212,175,55,0.15)] flex flex-col" },
                 h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
-                
                 step === 1 ? h(React.Fragment, null,
-                    h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-4 text-center" }, "The Vault is Closing..."),
-                    h('div', { className: "bg-obsessed-gold/10 p-2 rounded text-center text-obsessed-gold text-[10px] mb-5 border border-obsessed-gold/20 uppercase tracking-widest" }, "🎁 You are leaving an exclusive acquisition"),
-                    h('p', { className: "font-sans text-xs text-gray-300 leading-relaxed mb-6 font-bold" }, "Before you go, what stopped your acquisition today?"),
-                    
-                    h('div', { className: "flex flex-col gap-3" },
-                        ['Found a better signature scent elsewhere', 'Technical issues with the dossier', 'Simply browsing the collection'].map((text, idx) => 
-                            h('label', { key: idx, className: "flex items-center gap-3 p-3 border border-gray-800 rounded cursor-pointer hover:border-obsessed-gold transition-colors text-gray-300 text-xs font-sans group" },
-                                h('input', { type: 'radio', name: 'exit_survey', onChange: handleSurveyClick, className: "accent-obsessed-gold" }),
-                                h('span', { className: "group-hover:text-white transition-colors" }, text)
-                            )
-                        )
-                    ),
+                    h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-4 text-center" }, "The Vault is Closing..."), h('div', { className: "bg-obsessed-gold/10 p-2 rounded text-center text-obsessed-gold text-[10px] mb-5 border border-obsessed-gold/20 uppercase tracking-widest" }, "🎁 You are leaving an exclusive acquisition"), h('p', { className: "font-sans text-xs text-gray-300 leading-relaxed mb-6 font-bold" }, "Before you go, what stopped your acquisition today?"),
+                    h('div', { className: "flex flex-col gap-3" }, ['Found a better signature scent elsewhere', 'Technical issues with the dossier', 'Simply browsing the collection'].map((text, idx) => h('label', { key: idx, className: "flex items-center gap-3 p-3 border border-gray-800 rounded cursor-pointer hover:border-obsessed-gold transition-colors text-gray-300 text-xs font-sans group" }, h('input', { type: 'radio', name: 'exit_survey', onChange: handleSurveyClick, className: "accent-obsessed-gold" }), h('span', { className: "group-hover:text-white transition-colors" }, text) )) ),
                     h('button', { onClick: onClose, className: "w-full mt-6 py-3 bg-transparent text-gray-500 font-sans text-[10px] font-bold uppercase tracking-[0.2em] border border-gray-800 hover:text-white hover:border-gray-500 transition-colors" }, "Skip and Exit")
                 ) : h(React.Fragment, null,
-                    h('h2', { className: "font-display text-4xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "WAIT!"),
-                    h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6 text-center" }, "Don't leave the vault without this. Claim an instant 10% off your entire acquisition."),
-                    
-                    h('div', { className: "bg-black border-2 border-dashed border-obsessed-gold p-4 mb-6 text-center" },
-                        h('span', { className: "font-mono text-2xl text-obsessed-gold tracking-[0.2em] font-bold" }, "VIP10")
-                    ),
-                    
-                    h('button', { onClick: () => onApplyDiscount('VIP10'), className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)] mb-3" }, "Apply & Secure Now"),
-                    h('button', { onClick: onClose, className: "w-full py-3 bg-transparent text-gray-500 font-sans text-[10px] font-bold uppercase tracking-[0.2em] hover:text-white transition-colors" }, "No, I will pass")
+                    h('h2', { className: "font-display text-4xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "WAIT!"), h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6 text-center" }, "Don't leave the vault without this. Claim an instant 10% off your entire acquisition."),
+                    h('div', { className: "bg-black border-2 border-dashed border-obsessed-gold p-4 mb-6 text-center" }, h('span', { className: "font-mono text-2xl text-obsessed-gold tracking-[0.2em] font-bold" }, "VIP10") ),
+                    h('button', { onClick: () => onApplyDiscount('VIP10'), className: "w-full py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)] mb-3" }, "Apply & Secure Now"), h('button', { onClick: onClose, className: "w-full py-3 bg-transparent text-gray-500 font-sans text-[10px] font-bold uppercase tracking-[0.2em] hover:text-white transition-colors" }, "No, I will pass")
                 )
             )
         );
@@ -798,40 +420,56 @@
       const DeliveryTimeline = () => {
         const dates = useMemo(() => {
             const today = new Date();
-            const addDays = (days) => {
-                const d = new Date(today);
-                d.setDate(d.getDate() + days);
-                return d;
-            };
+            const addDays = (days) => { const d = new Date(today); d.setDate(d.getDate() + days); return d; };
             const format = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-            return {
-                ordered: format(today),
-                readyStart: format(addDays(1)),
-                readyEnd: format(addDays(2)),
-                delStart: format(addDays(4)),
-                delEnd: format(addDays(6))
-            };
+            return { ordered: format(today), readyStart: format(addDays(1)), readyEnd: format(addDays(2)), delStart: format(addDays(4)), delEnd: format(addDays(6)) };
         }, []);
 
         return h('div', { className: "flex justify-between items-start w-full mt-6 pt-5 border-t border-gray-800/60 pointer-events-none" },
-            h('div', { className: "flex flex-col items-center flex-1" },
-                h('div', { className: "w-8 h-8 rounded-full bg-obsessed-gold/10 flex items-center justify-center border border-obsessed-gold/30 shadow-[0_0_10px_rgba(212,175,55,0.2)]" }, h(Package, { size: 14, className: "text-obsessed-gold" })),
-                h('span', { className: "font-sans text-[8px] text-white uppercase tracking-widest mt-2 mb-1" }, "Ordered"),
-                h('span', { className: "font-mono text-[9px] text-obsessed-gold tracking-wider font-bold text-center" }, dates.ordered)
-            ),
+            h('div', { className: "flex flex-col items-center flex-1" }, h('div', { className: "w-8 h-8 rounded-full bg-obsessed-gold/10 flex items-center justify-center border border-obsessed-gold/30 shadow-[0_0_10px_rgba(212,175,55,0.2)]" }, h(Package, { size: 14, className: "text-obsessed-gold" })), h('span', { className: "font-sans text-[8px] text-white uppercase tracking-widest mt-2 mb-1" }, "Ordered"), h('span', { className: "font-mono text-[9px] text-obsessed-gold tracking-wider font-bold text-center" }, dates.ordered) ),
             h('div', { className: "w-8 md:w-12 h-px bg-gray-800/80 mt-4" }),
-            h('div', { className: "flex flex-col items-center flex-1" },
-                h('div', { className: "w-8 h-8 rounded-full bg-[#111] flex items-center justify-center border border-gray-700" }, h(Box, { size: 14, className: "text-gray-400" })),
-                h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest mt-2 mb-1" }, "Ready"),
-                h('span', { className: "font-mono text-[9px] text-gray-500 tracking-wider text-center" }, `${dates.readyStart} - ${dates.readyEnd}`)
-            ),
+            h('div', { className: "flex flex-col items-center flex-1" }, h('div', { className: "w-8 h-8 rounded-full bg-[#111] flex items-center justify-center border border-gray-700" }, h(Box, { size: 14, className: "text-gray-400" })), h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest mt-2 mb-1" }, "Ready"), h('span', { className: "font-mono text-[9px] text-gray-500 tracking-wider text-center" }, `${dates.readyStart} - ${dates.readyEnd}`) ),
             h('div', { className: "w-8 md:w-12 h-px bg-gray-800/80 mt-4" }),
-            h('div', { className: "flex flex-col items-center flex-1" },
-                h('div', { className: "w-8 h-8 rounded-full bg-[#111] flex items-center justify-center border border-gray-700" }, h(Truck, { size: 14, className: "text-gray-400" })),
-                h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest mt-2 mb-1" }, "Delivered"),
-                h('span', { className: "font-mono text-[9px] text-gray-500 tracking-wider text-center" }, `${dates.delStart} - ${dates.delEnd}`)
-            )
+            h('div', { className: "flex flex-col items-center flex-1" }, h('div', { className: "w-8 h-8 rounded-full bg-[#111] flex items-center justify-center border border-gray-700" }, h(Truck, { size: 14, className: "text-gray-400" })), h('span', { className: "font-sans text-[8px] text-gray-400 uppercase tracking-widest mt-2 mb-1" }, "Delivered"), h('span', { className: "font-mono text-[9px] text-gray-500 tracking-wider text-center" }, `${dates.delStart} - ${dates.delEnd}`) )
+        );
+      };
+
+      const CustomCheckoutPage = ({ isOpen, onBack, onPay, cart, formData, appliedPromo }) => {
+          if (!isOpen) return null;
+          const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+          const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
+          const finalTotal = subtotal - discountAmount;
+
+          return h('div', { className: "fixed inset-0 z-[110] bg-[#111] overflow-y-auto flex flex-col md:flex-row animate-fade-in pointer-events-auto" },
+              h('div', { className: "w-full md:w-3/5 p-6 md:p-16 flex flex-col border-r border-gray-800" },
+                  h('div', { className: "flex items-center justify-between mb-12" }, h('button', { onClick: onBack, className: "flex items-center gap-2 text-gray-500 hover:text-obsessed-gold transition-colors font-sans text-[10px] tracking-widest uppercase" }, h(ArrowLeft, { size: 14 }), "Return to Cart" ), h('h1', { className: "font-display text-xl tracking-[0.2em] text-obsessed-gold" }, "SCENT OBSESSED") ),
+                  h('h2', { className: "font-display text-2xl text-white mb-6 tracking-widest" }, "Delivery Information"),
+                  h('div', { className: "bg-black/50 border border-gray-800 p-6 rounded-sm space-y-4 font-sans text-sm text-gray-300" },
+                      h('div', { className: "flex justify-between border-b border-gray-800/50 pb-4" }, h('span', { className: "text-gray-500 uppercase text-[10px] tracking-widest" }, "Contact"), h('span', null, `${formData.name} (${formData.phone})`) ),
+                      h('div', { className: "flex justify-between border-b border-gray-800/50 pb-4" }, h('span', { className: "text-gray-500 uppercase text-[10px] tracking-widest" }, "Email"), h('span', null, formData.email) ),
+                      h('div', { className: "flex justify-between" }, h('span', { className: "text-gray-500 uppercase text-[10px] tracking-widest" }, "Ship To"), h('span', { className: "text-right" }, `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`) )
+                  ),
+                  h('div', { className: "mt-8 flex items-center gap-3 text-green-500/80 font-sans text-[10px] tracking-widest uppercase border border-green-900/30 bg-green-900/10 p-4" }, h(Lock, { size: 14 }), "End-to-End Encrypted via Cashfree Payments" )
+              ),
+              h('div', { className: "w-full md:w-2/5 bg-black p-6 md:p-16 flex flex-col" },
+                  h('h2', { className: "font-display text-xl text-obsessed-gold mb-8 tracking-widest" }, "Order Summary"),
+                  h('div', { className: "flex-1 overflow-y-auto pr-2 space-y-6 no-scrollbar mb-8" }, cart.map(item => h('div', { key: item.id, className: "flex items-start gap-4" }, h('div', { className: "relative" }, h('img', { src: item.imageUrl, className: "w-16 h-20 object-cover rounded border border-gray-800" }), h('span', { className: "absolute -top-2 -right-2 bg-obsessed-gold text-black text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold" }, item.qty) ), h('div', { className: "flex-1 pt-1" }, h('h4', { className: "font-display text-sm text-white" }, item.name), item.isReward ? h('span', { className: "text-[9px] font-sans text-obsessed-gold uppercase tracking-widest mt-1 block" }, "Loyalty Reward") : h('p', { className: "text-gray-500 font-mono text-xs mt-1" }, item.price) ) )) ),
+                  h('div', { className: "border-t border-gray-800 pt-6 space-y-4" },
+                      h('div', { className: "flex justify-between font-sans text-[11px] tracking-widest uppercase text-gray-400" }, h('span', null, "Subtotal"), h('span', { className: "font-mono" }, formatPrice(subtotal)) ),
+                      appliedPromo && h('div', { className: "flex justify-between font-sans text-[11px] tracking-widest uppercase text-obsessed-gold" }, h('span', null, `Discount (${appliedPromo.code})`), h('span', { className: "font-mono" }, `- ${formatPrice(discountAmount)}`) ),
+                      h('div', { className: "flex justify-between font-sans text-[11px] tracking-widest uppercase text-gray-400" }, h('span', null, "Shipping"), h('span', { className: "text-green-500" }, "Complimentary") ),
+                      h('div', { className: "flex justify-between items-end border-t border-gray-800 pt-6 mt-4" }, h('span', { className: "font-sans text-sm tracking-widest text-white uppercase" }, "Total"), h('span', { className: "font-display text-3xl text-white" }, formatPrice(finalTotal)) ),
+                      h('button', { onClick: () => onPay(finalTotal), className: "w-full mt-8 py-4 bg-obsessed-gold text-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex justify-center items-center gap-2" }, "Complete Payment" )
+                  )
+              )
+          );
+      };
+
+      const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
+        return h('nav', { className: "fixed top-[26px] md:top-[34px] left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
+          h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }) ) ),
+          h('div', { className: "flex-[2] text-center pointer-events-none flex flex-col items-center justify-center select-none" }, h('h1', { className: "font-display text-[1.1rem] sm:text-lg md:text-2xl tracking-[0.2em] md:tracking-[0.3em] font-bold text-obsessed-gold whitespace-nowrap" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[0.45rem] sm:text-[0.5rem] md:text-[0.6rem] tracking-[0.4em] md:tracking-[0.5em] mt-1 text-white uppercase opacity-70 hidden sm:block" }, "EAU DE PARFUM") ),
+          h('div', { className: "flex-1 flex justify-end gap-1 sm:gap-2 md:gap-4 pointer-events-auto items-center relative z-10" }, h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors p-2" }, h(Search, { size: 20, strokeWidth: 1 }) ), h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors p-2 ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 }) ), h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative p-2 -mr-2" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute top-0 right-0 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount) ) )
         );
       };
 
@@ -859,6 +497,7 @@
         const [selectedTrackingOrder, setSelectedTrackingOrder] = useState(null);
         const [isWheelOpen, setIsWheelOpen] = useState(false);
         const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+        const [isCheckoutActive, setIsCheckoutActive] = useState(false);
 
         const [formData, setFormData] = useState({ name: '', phone: '', email: '', street: '', city: '', state: '', pincode: '' });
         const [is3DMode, setIs3DMode] = useState(false);
@@ -883,19 +522,32 @@
         const handleApplyExitDiscount = (code) => {
             setAppliedPromo({ code: code, type: 'VIP', discount: 10 });
             setIsExitModalOpen(false);
-            setIsCartOpen(true);
+            if (!isCheckoutActive) setIsCartOpen(true);
             notify("VIP Vault Code Applied!");
+        };
+
+        const triggerVaultIfEligible = () => {
+            const hasTriggered = sessionStorage.getItem('exitTriggered');
+            if (!hasTriggered && cart.length > 0) {
+                setIsExitModalOpen(true);
+                sessionStorage.setItem('exitTriggered', 'true');
+            }
         };
 
         const handleCloseCart = () => {
             setIsCartOpen(false);
-            const hasTriggered = sessionStorage.getItem('exitTriggered');
-            if (!hasTriggered && cart.length > 0) {
-                setTimeout(() => {
-                    setIsExitModalOpen(true);
-                    sessionStorage.setItem('exitTriggered', 'true');
-                }, 400);
-            }
+            setTimeout(() => triggerVaultIfEligible(), 400);
+        };
+
+        const proceedToCustomCheckout = () => {
+            setIsCartOpen(false);
+            setIsCheckoutActive(true);
+        };
+
+        const handleBackFromCheckout = () => {
+            triggerVaultIfEligible();
+            setIsCheckoutActive(false);
+            setIsCartOpen(true);
         };
 
         useEffect(() => {
@@ -912,16 +564,38 @@
                 }
                 document.removeEventListener('click', handleFirstClick);
             };
-            
-            const timer = setTimeout(() => {
-                document.addEventListener('click', handleFirstClick);
-            }, 1000);
+            const timer = setTimeout(() => document.addEventListener('click', handleFirstClick), 1000);
+            return () => { clearTimeout(timer); document.removeEventListener('click', handleFirstClick); };
+        }, []);
+
+        useEffect(() => {
+            if (!isCheckoutActive) return;
+
+            let lastScrollY = window.scrollY;
+
+            const handleMouseLeave = (e) => { if (e.clientY <= 20) triggerVaultIfEligible(); };
+            const handleVisibilityChange = () => { if (document.hidden) triggerVaultIfEligible(); };
+            const handleWindowBlur = () => { triggerVaultIfEligible(); };
+
+            const handleScroll = () => {
+                const currentScrollY = window.scrollY;
+                const delta = lastScrollY - currentScrollY; 
+                if (delta > 10 && currentScrollY < 150) triggerVaultIfEligible();
+                lastScrollY = currentScrollY;
+            };
+
+            document.addEventListener('mouseleave', handleMouseLeave);
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            window.addEventListener('blur', handleWindowBlur);
+            window.addEventListener('scroll', handleScroll, { passive: true });
 
             return () => {
-                clearTimeout(timer);
-                document.removeEventListener('click', handleFirstClick);
+                document.removeEventListener('mouseleave', handleMouseLeave);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                window.removeEventListener('blur', handleWindowBlur);
+                window.removeEventListener('scroll', handleScroll);
             };
-        }, []);
+        }, [isCheckoutActive, cart.length]);
 
         useEffect(() => {
           const urlParams = new URLSearchParams(window.location.search);
@@ -929,15 +603,15 @@
           if (orderId) {
             window.history.replaceState({}, document.title, window.location.pathname);
             if (orderId.startsWith('FREE_')) {
-                setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null);
+                setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null); setIsCheckoutActive(false);
             } else {
                 fetch(`/api/verify-payment/${orderId}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'PAID' || data.status === 'SUCCESS') {
-                            setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null);
-                        } else { setShowFailed(true); setIsCartOpen(true); }
-                    }).catch(err => { console.error("Verification error:", err); setShowFailed(true); setIsCartOpen(true); });
+                            setShowSuccess(true); setSuccessOrderId(orderId); setCart([]); setAppliedPromo(null); setIsCheckoutActive(false);
+                        } else { setShowFailed(true); setIsCheckoutActive(true); }
+                    }).catch(err => { console.error("Verification error:", err); setShowFailed(true); setIsCheckoutActive(true); });
             }
           }
         }, []);
@@ -960,10 +634,7 @@
                         const parsed = JSON.parse(profileData.shipping_address);
                         if(parsed.street) { streetData = parsed.street; c = parsed.city; s = parsed.state; p = parsed.pincode; }
                     } catch(e) {}
-                    setFormData({
-                        email: user.email, name: profileData.full_name || user.user_metadata?.full_name || '',
-                        phone: profileData.phone || '', street: streetData, city: c, state: s, pincode: p
-                    });
+                    setFormData({ email: user.email, name: profileData.full_name || user.user_metadata?.full_name || '', phone: profileData.phone || '', street: streetData, city: c, state: s, pincode: p });
                 }
             };
             fetchProfileData();
@@ -1006,15 +677,12 @@
             notify("Referral Accepted: 10% Off Applied to your collection."); setIsOrdersOpen(false); setIsCartOpen(true); 
         };
 
-        const handleCheckout = async (finalDiscountedTotal, appliedPromoCode = '') => {
+        const handleCheckoutPay = async (finalDiscountedTotal) => {
+          const appliedPromoCode = appliedPromo ? appliedPromo.code : '';
           if (!user) { notify("Please log in via the profile menu to secure your checkout."); return; }
-          if (!formData.name || !formData.phone || !formData.email || !formData.street || !formData.city || !formData.state || !formData.pincode) { 
-              notify("Please fill out all Delivery Details."); return; 
-          }
           
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
           const hasReward = cart.some(item => item.isReward);
-          
           const earnedRewardMl = totalPaidItems * 20; 
           const claimedRewardMl = hasReward ? 100 : 0; 
           const totalMoney = finalDiscountedTotal; 
@@ -1024,23 +692,15 @@
           
           if (totalMoney === 0) {
              const fakeOrderId = 'FREE_' + Date.now();
-             await supabase.from('orders').insert([{
-                  order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email,
-                  shipping_address: addressString, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, 
-                  cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromoCode
-             }]);
+             await supabase.from('orders').insert([{ order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email, shipping_address: addressString, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromoCode }]);
              await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
              window.location.href = `/?order_id=${fakeOrderId}`; return;
           }
 
           try {
             const response = await fetch('/create-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderAmount: totalMoney, customerName: formData.name, customerPhone: formData.phone, customerEmail: formData.email,
-                shippingAddress: addressString, rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode
-              })
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderAmount: totalMoney, customerName: formData.name, customerPhone: formData.phone, customerEmail: formData.email, shippingAddress: addressString, rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode })
             });
 
             const data = await response.json();
@@ -1057,13 +717,14 @@
         }, [searchQuery]);
 
         useEffect(() => {
+          if (isCheckoutActive) return; 
           observerRefs.current = observerRefs.current.slice(0, displayedProducts.length);
           const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => { if (entry.isIntersecting) setActiveSection(Number(entry.target.getAttribute('data-index'))); });
           }, { root: null, rootMargin: '-30% 0px -30% 0px', threshold: 0 }); 
           observerRefs.current.forEach((ref) => { if (ref) observer.observe(ref); });
           return () => observer.disconnect();
-        }, [displayedProducts]);
+        }, [displayedProducts, isCheckoutActive]);
 
         return h('div', { className: "relative min-h-screen bg-obsessed-black text-obsessed-cream selection:bg-obsessed-gold selection:text-black" },
           h(AnnouncementBar),
@@ -1077,102 +738,105 @@
             }`
           }) : null,
 
-          h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
-            h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
-              h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
-              h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."),
-              h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."),
-              h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")),
-              h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."),
-              h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.")
-            )
-          ),
-          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy...")) ),
-          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms...")) ),
-          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
-          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
-
-          h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
-          h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
-          h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
-          h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
+          // Popups & Modals (All perfectly loaded now)
           h(LaunchWheelModal, { isOpen: isWheelOpen, onClose: () => setIsWheelOpen(false), notify: notify }),
           h(ExitIntentModal, { isOpen: isExitModalOpen, onClose: () => setIsExitModalOpen(false), onApplyDiscount: handleApplyExitDiscount }),
+          h(CustomCheckoutPage, { isOpen: isCheckoutActive, onBack: handleBackFromCheckout, onPay: handleCheckoutPay, cart: cart, formData: formData, appliedPromo: appliedPromo }),
           
-          h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
-          h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
-          
-          h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
-          h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, checkout: handleCheckout, formData: formData, setFormData: setFormData, notify: notify, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo }),
+          // Main Content Structure
+          !isCheckoutActive && h(React.Fragment, null,
+              h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
+                h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
+                  h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })),
+                  h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."),
+                  h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."),
+                  h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")),
+                  h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."),
+                  h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.")
+                )
+              ),
+              h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy...")) ),
+              h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms...")) ),
+              h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
+              h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
 
-          h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
-          h(FailedModal, { isOpen: showFailed, onClose: () => setShowFailed(false) }),
-          h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
-          h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive }),
+              h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
+              h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
+              h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
+              h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
+              
+              h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
+              h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
+              
+              h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
+              h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout, formData: formData, setFormData: setFormData, notify: notify, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo }),
 
-          h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
-            displayedProducts.map((product, index) => (
-              h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
-                
-                h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
-                  
-                  h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
-                  h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
-                  h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90" }, `"${product.tagline}"`),
-                  h('div', { className: "h-px w-16 md:w-20 bg-obsessed-gold mb-6 md:mb-8" }),
-                  h('p', { className: "font-sans font-light text-xs md:text-sm leading-6 md:leading-8 tracking-wide text-gray-300 mb-8 md:mb-10 whitespace-pre-line" }, product.narrative),
-                  
-                  h('div', { className: "flex flex-col w-full" },
-                    // 1. The Price
-                    h('div', { className: "flex flex-col mb-4" },
-                      h('div', { className: "flex items-baseline gap-2 md:gap-3" }, 
-                        h('span', { className: "font-display text-3xl md:text-4xl text-white" }, product.price), 
-                        product.originalPrice ? h('span', { className: "font-sans text-sm text-gray-500 line-through" }, product.originalPrice) : null 
+              h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
+              h(FailedModal, { isOpen: showFailed, onClose: () => setShowFailed(false) }),
+              h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
+              h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive }),
+
+              h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
+                displayedProducts.map((product, index) => (
+                  h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${isSidebarActive ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: 'none', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
+                    
+                    h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${isSidebarActive ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
+                      
+                      h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
+                      h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
+                      h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90" }, `"${product.tagline}"`),
+                      h('div', { className: "h-px w-16 md:w-20 bg-obsessed-gold mb-6 md:mb-8" }),
+                      h('p', { className: "font-sans font-light text-xs md:text-sm leading-6 md:leading-8 tracking-wide text-gray-300 mb-8 md:mb-10 whitespace-pre-line" }, product.narrative),
+                      
+                      h('div', { className: "flex flex-col w-full" },
+                        h('div', { className: "flex flex-col mb-4" },
+                          h('div', { className: "flex items-baseline gap-2 md:gap-3" }, 
+                            h('span', { className: "font-display text-3xl md:text-4xl text-white" }, product.price), 
+                            product.originalPrice ? h('span', { className: "font-sans text-sm text-gray-500 line-through" }, product.originalPrice) : null 
+                          )
+                        ),
+                        
+                        h('button', { onClick: () => addToCart(product), className: "w-full py-4 bg-obsessed-gold text-black font-sans hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center rounded-sm" },
+                          h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD"),
+                          h('span', { className: "text-[8px] opacity-75 mt-1 tracking-widest uppercase font-mono" }, "Powered By Secure Cashfree Gateway")
+                        ),
+
+                        h(DeliveryTimeline)
                       )
                     ),
-                    
-                    // 2. The Massive UPI/COD Button
-                    h('button', { onClick: () => addToCart(product), className: "w-full py-4 bg-obsessed-gold text-black font-sans hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center rounded-sm" },
-                      h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD"),
-                      h('span', { className: "text-[8px] opacity-75 mt-1 tracking-widest uppercase font-mono" }, "Powered By Secure Cashfree Gateway")
-                    ),
-
-                    // 3. The Delivery Timeline
-                    h(DeliveryTimeline)
+                    index === 0 && h('div', { className: "absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-50 animate-bounce hidden md:flex" }, h('span', { className: "text-[10px] tracking-[0.3em] uppercase mb-2" }, "Scroll to Reveal"), h(ArrowDown, { size: 16 }) )
+                  )
+                ))
+              ),
+              
+              h('footer', { className: "relative w-full bg-[#111] flex flex-col justify-between pt-24 pb-12 border-t border-obsessed-gold/20 z-20 mt-20 pointer-events-auto" },
+                h('div', { className: "w-full px-8 md:px-20 grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 relative z-10" },
+                  h('div', null,
+                    h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Discover"),
+                    h('button', { onClick: (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "The Collection"),
+                    h('button', { onClick: () => setIsStoryOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Our Story")
+                  ),
+                  h('div', null,
+                    h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Concierge"),
+                    h('a', { href: "https://mail.google.com/mail/?view=cm&fs=1&to=info@scentobsessed.in", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "info@scentobsessed.in"),
+                    h('a', { href: "tel:+917814930720", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "+91 78149 30720"),
+                    h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Instagram"),
+                    h('a', { href: "https://wa.me/917814930720?text=Hello%2C%20I%20would%20like%20to%20track%20my%20Scent%20Obsessed%20order.", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Track Order")
+                  ),
+                  h('div', null,
+                    h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Legal"),
+                    h('button', { onClick: () => setIsPrivacyOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Privacy Policy"),
+                    h('button', { onClick: () => setIsTermsOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Terms & Conditions"),
+                    h('button', { onClick: () => setIsRefundOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Refund & Cancellation"),
+                    h('button', { onClick: () => setIsShippingOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Shipping Policy")
                   )
                 ),
-                index === 0 && h('div', { className: "absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-50 animate-bounce hidden md:flex" }, h('span', { className: "text-[10px] tracking-[0.3em] uppercase mb-2" }, "Scroll to Reveal"), h(ArrowDown, { size: 16 }) )
+                h('div', { className: "w-full flex flex-col items-center mt-12 relative z-0 overflow-hidden" },
+                  h('h2', { className: "font-display text-[11vw] md:text-[8.5vw] leading-none text-obsessed-gold opacity-10 whitespace-nowrap select-none pointer-events-none" }, "SCENT OBSESSED"),
+                  h('p', { className: "font-sans text-[9px] tracking-[0.3em] text-gray-600 mt-8 uppercase" }, "© 2026 Scent Obsessed. All Rights Reserved.")
+                )
               )
-            ))
-          ),
-          
-          h('footer', { className: "relative w-full bg-[#111] flex flex-col justify-between pt-24 pb-12 border-t border-obsessed-gold/20 z-20 mt-20 pointer-events-auto" },
-            h('div', { className: "w-full px-8 md:px-20 grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 relative z-10" },
-              h('div', null,
-                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Discover"),
-                h('button', { onClick: (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "The Collection"),
-                h('button', { onClick: () => setIsStoryOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Our Story")
-              ),
-              h('div', null,
-                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Concierge"),
-                h('a', { href: "https://mail.google.com/mail/?view=cm&fs=1&to=info@scentobsessed.in", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "info@scentobsessed.in"),
-                h('a', { href: "tel:+917814930720", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "+91 78149 30720"),
-                h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Instagram"),
-                h('a', { href: "https://wa.me/917814930720?text=Hello%2C%20I%20would%20like%20to%20track%20my%20Scent%20Obsessed%20order.", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Track Order")
-              ),
-              h('div', null,
-                h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Legal"),
-                h('button', { onClick: () => setIsPrivacyOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Privacy Policy"),
-                h('button', { onClick: () => setIsTermsOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Terms & Conditions"),
-                h('button', { onClick: () => setIsRefundOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Refund & Cancellation"),
-                h('button', { onClick: () => setIsShippingOpen(true), className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "Shipping Policy")
-              )
-            ),
-            h('div', { className: "w-full flex flex-col items-center mt-12 relative z-0 overflow-hidden" },
-              h('h2', { className: "font-display text-[11vw] md:text-[8.5vw] leading-none text-obsessed-gold opacity-10 whitespace-nowrap select-none pointer-events-none" }, "SCENT OBSESSED"),
-              h('p', { className: "font-sans text-[9px] tracking-[0.3em] text-gray-600 mt-8 uppercase" }, "© 2026 Scent Obsessed. All Rights Reserved.")
-            )
-          )
+          ) // End of !isCheckoutActive block
         );
       };
 
