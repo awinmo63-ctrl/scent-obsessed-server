@@ -416,14 +416,24 @@
       const [step, setStep] = useState(1);
       useEffect(() => { if (isOpen) setStep(1); }, [isOpen]);
       if (!isOpen) return null;
-      const handleSurveyClick = () => { setTimeout(() => setStep(2), 400); };
+
+      // --- SUPABASE EXIT SURVEY INTEGRATION ---
+      const handleSurveyClick = async (reason) => {
+        setTimeout(() => setStep(2), 400); // Move to next screen instantly for UX
+        try {
+          await supabase.from('exit_survey_responses').insert([{ reason: reason }]);
+        } catch (err) {
+          console.error("Survey save error:", err);
+        }
+      };
+      // ----------------------------------------
 
       return h('div', { className: "fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
         h('div', { className: "relative w-full max-w-md bg-[#1a1a1a] border border-obsessed-gold/40 p-8 text-left shadow-[0_0_50px_rgba(212,175,55,0.15)] flex flex-col" },
           h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 })),
           step === 1 ? h(React.Fragment, null,
             h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-4 text-center" }, "The Vault is Closing..."), h('div', { className: "bg-obsessed-gold/10 p-2 rounded text-center text-obsessed-gold text-[10px] mb-5 border border-obsessed-gold/20 uppercase tracking-widest" }, "🎁 You are leaving an exclusive acquisition"), h('p', { className: "font-sans text-xs text-gray-300 leading-relaxed mb-6 font-bold" }, "Before you go, what stopped your acquisition today?"),
-            h('div', { className: "flex flex-col gap-3" }, ['Found a better signature scent elsewhere', 'Technical issues with the dossier', 'Simply browsing the collection'].map((text, idx) => h('label', { key: idx, className: "flex items-center gap-3 p-3 border border-gray-800 rounded cursor-pointer hover:border-obsessed-gold transition-colors text-gray-300 text-xs font-sans group" }, h('input', { type: 'radio', name: 'exit_survey', onChange: handleSurveyClick, className: "accent-obsessed-gold" }), h('span', { className: "group-hover:text-white transition-colors" }, text)))),
+            h('div', { className: "flex flex-col gap-3" }, ['Found a better signature scent elsewhere', 'Technical issues with the dossier', 'Simply browsing the collection'].map((text, idx) => h('label', { key: idx, className: "flex items-center gap-3 p-3 border border-gray-800 rounded cursor-pointer hover:border-obsessed-gold transition-colors text-gray-300 text-xs font-sans group" }, h('input', { type: 'radio', name: 'exit_survey', onChange: () => handleSurveyClick(text), className: "accent-obsessed-gold" }), h('span', { className: "group-hover:text-white transition-colors" }, text)))),
             h('button', { onClick: onClose, className: "w-full mt-6 py-3 bg-transparent text-gray-500 font-sans text-[10px] font-bold uppercase tracking-[0.2em] border border-gray-800 hover:text-white hover:border-gray-500 transition-colors" }, "Skip and Exit")
           ) : h(React.Fragment, null,
             h('h2', { className: "font-display text-4xl text-obsessed-gold tracking-widest uppercase mb-2 text-center" }, "WAIT!"), h('p', { className: "font-sans text-xs text-gray-400 leading-relaxed mb-6 text-center" }, "Don't leave the vault without this. Claim an instant 10% off your entire acquisition."),
@@ -512,7 +522,18 @@
 
     const App = () => {
       const [activeSection, setActiveSection] = useState(0);
-      const [cart, setCart] = useState([]);
+
+      const [cart, setCart] = useState(() => {
+        try {
+          const saved = localStorage.getItem('scent_obsessed_cart');
+          return saved ? JSON.parse(saved) : [];
+        } catch (e) { return []; }
+      });
+
+      useEffect(() => {
+        localStorage.setItem('scent_obsessed_cart', JSON.stringify(cart));
+      }, [cart]);
+
       const [isCartOpen, setIsCartOpen] = useState(false);
       const [isMenuOpen, setIsMenuOpen] = useState(false);
       const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -690,13 +711,23 @@
         }, 1400);
       };
 
-      const addToCart = (product) => {
+      const handleAddToCart = (product) => {
         setCart(prev => {
           const existing = prev.find(item => item.id === product.id && !item.isReward);
           if (existing) return prev.map(item => item.id === product.id && !item.isReward ? { ...item, qty: item.qty + 1 } : item);
           return [...prev, { ...product, qty: 1 }];
         });
         setIsCartOpen(true);
+      };
+
+      const handleBuyNow = (product) => {
+        setCart(prev => {
+          const existing = prev.find(item => item.id === product.id && !item.isReward);
+          if (existing) return prev.map(item => item.id === product.id && !item.isReward ? { ...item, qty: item.qty + 1 } : item);
+          return [...prev, { ...product, qty: 1 }];
+        });
+        setIsCartOpen(false);
+        setIsCheckoutActive(true);
       };
 
       const updateQty = (id, delta) => { setCart(prev => prev.map(item => item.id === id && !item.isReward ? { ...item, qty: Math.max(0, item.qty + delta) } : item).filter(item => item.qty > 0 || item.isReward)); };
@@ -765,7 +796,7 @@
         h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
         mistState !== 'idle' ? h('div', { className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' : mistState === 'flying' ? 'top-[calc(100vh-100px)] md:top-[calc(100vh-60px)] left-10 md:left-14 w-16 h-16 opacity-80 duration-1000' : mistState === 'claiming_bloom' ? 'bottom-16 left-16 w-40 h-40 opacity-100 duration-500' : mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' : 'opacity-0'}` }) : null,
 
-        // Modals and Overlays
+        // OVERLAYS & MODALS (Z-INDEX HIGH)
         h(LaunchWheelModal, { isOpen: isWheelOpen, onClose: () => setIsWheelOpen(false), notify: notify }),
         h(ExitIntentModal, { isOpen: isExitModalOpen, onClose: () => setIsExitModalOpen(false), onApplyDiscount: handleApplyExitDiscount }),
         h(CustomCheckoutPage, { isOpen: isCheckoutActive, onBack: handleBackFromCheckout, onPay: handleCheckoutPay, cart: cart, formData: formData, setFormData: setFormData, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo, notify: notify }),
@@ -774,27 +805,25 @@
         h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
         h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
         h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
-
         h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" }, h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })), h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."), h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."), h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")), h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."), h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed."))),
         h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy..."))),
         h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms..."))),
         h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles..."))),
         h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours..."))),
 
-        // Sidebars
+        // SIDEBARS
         h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
         h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
         h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout }),
 
-        // Navigation and Floating UI
-        h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
+        // FLOATING ELEMENTS
         h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
         h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
+        h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
 
-        // Main Visuals Layer (Now always in DOM to prevent 3D unmount panic)
+        // MAIN VISUALS & SCROLLING CONTENT
+        // Notice we DO NOT conditionally render this anymore. It is safely hidden beneath the CustomCheckoutPage overlay.
         h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive || isCheckoutActive }),
-
-        // Main Scrollable Content
         h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: isCheckoutActive ? 'none' : 'auto' } },
           displayedProducts.map((product, index) => (
             h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${(isSidebarActive || isCheckoutActive) ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: isCheckoutActive ? 'none' : 'auto', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
@@ -806,7 +835,16 @@
                 h('p', { className: "font-sans font-light text-xs md:text-sm leading-6 md:leading-8 tracking-wide text-gray-300 mb-8 md:mb-10 whitespace-pre-line" }, product.narrative),
                 h('div', { className: "flex flex-col w-full" },
                   h('div', { className: "flex flex-col mb-4" }, h('div', { className: "flex items-baseline gap-2 md:gap-3" }, h('span', { className: "font-display text-3xl md:text-4xl text-white" }, product.price), product.originalPrice ? h('span', { className: "font-sans text-sm text-gray-500 line-through" }, product.originalPrice) : null)),
-                  h('button', { onClick: () => addToCart(product), className: "w-full py-4 bg-obsessed-gold text-black font-sans hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center rounded-sm" }, h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD"), h('span', { className: "text-[8px] opacity-75 mt-1 tracking-widest uppercase font-mono" }, "Powered By Secure Cashfree Gateway")),
+
+                  // 6. THE NEW TWO-BUTTON SPLIT (Add to Cart / Buy Now)
+                  h('div', { className: "flex flex-col gap-3 w-full mb-2" },
+                    h('button', { onClick: () => handleBuyNow(product), className: "w-full py-4 bg-obsessed-gold text-black font-sans hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center rounded-sm" },
+                      h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD"),
+                      h('span', { className: "text-[8px] opacity-75 mt-1 tracking-widest uppercase font-mono" }, "Powered By Secure Cashfree Gateway")
+                    ),
+                    h('button', { onClick: () => handleAddToCart(product), className: "w-full py-3 bg-transparent border border-obsessed-gold text-obsessed-gold font-sans font-bold uppercase tracking-[0.2em] hover:bg-obsessed-gold hover:text-black transition-colors rounded-sm text-[10px] shadow-[0_0_10px_rgba(212,175,55,0.1)]" }, "Add to Cart")
+                  ),
+
                   h(DeliveryTimeline)
                 )
               ),
