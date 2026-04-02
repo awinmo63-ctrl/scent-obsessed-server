@@ -113,17 +113,17 @@
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const PRODUCTS = [
-      { id: 'blue-monarch', name: 'Blue Monarch', tagline: 'Rule Your Realm', narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#0f52ba', imageUrl: './blue_monarch.png', bottleColor: 'sapphire', modelSrc: './blue_monarch.glb', orientation: '0deg -90deg 0deg' },
-      { id: 'urban-ember', name: 'Urban Ember', tagline: 'Ignite Your Presence', narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#d4af37', imageUrl: './urban_ember.png', bottleColor: 'white', modelSrc: './urban_ember.glb', orientation: '0deg -90deg 0deg' },
-      { id: 'flora-essence', name: 'Flora Essence', tagline: 'The Scent of Sunlight', narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#046307', imageUrl: './flora_essence.jpeg', bottleColor: 'emerald', modelSrc: './flora_essence.glb', orientation: '0deg 0deg 0deg' },
-      { id: 'savage-wind', name: 'Savage Wind', tagline: 'Unleash the Storm', narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.", price: "₹ 720", originalPrice: "₹ 2,499", colorHex: '#555555', imageUrl: './savage_wind.png', bottleColor: 'black', modelSrc: './savage_wind.glb', orientation: '0deg 0deg 0deg' }
+      { id: 'blue-monarch', name: 'Blue Monarch', tagline: 'Rule Your Realm', narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.", price: "₹ 2,499", colorHex: '#0f52ba', imageUrl: './blue_monarch.png', bottleColor: 'sapphire', modelSrc: './blue_monarch.glb', orientation: '0deg -90deg 0deg' },
+      { id: 'urban-ember', name: 'Urban Ember', tagline: 'Ignite Your Presence', narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.", price: "₹ 2,499", colorHex: '#d4af37', imageUrl: './urban_ember.png', bottleColor: 'white', modelSrc: './urban_ember.glb', orientation: '0deg -90deg 0deg' },
+      { id: 'flora-essence', name: 'Flora Essence', tagline: 'The Scent of Sunlight', narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.", price: "₹ 2,499", colorHex: '#046307', imageUrl: './flora_essence.jpeg', bottleColor: 'emerald', modelSrc: './flora_essence.glb', orientation: '0deg 0deg 0deg' },
+      { id: 'savage-wind', name: 'Savage Wind', tagline: 'Unleash the Storm', narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.", price: "₹ 2,499", colorHex: '#555555', imageUrl: './savage_wind.png', bottleColor: 'black', modelSrc: './savage_wind.glb', orientation: '0deg 0deg 0deg' }
     ];
 
     const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
     const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
 
     const AnnouncementBar = () => {
-      const announcementText = "✦ GRAND LAUNCH OFFER LIVE TILL 31ST MARCH ✦ ACQUIRE YOUR SIGNATURE SCENT FOR JUST ₹ 720 (ORIGINALLY ₹ 2,499) ✦ EARN 20ML PER BOTTLE FOR YOUR LOYALTY VESSEL ";
+      const announcementText = "✦ WELCOME TO SCENT OBSESSED ✦ EXPERIENCE TRUE EXTRAIT DE PARFUM ✦ COMPLIMENTARY SECURE SHIPPING ON ALL DOSSIERS ✦ SPIN TO UNLOCK EXCLUSIVE VAULT ACCESS ✦ ";
       return h('div', { className: "fixed top-0 left-0 right-0 z-[80] bg-obsessed-gold text-black py-1.5 md:py-2 overflow-hidden flex whitespace-nowrap shadow-[0_2px_10px_rgba(212,175,55,0.2)]" },
         h('div', { className: "animate-marquee flex whitespace-nowrap items-center font-sans text-[8px] md:text-[9.5px] tracking-[0.2em] font-bold uppercase" },
           h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText), h('span', null, announcementText)
@@ -261,16 +261,29 @@
       );
     };
 
-    const MobileMenu = ({ isOpen, onClose, onOpenStory }) => {
+    // UPDATED TO INCLUDE 'UNLOCK THE VAULT' MENU ITEM
+    const MobileMenu = ({ isOpen, onClose, onOpenStory, onOpenWheel }) => {
       const links = [
-        { name: 'The Collection', type: 'scroll' }, { name: 'Our Story', type: 'story' },
+        { name: 'Unlock The Vault', type: 'wheel' }, // Re-trigger the spin wheel here
+        { name: 'The Collection', type: 'scroll' },
+        { name: 'Our Story', type: 'story' },
         { name: 'Track Order', type: 'whatsapp', message: 'Hello, I would like to track my Scent Obsessed order.' },
         { name: 'Contact Concierge', type: 'whatsapp', message: 'Hello Scent Obsessed, I need some assistance finding my signature scent.' }
       ];
       return h('div', { className: `fixed inset-y-0 left-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-r border-l-0 border-obsessed-gold/20 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` },
         h('div', { className: "flex flex-col h-full p-8" },
           h('div', { className: "flex justify-between items-center mb-20" }, h('span', { className: "font-display text-xl text-obsessed-gold tracking-[0.2em]" }, "MENU"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))),
-          h('nav', { className: "flex flex-col gap-8" }, links.map(link => h('a', { key: link.name, href: "#", onClick: (e) => { e.preventDefault(); if (link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); } else if (link.type === 'story') { onOpenStory(); onClose(); } else if (link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); } }, className: "font-display text-2xl md:text-3xl text-white hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100" }, link.name))),
+          h('nav', { className: "flex flex-col gap-8" }, links.map(link => h('a', {
+            key: link.name, href: "#",
+            onClick: (e) => {
+              e.preventDefault();
+              if (link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); }
+              else if (link.type === 'story') { onOpenStory(); onClose(); }
+              else if (link.type === 'wheel') { onOpenWheel(); onClose(); } // Triggers the wheel modal again
+              else if (link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); }
+            },
+            className: `font-display text-2xl md:text-3xl hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100 ${link.type === 'wheel' ? 'text-obsessed-gold' : 'text-white'}`
+          }, link.name))),
           h('div', { className: "mt-auto opacity-50" }, h('a', { href: "https://www.instagram.com/scentobsessedofficial/", target: "_blank", className: "font-sans text-xs tracking-[0.3em] text-white hover:text-obsessed-gold transition-colors uppercase block mb-8" }, "Follow the Obsession"), h('p', { className: "font-sans text-xs tracking-[0.3em] text-obsessed-gold mb-2" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[10px] text-gray-400" }, "EST. 2026"))
         )
       );
@@ -283,6 +296,21 @@
           h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })), h('h2', { className: "font-display text-xl md:text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title), h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
         )
       );
+    };
+
+    const calculateCartTotals = (cart, promo) => {
+      let subtotal = 0; let finalTotal = 0; let discountAmount = 0;
+      cart.forEach(item => {
+        if (item.isReward) return;
+        const base = parsePrice(item.price);
+        subtotal += base * item.qty;
+        if (promo && promo.type === 'FIXED_PRICE') { finalTotal += promo.pricePerItem * item.qty; } else { finalTotal += base * item.qty; }
+      });
+      if (promo && (promo.type === 'PERCENTAGE' || promo.type === 'VIP' || promo.type === 'REF')) {
+        discountAmount = Math.floor(subtotal * ((promo.discount || 0) / 100));
+        finalTotal = subtotal - discountAmount;
+      } else if (promo && promo.type === 'FIXED_PRICE') { discountAmount = subtotal - finalTotal; }
+      return { subtotal, discountAmount, finalTotal };
     };
 
     const OrdersSidebar = ({ isOpen, onClose, user, loyaltyMl, orders, onLogout, onTrackOrder, notify, hasUsedReferral, onApplyReferral }) => {
@@ -306,17 +334,18 @@
       );
     };
 
-    const CartSidebar = ({ isOpen, onClose, cart, updateQty, proceedToCheckout }) => {
-      const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
+    const CartSidebar = ({ isOpen, onClose, cart, updateQty, proceedToCheckout, appliedPromo }) => {
+      const { subtotal, discountAmount, finalTotal } = calculateCartTotals(cart, appliedPromo);
 
       return h('div', { className: `fixed inset-y-0 right-0 z-[90] w-full md:w-96 glass-panel transform transition-transform duration-500 ease-out border-l border-obsessed-gold/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col` },
         h('div', { className: "flex justify-between items-center p-8 pb-6 flex-shrink-0" }, h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-[0.2em]" }, "YOUR COLLECTION"), h('button', { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors" }, h(X, { size: 24 }))),
         h('div', { className: "flex-1 overflow-y-auto px-8 no-scrollbar space-y-6" },
           cart.length === 0 ? h('div', { className: "h-full flex items-center justify-center text-gray-500 font-serif italic pb-20" }, "Your vessel is empty.") :
-            h(React.Fragment, null, cart.map(item => h('div', { key: item.id, className: "flex items-start gap-4 border-b border-gray-800 pb-4" }, h('img', { src: item.imageUrl, className: "w-16 h-20 object-cover rounded border border-gray-800" }), h('div', { className: "flex-1" }, h('h4', { className: "font-display text-sm text-white mb-1" }, item.name), h('div', { className: "flex items-baseline gap-2 mb-2" }, h('p', { className: `text-xs ${item.isReward ? 'text-green-400 font-bold' : 'text-obsessed-gold'}` }, item.price), item.originalPrice ? h('p', { className: "text-gray-600 text-[10px] line-through" }, item.originalPrice) : null), item.isReward ? h('span', { className: "text-[9px] font-sans text-obsessed-gold uppercase tracking-widest bg-obsessed-gold/10 px-2 py-1 border border-obsessed-gold/30 rounded" }, "Loyalty Reward") : h('div', { className: "flex items-center gap-3" }, h('button', { onClick: () => updateQty(item.id, -1), className: "p-2 hover:bg-gray-800 rounded" }, h(Minus, { size: 12 })), h('span', { className: "text-xs font-mono" }, item.qty), h('button', { onClick: () => updateQty(item.id, 1), className: "p-2 hover:bg-gray-800 rounded" }, h(Plus, { size: 12 })))))))
+            h(React.Fragment, null, cart.map(item => h('div', { key: item.id, className: "flex items-start gap-4 border-b border-gray-800 pb-4" }, h('img', { src: item.imageUrl, className: "w-16 h-20 object-cover rounded border border-gray-800" }), h('div', { className: "flex-1" }, h('h4', { className: "font-display text-sm text-white mb-1" }, item.name), h('div', { className: "flex items-baseline gap-2 mb-2" }, h('p', { className: `text-xs ${item.isReward ? 'text-green-400 font-bold' : 'text-obsessed-gold'}` }, item.price)), item.isReward ? h('span', { className: "text-[9px] font-sans text-obsessed-gold uppercase tracking-widest bg-obsessed-gold/10 px-2 py-1 border border-obsessed-gold/30 rounded" }, "Loyalty Reward") : h('div', { className: "flex items-center gap-3" }, h('button', { onClick: () => updateQty(item.id, -1), className: "p-2 hover:bg-gray-800 rounded" }, h(Minus, { size: 12 })), h('span', { className: "text-xs font-mono" }, item.qty), h('button', { onClick: () => updateQty(item.id, 1), className: "p-2 hover:bg-gray-800 rounded" }, h(Plus, { size: 12 })))))))
         ),
         h('div', { className: "p-8 pt-6 border-t border-obsessed-gold/20 flex-shrink-0 bg-[#111]" },
-          h('div', { className: "flex justify-between items-end mb-6" }, h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Subtotal"), h('span', { className: "font-display text-2xl text-white" }, formatPrice(subtotal))),
+          appliedPromo && h('div', { className: "flex justify-between items-end mb-3" }, h('span', { className: "font-sans text-[10px] tracking-widest text-obsessed-gold uppercase" }, "Vault Discount"), h('span', { className: "font-mono text-xs text-obsessed-gold" }, `- ${formatPrice(discountAmount)}`)),
+          h('div', { className: "flex justify-between items-end mb-6" }, h('span', { className: "font-sans text-xs tracking-widest text-white uppercase" }, "Subtotal"), h('span', { className: "font-display text-2xl text-white" }, formatPrice(finalTotal))),
           h('button', { onClick: proceedToCheckout, disabled: cart.length === 0, className: "w-full py-4 bg-obsessed-gold text-obsessed-black font-sans font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50" }, h(Box, { size: 18 }), "Checkout")
         )
       );
@@ -380,7 +409,7 @@
         h('div', { className: "relative w-full max-w-lg bg-[#111] border border-obsessed-gold/40 p-8 text-center shadow-[0_0_50px_rgba(212,175,55,0.15)] flex flex-col md:flex-row items-center gap-8 rounded-lg overflow-hidden" },
           h('button', { onClick: onClose, className: "absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20" }, h(X, { size: 24 })),
           h('div', { className: "flex-1 flex flex-col items-center md:items-start text-center md:text-left relative z-10" },
-            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-2" }, "Launch Sale Live"),
+            h('h2', { className: "font-display text-2xl text-obsessed-gold tracking-widest uppercase mb-2" }, "Vault Access Live"),
             h('p', { className: "font-sans text-[10px] text-gray-400 uppercase tracking-widest mb-6" }, "Spin for a Surprise Gift"),
             step === 0 ? h(React.Fragment, null,
               h('div', { className: "flex w-full bg-black border border-gray-700 rounded-sm mb-4" },
@@ -417,16 +446,11 @@
       useEffect(() => { if (isOpen) setStep(1); }, [isOpen]);
       if (!isOpen) return null;
 
-      // --- SUPABASE EXIT SURVEY INTEGRATION ---
       const handleSurveyClick = async (reason) => {
-        setTimeout(() => setStep(2), 400); // Move to next screen instantly for UX
-        try {
-          await supabase.from('exit_survey_responses').insert([{ reason: reason }]);
-        } catch (err) {
-          console.error("Survey save error:", err);
-        }
+        setTimeout(() => setStep(2), 400);
+        try { await supabase.from('exit_survey_responses').insert([{ reason: reason }]); }
+        catch (err) { console.error("Survey save error:", err); }
       };
-      // ----------------------------------------
 
       return h('div', { className: "fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
         h('div', { className: "relative w-full max-w-md bg-[#1a1a1a] border border-obsessed-gold/40 p-8 text-left shadow-[0_0_50px_rgba(212,175,55,0.15)] flex flex-col" },
@@ -469,13 +493,17 @@
 
       if (!isOpen) return null;
 
-      const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
-      const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
-      const finalTotal = subtotal - discountAmount;
+      const { subtotal, discountAmount, finalTotal } = calculateCartTotals(cart, appliedPromo);
 
       const handleApplyPromo = async () => {
         const code = promoInput.trim().toUpperCase();
         if (!code) return;
+
+        if (code === 'VIP720') { setAppliedPromo({ code: code, type: 'FIXED_PRICE', pricePerItem: 720 }); setPromoInput(''); notify("Vault Unlocked: All items reduced to ₹720!"); return; }
+        if (code === 'VIP1499') { setAppliedPromo({ code: code, type: 'FIXED_PRICE', pricePerItem: 1499 }); setPromoInput(''); notify("Vault Unlocked: All items reduced to ₹1,499!"); return; }
+        if (code === 'HALF50') { setAppliedPromo({ code: code, type: 'PERCENTAGE', discount: 50 }); setPromoInput(''); notify("Vault Unlocked: 50% Off Applied!"); return; }
+        if (code === 'VIP10') { setAppliedPromo({ code: code, type: 'PERCENTAGE', discount: 10 }); setPromoInput(''); notify("Vault Unlocked: 10% Off Applied!"); return; }
+
         const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
         if (error || !data) { notify("Invalid Code."); return; }
         if (data.is_used) { notify("This Code has already been redeemed."); return; }
@@ -524,15 +552,11 @@
       const [activeSection, setActiveSection] = useState(0);
 
       const [cart, setCart] = useState(() => {
-        try {
-          const saved = localStorage.getItem('scent_obsessed_cart');
-          return saved ? JSON.parse(saved) : [];
-        } catch (e) { return []; }
+        try { const saved = localStorage.getItem('scent_obsessed_cart'); return saved ? JSON.parse(saved) : []; }
+        catch (e) { return []; }
       });
 
-      useEffect(() => {
-        localStorage.setItem('scent_obsessed_cart', JSON.stringify(cart));
-      }, [cart]);
+      useEffect(() => { localStorage.setItem('scent_obsessed_cart', JSON.stringify(cart)); }, [cart]);
 
       const [isCartOpen, setIsCartOpen] = useState(false);
       const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -578,7 +602,7 @@
       }, [myOrders]);
 
       const handleApplyExitDiscount = (code) => {
-        setAppliedPromo({ code: code, type: 'VIP', discount: 10 });
+        setAppliedPromo({ code: code, type: 'PERCENTAGE', discount: 10 });
         setIsExitModalOpen(false);
         if (!isCheckoutActive) setIsCartOpen(true);
         notify("VIP Vault Code Applied!");
@@ -592,10 +616,7 @@
         }
       };
 
-      const handleCloseCart = () => {
-        setIsCartOpen(false);
-        setTimeout(() => triggerVaultIfEligible(), 400);
-      };
+      const handleCloseCart = () => { setIsCartOpen(false); };
 
       const proceedToCustomCheckout = () => {
         setIsCartOpen(false);
@@ -606,6 +627,12 @@
         triggerVaultIfEligible();
         setIsCheckoutActive(false);
         setIsCartOpen(true);
+      };
+
+      // NEW METHOD to manually trigger the wheel from the menu
+      const handleOpenWheel = () => {
+        setIsMenuOpen(false);
+        setIsWheelOpen(true);
       };
 
       useEffect(() => {
@@ -624,33 +651,17 @@
       }, []);
 
       useEffect(() => {
-        if (!isCheckoutActive) return;
-
-        let lastScrollY = window.scrollY;
-
         const handleMouseLeave = (e) => { if (e.clientY <= 20) triggerVaultIfEligible(); };
         const handleVisibilityChange = () => { if (document.hidden) triggerVaultIfEligible(); };
-        const handleWindowBlur = () => { triggerVaultIfEligible(); };
-
-        const handleScroll = () => {
-          const currentScrollY = window.scrollY;
-          const delta = lastScrollY - currentScrollY;
-          if (delta > 10 && currentScrollY < 150) triggerVaultIfEligible();
-          lastScrollY = currentScrollY;
-        };
 
         document.addEventListener('mouseleave', handleMouseLeave);
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('blur', handleWindowBlur);
-        window.addEventListener('scroll', handleScroll, { passive: true });
 
         return () => {
           document.removeEventListener('mouseleave', handleMouseLeave);
           document.removeEventListener('visibilitychange', handleVisibilityChange);
-          window.removeEventListener('blur', handleWindowBlur);
-          window.removeEventListener('scroll', handleScroll);
         };
-      }, [isCheckoutActive, cart.length]);
+      }, [cart.length]);
 
       useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -796,12 +807,22 @@
         h(NotificationBanner, { message: notification, onClose: () => setNotification(null) }),
         mistState !== 'idle' ? h('div', { className: `fixed z-[9999] rounded-full bg-obsessed-gold blur-[40px] mix-blend-screen pointer-events-none transition-all ease-in-out ${mistState === 'blooming' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-100 duration-500' : mistState === 'flying' ? 'top-[calc(100vh-100px)] md:top-[calc(100vh-60px)] left-10 md:left-14 w-16 h-16 opacity-80 duration-1000' : mistState === 'claiming_bloom' ? 'bottom-16 left-16 w-40 h-40 opacity-100 duration-500' : mistState === 'claiming_fly' ? 'top-10 right-10 w-16 h-16 opacity-80 duration-1000' : 'opacity-0'}` }) : null,
 
-        // OVERLAYS & MODALS (Z-INDEX HIGH)
+        // OVERLAYS & MODALS 
         h(LaunchWheelModal, { isOpen: isWheelOpen, onClose: () => setIsWheelOpen(false), notify: notify }),
         h(ExitIntentModal, { isOpen: isExitModalOpen, onClose: () => setIsExitModalOpen(false), onApplyDiscount: handleApplyExitDiscount }),
         h(CustomCheckoutPage, { isOpen: isCheckoutActive, onBack: handleBackFromCheckout, onPay: handleCheckoutPay, cart: cart, formData: formData, setFormData: setFormData, appliedPromo: appliedPromo, setAppliedPromo: setAppliedPromo, notify: notify }),
+
         h(SuccessModal, { isOpen: showSuccess, onTriggerMist: handleTriggerPurchaseMist, orderId: successOrderId }),
-        h(FailedModal, { isOpen: showFailed, onClose: () => setShowFailed(false) }),
+        h(FailedModal, {
+          isOpen: showFailed, onClose: () => {
+            setShowFailed(false);
+            setIsCheckoutActive(false);
+            setIsCartOpen(true);
+            sessionStorage.removeItem('exitTriggered');
+            setTimeout(() => setIsExitModalOpen(true), 600);
+          }
+        }),
+
         h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
         h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
         h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
@@ -812,9 +833,9 @@
         h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours..."))),
 
         // SIDEBARS
-        h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true) }),
+        h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true), onOpenWheel: handleOpenWheel }),
         h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
-        h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout }),
+        h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout, appliedPromo: appliedPromo }),
 
         // FLOATING ELEMENTS
         h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
@@ -822,27 +843,37 @@
         h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
 
         // MAIN VISUALS & SCROLLING CONTENT
-        // Notice we DO NOT conditionally render this anymore. It is safely hidden beneath the CustomCheckoutPage overlay.
         h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive || isCheckoutActive }),
         h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: isCheckoutActive ? 'none' : 'auto' } },
           displayedProducts.map((product, index) => (
             h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${(isSidebarActive || isCheckoutActive) ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', pointerEvents: isCheckoutActive ? 'none' : 'auto', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
               h('div', { className: `w-full max-w-md p-6 md:p-8 rounded-t-3xl md:rounded-sm border-t border-obsessed-gold/30 md:border-t-0 md:border-l md:border-obsessed-gold/30 transition-all duration-1000 transform bg-[#1a1a1a]/85 backdrop-blur-md md:bg-transparent ${index === 0 ? 'mt-[55vh]' : 'mt-[45vh]'} md:mt-0 max-h-[55vh] md:max-h-none overflow-y-auto md:overflow-visible no-scrollbar pb-24 md:pb-12 pointer-events-auto ${activeSection === index ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-20'} ${(isSidebarActive || isCheckoutActive) ? 'scale-90' : 'scale-100'}`, style: { backgroundImage: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(26,26,26,0.5) 100%)' } },
                 h('h4', { className: "font-sans text-[10px] md:text-xs tracking-[0.4em] text-obsessed-gold uppercase mb-3 md:mb-4" }, `No. 0${index + 1}`),
-                h('h2', { className: "font-display text-4xl md:text-7xl mb-2 text-white" }, product.name),
-                h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90" }, `"${product.tagline}"`),
+
+                h('h2', { className: "font-display text-4xl md:text-7xl text-white mb-1" }, product.name),
+                h('div', { className: "flex items-center gap-2 mb-2" },
+                  h('div', { className: "flex text-obsessed-gold text-[10px]" }, '★★★★★'),
+                  h('span', { className: "text-[8px] font-sans text-gray-400 tracking-widest uppercase" }, "4.9/5 (120+ REVIEWS)")
+                ),
+
+                h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90 mt-2" }, `"${product.tagline}"`),
                 h('div', { className: "h-px w-16 md:w-20 bg-obsessed-gold mb-6 md:mb-8" }),
                 h('p', { className: "font-sans font-light text-xs md:text-sm leading-6 md:leading-8 tracking-wide text-gray-300 mb-8 md:mb-10 whitespace-pre-line" }, product.narrative),
-                h('div', { className: "flex flex-col w-full" },
-                  h('div', { className: "flex flex-col mb-4" }, h('div', { className: "flex items-baseline gap-2 md:gap-3" }, h('span', { className: "font-display text-3xl md:text-4xl text-white" }, product.price), product.originalPrice ? h('span', { className: "font-sans text-sm text-gray-500 line-through" }, product.originalPrice) : null)),
 
-                  // 6. THE NEW TWO-BUTTON SPLIT (Add to Cart / Buy Now)
+                h('div', { className: "flex flex-col w-full" },
+                  h('div', { className: "flex flex-col mb-4" }, h('div', { className: "flex items-baseline gap-2 md:gap-3" }, h('span', { className: "font-display text-3xl md:text-4xl text-white" }, product.price))),
+
                   h('div', { className: "flex flex-col gap-3 w-full mb-2" },
                     h('button', { onClick: () => handleBuyNow(product), className: "w-full py-4 bg-obsessed-gold text-black font-sans hover:bg-white transition-colors shadow-[0_0_20px_rgba(212,175,55,0.3)] flex flex-col items-center justify-center rounded-sm" },
-                      h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD"),
-                      h('span', { className: "text-[8px] opacity-75 mt-1 tracking-widest uppercase font-mono" }, "Powered By Secure Cashfree Gateway")
+                      h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD")
                     ),
                     h('button', { onClick: () => handleAddToCart(product), className: "w-full py-3 bg-transparent border border-obsessed-gold text-obsessed-gold font-sans font-bold uppercase tracking-[0.2em] hover:bg-obsessed-gold hover:text-black transition-colors rounded-sm text-[10px] shadow-[0_0_10px_rgba(212,175,55,0.1)]" }, "Add to Cart")
+                  ),
+
+                  h('div', { className: "flex justify-center items-center gap-3 mt-4 mb-2 opacity-70" },
+                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "EXTRAIT DE PARFUM"),
+                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "24HR+ LONGEVITY"),
+                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "ZERO TOXINS")
                   ),
 
                   h(DeliveryTimeline)
