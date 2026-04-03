@@ -30,6 +30,7 @@
             'float': 'float 6s ease-in-out infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards',
             'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards', 'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'marquee': 'marquee 30s linear infinite',
+            'loading-bar': 'loadingBar 1.5s ease-in-out infinite'
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
@@ -80,14 +81,8 @@
       scrollbar-width: none;
     }
 
-    /* Ensure model-viewer takes full touches when active */
     model-viewer.active {
       pointer-events: auto !important;
-    }
-
-    /* Hide the default grey poster background to keep it clean */
-    model-viewer {
-      --poster-color: transparent;
     }
   </style>
   <script type="importmap">
@@ -120,10 +115,10 @@
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const PRODUCTS = [
-      { id: 'blue-monarch', name: 'Blue Monarch', tagline: 'Rule Your Realm', narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.", price: "₹ 2,499", colorHex: '#0f52ba', imageUrl: './blue_monarch.png', bottleColor: 'sapphire', modelSrc: './blue_monarch.glb', orientation: '0deg -90deg 0deg', notes: { top: "Zesty Citrus, Cool Mint", heart: "Aromatic Ginger, Warm Nutmeg", base: "Rich Sandalwood, Earthy Vetiver, Smoky Incense" } },
-      { id: 'urban-ember', name: 'Urban Ember', tagline: 'Ignite Your Presence', narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.", price: "₹ 2,499", colorHex: '#d4af37', imageUrl: './urban_ember.png', bottleColor: 'white', modelSrc: './urban_ember.glb', orientation: '0deg -90deg 0deg', notes: { top: "Fresh Bergamot, Lavender Spark", heart: "Port Wine, Rugged Leather, Mimosa", base: "Smoky Amber, Deep Woods" } },
-      { id: 'flora-essence', name: 'Flora Essence', tagline: 'The Scent of Sunlight', narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.", price: "₹ 2,499", colorHex: '#046307', imageUrl: './flora_essence.jpeg', bottleColor: 'emerald', modelSrc: './flora_essence.glb', orientation: '0deg 0deg 0deg', notes: { top: "Liquid Sunshine, Mandarin Essence", heart: "Rich Magnolia, Grandiflorum Jasmine", base: "Smooth Sandalwood, Warm Musk" } },
-      { id: 'savage-wind', name: 'Savage Wind', tagline: 'Unleash the Storm', narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.", price: "₹ 2,499", colorHex: '#555555', imageUrl: './savage_wind.png', bottleColor: 'black', modelSrc: './savage_wind.glb', orientation: '0deg 0deg 0deg', notes: { top: "Crisp Bergamot, Electric Air", heart: "Spicy Nutmeg, Aromatic Lavender", base: "Vanilla Absolute, Smoky Resins" } }
+      { id: 'blue-monarch', name: 'Blue Monarch', tagline: 'Rule Your Realm', narrative: "Ascend to a new level of sophistication with Blue Monarch by Scent Obsessed. This is a fragrance for those who write their own rules—a tribute to absolute freedom, power, and timeless elegance.\n\nThe experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses. As the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg, creating a perfect balance between sharp freshness and spicy depth.\n\nThe reign of this fragrance is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority.", price: "₹ 2,499", colorHex: '#0f52ba', imageUrl: './blue_monarch.png', bottleColor: 'sapphire', modelSrc: './blue_monarch.glb', orientation: '0deg -90deg 0deg' },
+      { id: 'urban-ember', name: 'Urban Ember', tagline: 'Ignite Your Presence', narrative: "Capture the electric energy of the city at twilight with Urban Ember by Scent Obsessed. This fragrance is designed for the modern trailblazer who commands attention without saying a word.\n\nThe journey begins with a vibrant spark—fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves, creating an opening that is impossible to ignore. As the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression.", price: "₹ 2,499", colorHex: '#d4af37', imageUrl: './urban_ember.png', bottleColor: 'white', modelSrc: './urban_ember.glb', orientation: '0deg -90deg 0deg' },
+      { id: 'flora-essence', name: 'Flora Essence', tagline: 'The Scent of Sunlight', narrative: "Capture the golden glow of a blooming garden at dawn with Flora Essence by Scent Obsessed. This is a fragrance that celebrates light, nature, and pure optimism.\n\nThe experience opens with a burst of liquid sunshine—zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy. As the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine, creating a floral signature that is opulent yet airy.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin.", price: "₹ 2,499", colorHex: '#046307', imageUrl: './flora_essence.jpeg', bottleColor: 'emerald', modelSrc: './flora_essence.glb', orientation: '0deg 0deg 0deg' },
+      { id: 'savage-wind', name: 'Savage Wind', tagline: 'Unleash the Storm', narrative: "Experience the rush of the untamed with Savage Wind by Scent Obsessed. This fragrance is a powerful force of nature, designed for the free spirit who refuses to be tamed.\n\nThe scent opens with a gust of crisp, electric freshness—Bergamot hits the skin like a cool breeze, instantly awakening the senses. But the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction. A rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness.", price: "₹ 2,499", colorHex: '#555555', imageUrl: './savage_wind.png', bottleColor: 'black', modelSrc: './savage_wind.glb', orientation: '0deg 0deg 0deg' }
     ];
 
     const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
@@ -144,23 +139,6 @@
         h(Sparkles, { size: 16, className: "text-obsessed-gold flex-shrink-0" }),
         h('span', { className: "font-sans text-[9px] md:text-[10px] tracking-[0.2em] text-white uppercase" }, message),
         h('button', { onClick: onClose, className: "text-gray-500 hover:text-obsessed-gold transition-colors ml-2 md:ml-4 flex-shrink-0" }, h(X, { size: 16 }))
-      );
-    };
-
-    const ScentPyramid = ({ notes }) => {
-      return h('div', { className: "flex flex-col gap-3 mb-8 border-l border-obsessed-gold/30 pl-4 py-1" },
-        h('div', { className: "flex flex-col" },
-          h('span', { className: "text-[8px] text-obsessed-gold uppercase tracking-widest font-bold" }, "Top Notes"),
-          h('span', { className: "text-[10px] text-gray-300 font-sans tracking-wide" }, notes.top)
-        ),
-        h('div', { className: "flex flex-col" },
-          h('span', { className: "text-[8px] text-obsessed-gold uppercase tracking-widest font-bold" }, "Heart Notes"),
-          h('span', { className: "text-[10px] text-gray-300 font-sans tracking-wide" }, notes.heart)
-        ),
-        h('div', { className: "flex flex-col" },
-          h('span', { className: "text-[8px] text-obsessed-gold uppercase tracking-widest font-bold" }, "Base Notes"),
-          h('span', { className: "text-[10px] text-gray-300 font-sans tracking-wide" }, notes.base)
-        )
       );
     };
 
@@ -251,25 +229,36 @@
       );
     };
 
-    // MAJOR UPDATE: 3D Models now preload silently, loading bar added, interactivity fixed.
+    // FIX: Optimized Visuals Layer with flawless loading bar and 3D interactivity
     const VisualsLayer = ({ products, activeIndex, is3DMode, isSidebarActive }) => {
+      const [loadedModels, setLoadedModels] = useState({});
+
+      const handleModelLoad = (id) => {
+        setLoadedModels(prev => ({ ...prev, [id]: true }));
+      };
+
       const safeProducts = products.length > 0 ? products : [];
       return h('div', { className: "fixed inset-0 z-0 pointer-events-none overflow-hidden bg-obsessed-black transition-colors duration-1000 ease-in-out" },
         safeProducts.length > 0 && h('div', { className: "absolute inset-0 opacity-20 transition-all duration-1000", style: { background: `radial-gradient(circle at 50% 50%, ${safeProducts[activeIndex]?.colorHex || '#1a1a1a'} 0%, transparent 70%)` } }),
         safeProducts.map((product, index) => {
-          const isActive = index === activeIndex; const isPrev = index === activeIndex - 1; const isNext = index === activeIndex + 1;
+          const isActive = index === activeIndex; 
+          const isPrev = index === activeIndex - 1; 
+          const isNext = index === activeIndex + 1;
           let transformStyle = {}; let opacity = 0; let zIndex = 0; let filter = 'none';
-
-          // Positioning logic
+          
           if (isActive) { opacity = 1; zIndex = 10; transformStyle = { transform: `translate(-50%, -50%) scale(1)`, top: '42%', left: '50%' }; }
           else if (isPrev) { opacity = 0.6; zIndex = 5; transformStyle = { transform: `translate(-50%, 0%) scale(0.15)`, top: 'auto', bottom: '2rem', left: '50%' }; filter = 'grayscale(100%)'; }
           else if (isNext) { opacity = 0; zIndex = 1; }
 
+          const isLoaded = loadedModels[product.id];
+          const show3D = is3DMode && isLoaded && isActive;
+          const showLoading = is3DMode && !isLoaded && isActive;
+
           return h('div', { key: product.id, className: `absolute transition-all duration-1000 ease-in-out will-change-transform w-[85vw] h-[50vh] md:w-[60vh] md:h-[80vh] pointer-events-none`, style: { ...transformStyle, opacity: opacity, zIndex: zIndex, filter: filter } },
             h('div', { className: "relative w-full h-full pointer-events-none" },
-              h('div', { className: "absolute inset-0 rounded-full blur-3xl opacity-40 transform scale-75 pointer-events-none", style: { backgroundColor: product.colorHex } }),
-
-              // THE 3D MODEL: Rendered immediately to preload. Opacity controls visibility.
+              h('div', { className: "absolute inset-0 rounded-full blur-3xl opacity-40 transform scale-75 transition-colors pointer-events-none", style: { backgroundColor: product.colorHex } }),
+              
+              // THE 3D MODEL: Always loaded in DOM to force background fetch
               h('model-viewer', {
                 src: product.modelSrc,
                 orientation: product.orientation,
@@ -277,27 +266,30 @@
                 'camera-controls': 'true',
                 'rotation-per-second': '30deg',
                 'interaction-prompt': 'none',
-                className: `absolute inset-0 w-full h-full transition-opacity duration-700 ${is3DMode ? 'opacity-100 z-20 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'} ${isActive ? 'active' : ''}`,
+                loading: isActive ? "eager" : "lazy",
+                onLoad: () => handleModelLoad(product.id),
+                className: `absolute inset-0 w-full h-full transition-opacity duration-700 ${show3D ? 'opacity-100 z-20 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'} ${isActive && !isSidebarActive ? 'active' : ''}`,
                 style: { backgroundColor: 'transparent' }
-              },
-                // THE NEW CUSTOM HTML LOADING BAR
-                h('div', { slot: "progress-bar", className: "absolute bottom-[15%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none" },
-                  h('span', { className: "font-sans text-[7px] tracking-[0.3em] text-obsessed-gold uppercase animate-pulse" }, "Materializing 3D..."),
-                  h('div', { className: "w-24 h-[1px] bg-gray-800 overflow-hidden relative" },
-                    h('div', { className: "absolute top-0 left-0 h-full w-1/2 bg-obsessed-gold animate-[loadingBar_1.5s_ease-in-out_infinite]" })
-                  )
-                )
-              ),
-
-              // THE 2D IMAGE: Fades out smoothly when 3D is toggled on.
+              }),
+              
+              // THE 2D IMAGE: Crossfades out when 3D is fully materialized
               h('img', {
                 src: product.imageUrl,
                 alt: product.name,
-                className: `absolute inset-0 w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-all duration-700 ${is3DMode ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-none'}`,
+                className: `absolute inset-0 w-full h-full object-cover rounded-t-full rounded-b-lg shadow-2xl transition-opacity duration-700 pointer-events-none ${show3D ? 'opacity-0' : 'opacity-100'}`,
                 style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' }
               }),
 
-              h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500 ${is3DMode ? 'opacity-0' : 'opacity-100'}` }, h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0]))
+              // THE LOADING BAR: Appears only when user clicks 3D but model is still fetching
+              h('div', { className: `absolute bottom-[10%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-opacity duration-300 z-30 pointer-events-none ${showLoading ? 'opacity-100' : 'opacity-0'}` },
+                h('span', { className: "font-sans text-[9px] tracking-[0.3em] text-obsessed-gold uppercase font-bold drop-shadow-md animate-pulse" }, "Materializing 3D..."),
+                h('div', { className: "w-32 h-[2px] bg-gray-800/80 overflow-hidden relative rounded-full" },
+                  h('div', { className: "absolute top-0 left-0 h-full w-1/2 bg-obsessed-gold animate-loading-bar" })
+                )
+              ),
+
+              // Title overlay
+              !show3D && h('div', { className: `absolute bottom-10 w-full text-center pointer-events-none transition-opacity duration-500` }, h('h3', { className: "font-display text-obsessed-gold text-2xl tracking-[0.2em] opacity-80 mix-blend-overlay" }, product.name.split(' ')[0]))
             )
           );
         }),
@@ -333,7 +325,7 @@
               e.preventDefault();
               if (link.type === 'scroll') { window.scrollTo({ top: 0, behavior: 'smooth' }); onClose(); }
               else if (link.type === 'story') { onOpenStory(); onClose(); }
-              else if (link.type === 'wheel') { onOpenWheel(); onClose(); }
+              else if (link.type === 'wheel') { onOpenWheel(); onClose(); } 
               else if (link.type === 'whatsapp') { window.open(`https://wa.me/917814930720?text=${encodeURIComponent(link.message)}`, '_blank'); }
             },
             className: `font-display text-2xl md:text-3xl hover:text-obsessed-gold transition-colors tracking-widest uppercase opacity-80 hover:opacity-100 ${link.type === 'wheel' ? 'text-obsessed-gold' : 'text-white'}`
@@ -886,7 +878,7 @@
         h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours..."))),
 
         // SIDEBARS
-        h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => document.getElementById('our-story')?.scrollIntoView({ behavior: 'smooth' }), onOpenWheel: handleOpenWheel }),
+        h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true), onOpenWheel: handleOpenWheel }),
         h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
         h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout, appliedPromo: appliedPromo }),
 
@@ -897,6 +889,7 @@
 
         // MAIN VISUALS & SCROLLING CONTENT
         h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive || isCheckoutActive }),
+        
         h('main', { className: "relative z-10 w-full pt-[10vh] md:pt-[20vh] pb-[20vh]", style: { pointerEvents: 'none' } },
           displayedProducts.map((product, index) => (
             h('section', { key: product.id, ref: (el) => { observerRefs.current[index] = el; }, 'data-index': index, className: `min-h-screen flex items-end md:items-center justify-center ${(isSidebarActive || isCheckoutActive) ? 'md:justify-start md:pl-20' : 'md:justify-end md:px-20'} lg:px-32 pb-24 md:pb-0 relative`, style: { marginBottom: '10vh', transition: 'padding-left 0.5s ease-out, justify-content 0.5s ease-out' } },
@@ -907,7 +900,6 @@
 
                 h('p', { className: "font-serif italic text-lg md:text-xl text-obsessed-gold mb-6 md:mb-8 opacity-90 mt-2" }, `"${product.tagline}"`),
                 h('div', { className: "h-px w-16 md:w-20 bg-obsessed-gold mb-6 md:mb-8" }),
-
                 h('p', { className: "font-sans font-light text-xs md:text-sm leading-6 md:leading-8 tracking-wide text-gray-300 mb-8 md:mb-10 whitespace-pre-line" }, product.narrative),
 
                 h('div', { className: "flex flex-col w-full" },
@@ -918,12 +910,6 @@
                       h('span', { className: "text-xs md:text-sm font-bold uppercase tracking-[0.2em]" }, "Buy Now with UPI / COD")
                     ),
                     h('button', { onClick: () => handleAddToCart(product), className: "w-full py-3 bg-transparent border border-obsessed-gold text-obsessed-gold font-sans font-bold uppercase tracking-[0.2em] hover:bg-obsessed-gold hover:text-black transition-colors rounded-sm text-[10px] shadow-[0_0_10px_rgba(212,175,55,0.1)]" }, "Add to Cart")
-                  ),
-
-                  h('div', { className: "flex justify-center items-center gap-3 mt-4 mb-2 opacity-70" },
-                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "EXTRAIT DE PARFUM"),
-                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "24HR+ LONGEVITY"),
-                    h('span', { className: "flex items-center gap-1 text-[7px] font-sans tracking-widest uppercase text-white" }, h(CheckCircle2, { size: 10, className: "text-obsessed-gold" }), "ZERO TOXINS")
                   ),
 
                   h(DeliveryTimeline)
