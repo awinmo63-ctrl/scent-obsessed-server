@@ -10,7 +10,7 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- SUPABASE (FIXED KEY NAMING) ---
+// --- SUPABASE ---
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 
 if (!process.env.SUPABASE_URL || !supaKey) {
@@ -20,7 +20,7 @@ if (!process.env.SUPABASE_URL || !supaKey) {
 
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
-// --- CASHFREE LIVE CONFIG (PRODUCTION) ---
+// --- CASHFREE LIVE CONFIG ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const CF_URL = "https://api.cashfree.com/pg";
@@ -45,7 +45,108 @@ const verifyAdmin = (req, res, next) => {
 };
 
 // ==========================================
-// --- CASHFREE PAYMENT LOGIC (RAW LIVE API) ---
+// --- SHIPROCKET AUTOMATION LOGIC ---
+// ==========================================
+
+async function pushToShiprocket(orderData) {
+    try {
+        // 1. Authenticate and get Token
+        const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', {
+            email: process.env.SHIPROCKET_EMAIL,
+            password: process.env.SHIPROCKET_PASSWORD
+        });
+        const token = authRes.data.token;
+
+        // 2. Format Address and Split Names 
+        const addr = typeof orderData.shipping_address === 'string' ? JSON.parse(orderData.shipping_address) : (orderData.shipping_address || {});
+
+        const nameParts = (orderData.customer_name || 'Guest').trim().split(' ');
+        const firstName = nameParts[0] || 'Guest';
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Customer';
+
+        // 3. Fix Math
+        let totalItemsPrice = 0;
+        const shiprocketItems = (orderData.cart_items || []).map(item => {
+            const itemPrice = item.isReward ? 0 : parseFloat(String(item.price).replace(/[^\d.-]/g, '')) || 0;
+            totalItemsPrice += (itemPrice * item.qty);
+            return {
+                name: item.name.substring(0, 50),
+                sku: item.id || 'ITEM',
+                units: item.qty || 1,
+                selling_price: itemPrice,
+                discount: 0,
+                tax: 0,
+                hsn: 33030010
+            };
+        });
+
+        const orderDiscount = Math.max(0, totalItemsPrice - orderData.total_amount);
+
+        // Fix Date Format for Shiprocket (YYYY-MM-DD HH:mm)
+        const dateObj = new Date(orderData.created_at || Date.now());
+        const formattedDate = dateObj.toISOString().replace('T', ' ').substring(0, 16);
+
+        // 4. Create the Custom Order Payload
+        const orderPayload = {
+            order_id: orderData.order_id,
+            order_date: formattedDate,
+            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+            billing_customer_name: firstName,
+            billing_last_name: lastName,
+            billing_address: addr.street || 'Address not provided',
+            billing_city: addr.city || 'City not provided',
+            billing_pincode: addr.pincode || '000000',
+            billing_state: addr.state || 'Punjab', // Fallback to avoid empty state rejection
+            billing_country: "India",
+            billing_email: orderData.customer_email || 'info@scentobsessed.in',
+            billing_phone: orderData.customer_phone || '9999999999',
+            shipping_is_billing: true,
+            order_items: shiprocketItems,
+            payment_method: "Prepaid",
+            sub_total: orderData.total_amount,
+            discount: orderDiscount,
+            length: 15,
+            breadth: 15,
+            height: 15,
+            weight: 0.5
+        };
+
+        const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/ad-hoc', orderPayload, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        return orderRes.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+// ==========================================
+// --- DIAGNOSTIC ROUTE (NEW) ---
+// ==========================================
+// This route will force the push to Shiprocket and print the exact error on your screen.
+app.get('/api/admin/force-shiprocket/:orderId', async (req, res) => {
+    try {
+        const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
+        if (!orderData) return res.status(404).json({ error: "Order not found in Supabase" });
+
+        const srData = await pushToShiprocket(orderData);
+
+        // If successful, update tracking to PACKED
+        await supabase.from('orders').update({ tracking_status: 'PACKED' }).eq('order_id', req.params.orderId);
+        res.json({ success: true, message: "Order instantly pushed to Shiprocket!", data: srData });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: "Shiprocket rejected the order",
+            shiprocket_reason: err.response ? err.response.data : err.message
+        });
+    }
+});
+
+
+// ==========================================
+// --- CHECKOUT & PAYMENT Logic ---
 // ==========================================
 
 app.post('/create-order', async (req, res) => {
@@ -54,7 +155,6 @@ app.post('/create-order', async (req, res) => {
         const orderId = 'ORDER_' + Date.now();
         const cleanPhone = customerPhone ? customerPhone.replace(/\D/g, '').slice(-10) : "9999999999";
 
-        // 1. Log Pending Order
         await supabase.from('orders').insert([{
             order_id: orderId, customer_name: customerName, customer_phone: cleanPhone,
             customer_email: customerEmail, shipping_address: shippingAddress,
@@ -62,7 +162,6 @@ app.post('/create-order', async (req, res) => {
             claimed_reward_ml: claimedRewardMl, cart_items: cartItems, tracking_status: 'PREPARING', applied_promo: appliedPromo
         }]);
 
-        // 2. Direct LIVE API Call using Axios
         const response = await axios.post(`${CF_URL}/orders`, {
             order_amount: Number(parseFloat(orderAmount).toFixed(2)),
             order_currency: "INR",
@@ -75,27 +174,16 @@ app.post('/create-order', async (req, res) => {
             },
             order_meta: { return_url: `https://${req.get('host')}/?order_id=${orderId}` }
         }, {
-            headers: {
-                'x-client-id': CF_CLIENT_ID,
-                'x-client-secret': CF_SECRET_KEY,
-                'x-api-version': '2023-08-01',
-                'Content-Type': 'application/json'
-            }
+            headers: { 'x-client-id': CF_CLIENT_ID, 'x-client-secret': CF_SECRET_KEY, 'x-api-version': '2023-08-01', 'Content-Type': 'application/json' }
         });
 
-        const data = response.data;
-
-        if (data.payment_session_id) {
-            console.log(`✅ LIVE Session Created: ${orderId}`);
-            res.json({ payment_session_id: data.payment_session_id, order_id: orderId });
+        if (response.data.payment_session_id) {
+            res.json({ payment_session_id: response.data.payment_session_id, order_id: orderId });
         } else {
-            console.error("❌ Cashfree API Error:", data);
-            res.status(400).json(data);
+            res.status(400).json(response.data);
         }
     } catch (error) {
-        const errorMessage = error.response && error.response.data ? JSON.stringify(error.response.data) : error.message;
-        console.error("❌ Server Error:", errorMessage);
-        res.status(500).json({ error: "Checkout failed", message: errorMessage });
+        res.status(500).json({ error: "Checkout failed", message: error.response?.data || error.message });
     }
 });
 
@@ -117,10 +205,18 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
                 if (orderData.applied_promo) {
                     await supabase.from('promo_codes').update({ is_used: true }).eq('code', orderData.applied_promo);
                 }
+
                 const { data: profile } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                 if (profile) {
                     const newMl = Math.max(0, (profile.loyalty_ml || 0) - (orderData.claimed_reward_ml || 0)) + (orderData.reward_ml || 0);
                     await supabase.from('profiles').update({ loyalty_ml: newMl }).eq('email', orderData.customer_email);
+                }
+
+                try {
+                    await pushToShiprocket(orderData);
+                    await supabase.from('orders').update({ tracking_status: 'PACKED' }).eq('order_id', orderId);
+                } catch (srError) {
+                    console.log("Shiprocket push failed silently. Needs manual review.");
                 }
             }
             return res.json({ status: 'SUCCESS' });
@@ -141,23 +237,13 @@ app.post('/api/admin/login', (req, res) => {
 });
 app.post('/api/admin/logout', (req, res) => { res.clearCookie('admin_token'); res.json({ success: true }); });
 
-// ✅ FIXED: Dashboard stats now strictly filter for real, paid revenue
 app.get('/api/admin/overview-stats', verifyAdmin, async (req, res) => {
     try {
         const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true });
-
-        // Only sum the total_amount if the payment was successful
-        const { data: paidOrders } = await supabase.from('orders')
-            .select('total_amount')
-            .in('payment_status', ['SUCCESS', 'PAID']);
-
-        const totalRealRevenue = paidOrders ? paidOrders.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0) : 0;
-
+        const { data: paidOrders } = await supabase.from('orders').select('total_amount').in('payment_status', ['SUCCESS', 'PAID']);
+        const totalRealRevenue = paidOrders ? paidOrders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0) : 0;
         res.json({ success: true, totalOrders: count || 0, totalRevenue: totalRealRevenue });
-    } catch (err) {
-        console.error("Stats error:", err);
-        res.status(500).json({ success: false });
-    }
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
 app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
