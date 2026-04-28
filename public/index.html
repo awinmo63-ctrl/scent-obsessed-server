@@ -342,10 +342,17 @@
               subtotal += base * item.qty;
               if (promo && promo.type === 'FIXED_PRICE') { finalTotal += promo.pricePerItem * item.qty; } else { finalTotal += base * item.qty; }
           });
-          if (promo && (promo.type === 'PERCENTAGE' || promo.type === 'VIP' || promo.type === 'REF')) {
+          
+          if (promo && promo.type === 'FIXED_TOTAL') {
+              finalTotal = promo.fixedTotal;
+              discountAmount = subtotal - finalTotal;
+          } else if (promo && (promo.type === 'PERCENTAGE' || promo.type === 'VIP' || promo.type === 'REF')) {
               discountAmount = Math.floor(subtotal * ((promo.discount || 0) / 100));
               finalTotal = subtotal - discountAmount;
-          } else if (promo && promo.type === 'FIXED_PRICE') { discountAmount = subtotal - finalTotal; }
+          } else if (promo && promo.type === 'FIXED_PRICE') { 
+              discountAmount = subtotal - finalTotal; 
+          }
+          
           return { subtotal, discountAmount, finalTotal };
       };
 
@@ -540,14 +547,23 @@
               const code = promoInput.trim().toUpperCase();
               if (!code) return;
               
+              // FIXED: Moving TEST5 and overrides ABOVE the database fetch!
+              if (code === 'TEST5') { 
+                  setAppliedPromo({ code: code, type: 'FIXED_TOTAL', fixedTotal: 5 }); 
+                  setPromoInput(''); 
+                  notify("Live Test Mode: Total set to ₹5!"); 
+                  return; 
+              }
               if (code === 'VIP720') { setAppliedPromo({ code: code, type: 'FIXED_PRICE', pricePerItem: 720 }); setPromoInput(''); notify("Vault Unlocked: All items reduced to ₹720!"); return; }
               if (code === 'VIP1499') { setAppliedPromo({ code: code, type: 'FIXED_PRICE', pricePerItem: 1499 }); setPromoInput(''); notify("Vault Unlocked: All items reduced to ₹1,499!"); return; }
               if (code === 'HALF50') { setAppliedPromo({ code: code, type: 'PERCENTAGE', discount: 50 }); setPromoInput(''); notify("Vault Unlocked: 50% Off Applied!"); return; }
               if (code === 'VIP10') { setAppliedPromo({ code: code, type: 'PERCENTAGE', discount: 10 }); setPromoInput(''); notify("Vault Unlocked: 10% Off Applied!"); return; }
 
               const { data, error } = await supabase.from('promo_codes').select('*').eq('code', code).single();
+              
               if (error || !data) { notify("Invalid Code."); return; }
               if (data.is_used) { notify("This Code has already been redeemed."); return; }
+              
               setAppliedPromo({ code: code, type: 'VIP', discount: data.discount_percentage || 10 });
               setPromoInput(''); notify(`Access Granted: ${data.discount_percentage || 10}% Off Applied.`);
           };
@@ -793,19 +809,28 @@
             notify("Referral Accepted: 10% Off Applied to your collection."); setIsOrdersOpen(false); setIsCartOpen(true); 
         };
 
-        // --- HARDCODED TO PRODUCTION MODE ---
         const handleCheckoutPay = async (finalDiscountedTotal) => {
-          if (!user) { notify("Please log in to secure your checkout."); return; }
+          if (!user) { notify("Please log in via the profile menu to secure your checkout."); return; }
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
           const earnedRewardMl = totalPaidItems * 20; 
           const claimedRewardMl = cart.some(item => item.isReward) ? 100 : 0; 
+          const totalMoney = finalDiscountedTotal; 
+
           const addressString = JSON.stringify({ street: formData.street, city: formData.city, state: formData.state, pincode: formData.pincode });
+          await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: addressString }).eq('email', formData.email);
           
+          if (totalMoney === 0) {
+             const fakeOrderId = 'FREE_' + Date.now();
+             await supabase.from('orders').insert([{ order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email, shipping_address: addressString, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromo ? appliedPromo.code : '' }]);
+             await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
+             window.location.href = `/?order_id=${fakeOrderId}`; return;
+          }
+
           try {
             const response = await fetch('/create-order', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                orderAmount: finalDiscountedTotal, customerName: formData.name, 
+                orderAmount: totalMoney, customerName: formData.name, 
                 customerPhone: formData.phone, customerEmail: formData.email, 
                 shippingAddress: addressString, rewardMl: earnedRewardMl, 
                 claimedRewardMl: claimedRewardMl, cartItems: cart, 
@@ -815,11 +840,11 @@
 
             const data = await response.json();
             if (data.payment_session_id) {
-               // ✅ STRICTLY PRODUCTION MODE
+               // ✅ Cashfree LIVE Production Mode
                const cashfree = Cashfree({ mode: "production" }); 
                cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify(data.message || "Checkout Error"); }
-          } catch (err) { notify("Connection Error"); }
+          } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
         };
 
         const displayedProducts = useMemo(() => {

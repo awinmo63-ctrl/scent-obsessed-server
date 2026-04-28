@@ -64,7 +64,8 @@ app.post('/create-order', async (req, res) => {
 
         // 2. Direct LIVE API Call using Axios
         const response = await axios.post(`${CF_URL}/orders`, {
-            order_amount: parseFloat(orderAmount).toFixed(2),
+            // FIXED: Forced this to be a pure Number instead of a String
+            order_amount: Number(parseFloat(orderAmount).toFixed(2)),
             order_currency: "INR",
             order_id: orderId,
             customer_details: {
@@ -93,8 +94,10 @@ app.post('/create-order', async (req, res) => {
             res.status(400).json(data);
         }
     } catch (error) {
-        console.error("❌ Server Error:", error.response ? error.response.data : error.message);
-        res.status(500).json({ error: "Checkout failed" });
+        // FIXED: Extract exact Cashfree error message to send back to the frontend
+        const errorMessage = error.response && error.response.data ? JSON.stringify(error.response.data) : error.message;
+        console.error("❌ Server Error:", errorMessage);
+        res.status(500).json({ error: "Checkout failed", message: errorMessage });
     }
 });
 
