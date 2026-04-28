@@ -95,13 +95,13 @@ async function pushToShiprocket(orderData) {
 }
 
 // ==========================================
-// --- ONE-CLICK DISPATCH API (NEW) ---
+// --- ONE-CLICK DISPATCH API (UPGRADED ERROR HANDLING) ---
 // ==========================================
 
 app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
     try {
         const { data: order } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
-        if (!order) return res.status(404).json({ error: "Order not found" });
+        if (!order) return res.status(404).json({ error: "Order not found in database" });
 
         // 1. Authenticate Shiprocket
         const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', { email: process.env.SHIPROCKET_EMAIL, password: process.env.SHIPROCKET_PASSWORD });
@@ -116,7 +116,7 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
             if (searchRes.data && searchRes.data.data && searchRes.data.data.length > 0) {
                 shipmentId = searchRes.data.data[0].shipments[0]?.id || searchRes.data.data[0].shipment_id;
             } else {
-                return res.status(400).json({ error: "Order not found in Shiprocket" });
+                return res.status(400).json({ error: "Order not found in Shiprocket.", details: "Make sure the order was pushed successfully first." });
             }
         }
 
@@ -124,26 +124,35 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
 
         // 2. Auto-Assign Courier
         if (!awbCode) {
-            const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', { shipment_id: shipmentId }, { headers });
-            if (awbRes.data.awb_assign_status === 1) {
-                awbCode = awbRes.data.response.data.awb_code;
-            } else {
-                return res.status(400).json({ error: "Shiprocket Auto-Assign Failed. Check wallet balance." });
+            try {
+                const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', { shipment_id: shipmentId }, { headers });
+                if (awbRes.data.awb_assign_status === 1) {
+                    awbCode = awbRes.data.response.data.awb_code;
+                } else {
+                    return res.status(400).json({ error: "AWB Auto-Assign Failed", details: awbRes.data });
+                }
+            } catch (awbErr) {
+                return res.status(400).json({ error: "Courier Assignment Rejected", details: awbErr.response?.data?.message || awbErr.response?.data || awbErr.message });
             }
         }
 
         // 3. Generate Label PDF
-        const labelRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/generate/label', { shipment_id: [shipmentId] }, { headers });
-        const labelUrl = labelRes.data.label_created === 1 ? labelRes.data.label_url : null;
-        if (!labelUrl) return res.status(400).json({ error: "Shiprocket generated AWB, but label is still rendering." });
+        try {
+            const labelRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/generate/label', { shipment_id: [shipmentId] }, { headers });
+            const labelUrl = labelRes.data.label_created === 1 ? labelRes.data.label_url : null;
 
-        // 4. Update Database
-        await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: awbCode, label_url: labelUrl, shiprocket_shipment_id: shipmentId }).eq('order_id', req.params.orderId);
-        res.json({ success: true, label_url: labelUrl, awb_code: awbCode });
+            if (!labelUrl) return res.status(400).json({ error: "AWB Generated, but label is still rendering.", details: "Try clicking the button again in 60 seconds." });
+
+            // 4. Update Database
+            await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: awbCode, label_url: labelUrl, shiprocket_shipment_id: shipmentId }).eq('order_id', req.params.orderId);
+            res.json({ success: true, label_url: labelUrl, awb_code: awbCode });
+        } catch (labelErr) {
+            return res.status(400).json({ error: "Label PDF Error", details: labelErr.response?.data?.message || labelErr.message });
+        }
 
     } catch (error) {
         console.error(error.response?.data || error.message);
-        res.status(500).json({ error: "Label Generation Failed", details: error.response?.data || error.message });
+        res.status(500).json({ error: "Server/Authentication Error", details: error.response?.data || error.message });
     }
 });
 

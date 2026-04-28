@@ -556,7 +556,7 @@
         async function loadOrdersSilently() { try { const res = await fetch('/api/admin/orders'); const data = await res.json(); if (data.success) globalOrders = data.orders; } catch (e) { } }
         async function loadCustomersSilently() { try { const res = await fetch('/api/admin/customers'); const data = await res.json(); if (data.success) globalCustomers = data.customers; } catch (e) { } }
 
-        // --- THE MAGIC ONE-CLICK DISPATCH FUNCTION ---
+        // --- THE MAGIC ONE-CLICK DISPATCH FUNCTION (UPGRADED ERROR DISPLAY) ---
         async function autoShipOrder(orderId, btnId) {
             const btn = document.getElementById(btnId);
             btn.innerText = "Processing Label...";
@@ -568,16 +568,18 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    window.open(data.label_url, '_blank'); // Opens PDF immediately
-                    loadOrders(); // Refresh dashboard silently
+                    window.open(data.label_url, '_blank');
+                    loadOrders();
                 } else {
-                    alert(`Shiprocket Error: ${data.error}`);
+                    // Extract exactly what Shiprocket complained about
+                    const detailStr = data.details ? (typeof data.details === 'string' ? data.details : JSON.stringify(data.details, null, 2)) : '';
+                    alert(`Shiprocket Error: ${data.error}\n\nReason: ${detailStr}\n\nCheck your Shiprocket Wallet Balance and Pickup Location verification.`);
                     btn.innerText = "📦 Generate Label & Ship";
                     btn.style.opacity = "1";
                     btn.style.pointerEvents = "auto";
                 }
             } catch (error) {
-                alert("Network error contacting Shiprocket API.");
+                alert("Network error contacting API.");
                 btn.innerText = "📦 Generate Label & Ship";
                 btn.style.opacity = "1";
                 btn.style.pointerEvents = "auto";
@@ -609,7 +611,6 @@
 
                         const statusClass = (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') ? 'success' : 'pending';
 
-                        // Render Shiprocket buttons ONLY for paid orders
                         let actionHtml = '';
                         if (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') {
                             if (order.tracking_status === 'PREPARING' || order.tracking_status === 'PACKED') {
@@ -708,7 +709,7 @@
             } catch (error) { promosContainer.innerHTML = '<span style="color: red;">Failed to load marketing data.</span>'; }
         }
 
-        // Modal Logic (Address, Promo, Customer) kept identical...
+        // Modal Logic
         function openAddressModal(orderId) {
             const order = globalOrders.find(o => o.id === orderId);
             if (!order) return;
