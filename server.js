@@ -10,13 +10,17 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// --- SUPABASE ---
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
 if (!process.env.SUPABASE_URL || !supaKey) {
     console.error("❌ ERROR: Supabase URL or Key is missing!");
     process.exit(1);
 }
+
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
+// --- CASHFREE LIVE CONFIG ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const CF_URL = "https://api.cashfree.com/pg";
@@ -95,7 +99,7 @@ async function pushToShiprocket(orderData) {
 }
 
 // ==========================================
-// --- ONE-CLICK DISPATCH API (UPGRADED ERROR HANDLING) ---
+// --- ONE-CLICK DISPATCH API (WITH SMART COURIER ASSIGNMENT) ---
 // ==========================================
 
 app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
@@ -109,6 +113,12 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
         let shipmentId = order.shiprocket_shipment_id;
+        let deliveryPincode = "000000";
+
+        try {
+            const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+            if (addr && addr.pincode) deliveryPincode = addr.pincode;
+        } catch (e) { }
 
         // Fallback: If shipment ID isn't saved, grab it dynamically
         if (!shipmentId) {
@@ -122,14 +132,29 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
 
         let awbCode = order.awb_code;
 
-        // 2. Auto-Assign Courier
+        // 2. Auto-Assign Courier (SMART MODE)
         if (!awbCode) {
             try {
-                const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', { shipment_id: shipmentId }, { headers });
+                // Ask Shiprocket who the best courier is for this route
+                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '141002'; // Derived from your screenshot
+                const serviceRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${deliveryPincode}&weight=0.5&cod=0`, { headers });
+
+                let bestCourierId = null;
+                if (serviceRes.data && serviceRes.data.data && serviceRes.data.data.available_courier_companies && serviceRes.data.data.available_courier_companies.length > 0) {
+                    // Grab the top recommended courier ID
+                    bestCourierId = serviceRes.data.data.available_courier_companies[0].courier_company_id;
+                }
+
+                // Force Shiprocket to use the best courier
+                const payload = { shipment_id: shipmentId };
+                if (bestCourierId) payload.courier_id = bestCourierId;
+
+                const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', payload, { headers });
+
                 if (awbRes.data.awb_assign_status === 1) {
                     awbCode = awbRes.data.response.data.awb_code;
                 } else {
-                    return res.status(400).json({ error: "AWB Auto-Assign Failed", details: awbRes.data });
+                    return res.status(400).json({ error: "AWB Assignment Failed", details: awbRes.data });
                 }
             } catch (awbErr) {
                 return res.status(400).json({ error: "Courier Assignment Rejected", details: awbErr.response?.data?.message || awbErr.response?.data || awbErr.message });
