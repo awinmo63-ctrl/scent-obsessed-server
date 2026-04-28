@@ -793,39 +793,33 @@
             notify("Referral Accepted: 10% Off Applied to your collection."); setIsOrdersOpen(false); setIsCartOpen(true); 
         };
 
+        // --- HARDCODED TO PRODUCTION MODE ---
         const handleCheckoutPay = async (finalDiscountedTotal) => {
-          const appliedPromoCode = appliedPromo ? appliedPromo.code : '';
-          if (!user) { notify("Please log in via the profile menu to secure your checkout."); return; }
-          
+          if (!user) { notify("Please log in to secure your checkout."); return; }
           const totalPaidItems = cart.filter(item => !item.isReward).reduce((sum, item) => sum + item.qty, 0);
-          const hasReward = cart.some(item => item.isReward);
           const earnedRewardMl = totalPaidItems * 20; 
-          const claimedRewardMl = hasReward ? 100 : 0; 
-          const totalMoney = finalDiscountedTotal; 
-
+          const claimedRewardMl = cart.some(item => item.isReward) ? 100 : 0; 
           const addressString = JSON.stringify({ street: formData.street, city: formData.city, state: formData.state, pincode: formData.pincode });
-          await supabase.from('profiles').update({ full_name: formData.name, phone: formData.phone, shipping_address: addressString }).eq('email', formData.email);
           
-          if (totalMoney === 0) {
-             const fakeOrderId = 'FREE_' + Date.now();
-             await supabase.from('orders').insert([{ order_id: fakeOrderId, customer_name: formData.name, customer_phone: formData.phone, customer_email: formData.email, shipping_address: addressString, total_amount: 0, payment_status: 'PAID', reward_ml: earnedRewardMl, claimed_reward_ml: claimedRewardMl, cart_items: cart, tracking_status: 'PREPARING', applied_promo: appliedPromoCode }]);
-             await supabase.from('profiles').update({ loyalty_ml: Math.max(0, loyaltyMl - 100) }).eq('email', formData.email);
-             window.location.href = `/?order_id=${fakeOrderId}`; return;
-          }
-
           try {
             const response = await fetch('/create-order', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderAmount: totalMoney, customerName: formData.name, customerPhone: formData.phone, customerEmail: formData.email, shippingAddress: addressString, rewardMl: earnedRewardMl, claimedRewardMl: claimedRewardMl, cartItems: cart, appliedPromo: appliedPromoCode })
+              body: JSON.stringify({ 
+                orderAmount: finalDiscountedTotal, customerName: formData.name, 
+                customerPhone: formData.phone, customerEmail: formData.email, 
+                shippingAddress: addressString, rewardMl: earnedRewardMl, 
+                claimedRewardMl: claimedRewardMl, cartItems: cart, 
+                appliedPromo: appliedPromo ? appliedPromo.code : '' 
+              })
             });
 
             const data = await response.json();
             if (data.payment_session_id) {
-               // --- CHANGED TO SANDBOX FOR TESTING ---
-               const cashfree = Cashfree({ mode: "sandbox" }); 
+               // ✅ STRICTLY PRODUCTION MODE
+               const cashfree = Cashfree({ mode: "production" }); 
                cashfree.checkout({ paymentSessionId: data.payment_session_id });
-            } else { notify("Error starting checkout. Please check your backend."); }
-          } catch (err) { console.error("Checkout Error:", err); notify("Cannot connect to the payment server."); }
+            } else { notify(data.message || "Checkout Error"); }
+          } catch (err) { notify("Connection Error"); }
         };
 
         const displayedProducts = useMemo(() => {
