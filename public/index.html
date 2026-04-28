@@ -88,7 +88,12 @@
       ];
 
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
-      const formatPrice = (amount) => "₹ " + amount.toLocaleString('en-IN');
+      
+      // ✅ BULLETPROOF FORMATTER: Never crashes even if the database has a null value
+      const formatPrice = (amount) => {
+          const safeAmount = Number(amount) || 0;
+          return "₹ " + safeAmount.toLocaleString('en-IN');
+      };
 
       const AnnouncementBar = () => {
         const announcementText = "✦ WELCOME TO SCENT OBSESSED ✦ EXPERIENCE TRUE EXTRAIT DE PARFUM ✦ COMPLIMENTARY SECURE SHIPPING ON ALL DOSSIERS ✦ SPIN TO UNLOCK EXCLUSIVE VAULT ACCESS ✦ ";
@@ -539,7 +544,6 @@
 
           if (!isOpen) return null;
 
-          // FIXED: We now use the global math calculation instead of duplicating it, preventing the NaN error!
           const { subtotal, discountAmount, finalTotal } = calculateCartTotals(cart, appliedPromo);
 
           const handleApplyPromo = async () => {
