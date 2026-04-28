@@ -5,13 +5,20 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios'); // <-- Bulletproof network client
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- SUPABASE ---
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+// --- SUPABASE (FIXED KEY NAMING) ---
+const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
+if (!process.env.SUPABASE_URL || !supaKey) {
+    console.error("❌ ERROR: Supabase URL or Key is missing in Render!");
+    process.exit(1);
+}
+
+const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
 // --- CASHFREE LIVE CONFIG (PRODUCTION) ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
@@ -169,4 +176,4 @@ app.put('/api/admin/orders/:id/address', verifyAdmin, async (req, res) => {
     res.json({ success: true });
 });
 app.get('/admin', verifyAdmin, (req, res) => { res.sendFile(path.join(__dirname, 'private-views', 'admin.html')); });
-app.listen(PORT, () => { console.log(`✅ Scent Obsessed Fortress online at http://localhost:${PORT}`); });
+app.listen(PORT, () => { console.log(`✅ Scent Obsessed Fortress online at port ${PORT}`); });
