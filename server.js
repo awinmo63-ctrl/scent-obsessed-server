@@ -64,7 +64,6 @@ app.post('/create-order', async (req, res) => {
 
         // 2. Direct LIVE API Call using Axios
         const response = await axios.post(`${CF_URL}/orders`, {
-            // FIXED: Forced this to be a pure Number instead of a String
             order_amount: Number(parseFloat(orderAmount).toFixed(2)),
             order_currency: "INR",
             order_id: orderId,
@@ -74,7 +73,8 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail,
                 customer_phone: cleanPhone
             },
-            order_meta: { return_url: `${req.protocol}://${req.get('host')}/?order_id=${orderId}` }
+            // FIXED: Forced HTTPS to beat Render's proxy HTTP glitch
+            order_meta: { return_url: `https://${req.get('host')}/?order_id=${orderId}` }
         }, {
             headers: {
                 'x-client-id': CF_CLIENT_ID,
@@ -94,7 +94,6 @@ app.post('/create-order', async (req, res) => {
             res.status(400).json(data);
         }
     } catch (error) {
-        // FIXED: Extract exact Cashfree error message to send back to the frontend
         const errorMessage = error.response && error.response.data ? JSON.stringify(error.response.data) : error.message;
         console.error("❌ Server Error:", errorMessage);
         res.status(500).json({ error: "Checkout failed", message: errorMessage });

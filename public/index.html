@@ -539,15 +539,13 @@
 
           if (!isOpen) return null;
 
-          const subtotal = cart.reduce((sum, item) => sum + (item.isReward ? 0 : parsePrice(item.price) * item.qty), 0);
-          const discountAmount = appliedPromo ? Math.floor(subtotal * (appliedPromo.discount / 100)) : 0;
-          const finalTotal = subtotal - discountAmount;
+          // FIXED: We now use the global math calculation instead of duplicating it, preventing the NaN error!
+          const { subtotal, discountAmount, finalTotal } = calculateCartTotals(cart, appliedPromo);
 
           const handleApplyPromo = async () => {
               const code = promoInput.trim().toUpperCase();
               if (!code) return;
               
-              // FIXED: Moving TEST5 and overrides ABOVE the database fetch!
               if (code === 'TEST5') { 
                   setAppliedPromo({ code: code, type: 'FIXED_TOTAL', fixedTotal: 5 }); 
                   setPromoInput(''); 
@@ -840,7 +838,6 @@
 
             const data = await response.json();
             if (data.payment_session_id) {
-               // ✅ Cashfree LIVE Production Mode
                const cashfree = Cashfree({ mode: "production" }); 
                cashfree.checkout({ paymentSessionId: data.payment_session_id });
             } else { notify(data.message || "Checkout Error"); }
