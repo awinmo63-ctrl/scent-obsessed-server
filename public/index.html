@@ -195,7 +195,6 @@
         );
       };
 
-      // 1. SAFEMODELVIEWER: Dedicated component to prevent React from swallowing the 'load' event
       const SafeModelViewer = ({ product, isActive, show3D, isSidebarActive, onModelLoaded }) => {
           const viewerRef = useRef(null);
 
@@ -207,10 +206,8 @@
                   onModelLoaded(product.id);
               };
               
-              // Listen natively to the DOM event, bypassing React's synthetic event wrapper
               viewer.addEventListener('load', handleLoad);
               
-              // Fallback: If it loaded from cache instantly before listener attached
               if (viewer.modelIsVisible) {
                   handleLoad();
               }
@@ -228,17 +225,15 @@
               'camera-controls': 'true',
               'rotation-per-second': '30deg',
               'interaction-prompt': 'none',
-              loading: "eager", // Forces the browser to start fetching instantly
+              loading: "eager", 
               className: `absolute inset-0 w-full h-full transition-opacity duration-700 ${show3D ? 'opacity-100 z-20 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'} ${isActive && !isSidebarActive ? 'active' : ''}`,
               style: { backgroundColor: 'transparent' }
           });
       };
 
-      // 2. VISUALSLAYER: Manages the crossfade between the fast 2D image and the heavy 3D model
       const VisualsLayer = ({ products, activeIndex, is3DMode, isSidebarActive }) => {
         const [loadedModels, setLoadedModels] = useState({});
 
-        // Stable reference to prevent infinite unmount loops
         const handleModelLoaded = React.useCallback((id) => {
             setLoadedModels(prev => ({ ...prev, [id]: true }));
         }, []);
@@ -270,7 +265,6 @@
                     onModelLoaded: handleModelLoaded 
                 }),
                 
-                // 2D Image Crossfader
                 h('img', { 
                     src: product.imageUrl, 
                     alt: product.name, 
@@ -278,7 +272,6 @@
                     style: { boxShadow: `0 25px 50px -12px ${product.colorHex}40`, border: '1px solid rgba(255,255,255,0.1)' } 
                 }),
                 
-                // Pulsing Loading Bar Layer
                 h('div', { className: `absolute bottom-[10%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-opacity duration-300 z-30 pointer-events-none ${showLoading ? 'opacity-100' : 'opacity-0'}` },
                     h('span', { className: "font-sans text-[9px] tracking-[0.3em] text-obsessed-gold uppercase font-bold drop-shadow-md animate-pulse" }, "Materializing 3D..."),
                     h('div', { className: "w-32 h-[2px] bg-gray-800/80 overflow-hidden relative rounded-full" },
@@ -431,11 +424,7 @@
           if (phone.length < 10) { notify("Please enter a valid 10-digit mobile number to spin."); return; }
           setStep(1);
           
-          try {
-              const { error } = await supabase.from('wheel_leads').insert([{ phone: phone }]);
-              if (error) console.error("Database connection error for lead:", error);
-          } catch (err) { console.error("Network error saving lead:", err); }
-
+          // 1. CALCULATE THE PRIZE FIRST
           const rand = Math.floor(Math.random() * 100) + 1;
           let targetOffset = 0; let prizeData = null;
 
@@ -444,6 +433,16 @@
           else if (rand <= 99) { targetOffset = 135; prizeData = { text: "Item @ ₹720", desc: "Steal Deal! Use code VIP720", code: "VIP720" }; } 
           else { targetOffset = 45; prizeData = { text: "Better Luck Next Time", desc: "No prize this time, but the vault is still open.", code: null }; }
 
+          // 2. NOW SEND BOTH PHONE AND PRIZE TO SUPABASE
+          try {
+              const { error } = await supabase.from('wheel_leads').insert([{ 
+                  phone: phone, 
+                  prize_won: prizeData.text 
+              }]);
+              if (error) console.error("Database connection error for lead:", error);
+          } catch (err) { console.error("Network error saving lead:", err); }
+
+          // 3. SPIN THE VISUAL WHEEL
           setRotation(1800 + targetOffset);
           setTimeout(() => { setResult(prizeData); }, 4000); 
         };
