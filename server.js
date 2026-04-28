@@ -5,9 +5,10 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
+const axios = require('axios'); // <-- Bulletproof network client
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // --- SUPABASE ---
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -46,6 +47,7 @@ app.post('/create-order', async (req, res) => {
         const orderId = 'ORDER_' + Date.now();
         const cleanPhone = customerPhone ? customerPhone.replace(/\D/g, '').slice(-10) : "9999999999";
 
+        // 1. Log Pending Order
         await supabase.from('orders').insert([{
             order_id: orderId, customer_name: customerName, customer_phone: cleanPhone,
             customer_email: customerEmail, shipping_address: shippingAddress,
@@ -53,39 +55,38 @@ app.post('/create-order', async (req, res) => {
             claimed_reward_ml: claimedRewardMl, cart_items: cartItems, tracking_status: 'PREPARING', applied_promo: appliedPromo
         }]);
 
-        const response = await fetch(`${CF_URL}/orders`, {
-            method: 'POST',
+        // 2. Direct LIVE API Call using Axios
+        const response = await axios.post(`${CF_URL}/orders`, {
+            order_amount: parseFloat(orderAmount).toFixed(2),
+            order_currency: "INR",
+            order_id: orderId,
+            customer_details: {
+                customer_id: customerEmail.replace(/[^a-zA-Z0-9_-]/g, '') || "GUEST",
+                customer_name: customerName || "Guest",
+                customer_email: customerEmail,
+                customer_phone: cleanPhone
+            },
+            order_meta: { return_url: `${req.protocol}://${req.get('host')}/?order_id=${orderId}` }
+        }, {
             headers: {
                 'x-client-id': CF_CLIENT_ID,
                 'x-client-secret': CF_SECRET_KEY,
                 'x-api-version': '2023-08-01',
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                order_amount: parseFloat(orderAmount).toFixed(2),
-                order_currency: "INR",
-                order_id: orderId,
-                customer_details: {
-                    customer_id: customerEmail.replace(/[^a-zA-Z0-9_-]/g, '') || "GUEST",
-                    customer_name: customerName || "Guest",
-                    customer_email: customerEmail,
-                    customer_phone: cleanPhone
-                },
-                order_meta: { return_url: `${req.protocol}://${req.get('host')}/?order_id=${orderId}` }
-            })
+            }
         });
 
-        const data = await response.json();
+        const data = response.data;
 
         if (data.payment_session_id) {
             console.log(`✅ LIVE Session Created: ${orderId}`);
             res.json({ payment_session_id: data.payment_session_id, order_id: orderId });
         } else {
-            console.error("❌ Cashfree LIVE API Error:", data);
+            console.error("❌ Cashfree API Error:", data);
             res.status(400).json(data);
         }
     } catch (error) {
-        console.error("❌ Server Error:", error.message);
+        console.error("❌ Server Error:", error.response ? error.response.data : error.message);
         res.status(500).json({ error: "Checkout failed" });
     }
 });
@@ -93,10 +94,11 @@ app.post('/create-order', async (req, res) => {
 app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
-        const response = await fetch(`${CF_URL}/orders/${orderId}/payments`, {
+        const response = await axios.get(`${CF_URL}/orders/${orderId}/payments`, {
             headers: { 'x-client-id': CF_CLIENT_ID, 'x-client-secret': CF_SECRET_KEY, 'x-api-version': '2023-08-01' }
         });
-        const payments = await response.json();
+
+        const payments = response.data || [];
         const isPaid = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
 
         if (isPaid) {
@@ -104,12 +106,9 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
             const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
 
             if (orderData) {
-                // Burn the single-use promo code
                 if (orderData.applied_promo) {
                     await supabase.from('promo_codes').update({ is_used: true }).eq('code', orderData.applied_promo);
                 }
-
-                // Update Loyalty ML
                 const { data: profile } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                 if (profile) {
                     const newMl = Math.max(0, (profile.loyalty_ml || 0) - (orderData.claimed_reward_ml || 0)) + (orderData.reward_ml || 0);
