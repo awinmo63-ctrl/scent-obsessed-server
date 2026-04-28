@@ -88,12 +88,7 @@
       ];
 
       const parsePrice = (priceStr) => parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
-      
-      // ✅ BULLETPROOF FORMATTER: Never crashes even if the database has a null value
-      const formatPrice = (amount) => {
-          const safeAmount = Number(amount) || 0;
-          return "₹ " + safeAmount.toLocaleString('en-IN');
-      };
+      const formatPrice = (amount) => { const safeAmount = Number(amount) || 0; return "₹ " + safeAmount.toLocaleString('en-IN'); };
 
       const AnnouncementBar = () => {
         const announcementText = "✦ WELCOME TO SCENT OBSESSED ✦ EXPERIENCE TRUE EXTRAIT DE PARFUM ✦ COMPLIMENTARY SECURE SHIPPING ON ALL DOSSIERS ✦ SPIN TO UNLOCK EXCLUSIVE VAULT ACCESS ✦ ";
@@ -333,8 +328,10 @@
       const LegalModal = ({ isOpen, onClose, title, children }) => {
         if (!isOpen) return null;
         return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" },
-          h('div', { className: "relative w-full max-w-2xl max-h-[80vh] bg-[#111] border border-obsessed-gold/30 p-8 md:p-12 overflow-y-auto shadow-2xl" },
-            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })), h('h2', { className: "font-display text-xl md:text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title), h('div', { className: "font-sans text-xs text-gray-300 leading-loose space-y-6" }, children)
+          h('div', { className: "relative w-full max-w-3xl max-h-[80vh] bg-[#111] border border-obsessed-gold/30 p-8 md:p-12 overflow-y-auto shadow-2xl" },
+            h('button', { onClick: onClose, className: "absolute top-6 right-6 text-gray-500 hover:text-obsessed-gold transition-colors" }, h(X, { size: 24 })), 
+            h('h2', { className: "font-display text-xl md:text-2xl text-obsessed-gold tracking-widest uppercase mb-8" }, title), 
+            h('div', { className: "font-sans text-xs text-gray-300 leading-relaxed" }, children)
           )
         );
       };
@@ -885,14 +882,172 @@
           h(RewardModal, { isOpen: isRewardModalOpen, onClose: () => setIsRewardModalOpen(false), onSelect: handleRewardSelection }),
           h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
           h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
-          h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" }, h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })), h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."), h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."), h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")), h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room."), h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.") ) ),
-          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, h('div', null, h('p', null, "Scent Obsessed is committed to protecting your privacy...")) ),
-          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, h('div', null, h('p', null, "By accessing Scent Obsessed, you agree to comply with our terms...")) ),
-          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, h('div', null, h('p', null, "Due to the intimate nature of fragrances, we accept returns only for completely unopened bottles...")) ),
-          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, h('div', null, h('p', null, "All orders are dispatched from our Punjab facility within 24 to 48 hours...")) ),
+          
+          // LEGAL & STORY MODALS (NOW FULLY POPULATED WITH YOUR ORIGINAL DATA)
+          
+          h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" }, 
+            h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" }, 
+              h('div', { className: "w-12 h-12 mb-2 rounded-full border border-obsessed-gold flex items-center justify-center bg-obsessed-gold/10" }, h(Box, { size: 20, className: "text-obsessed-gold" })), 
+              h('h3', { className: "font-display text-xl text-obsessed-gold uppercase tracking-widest" }, "Born from Passion. Crafted for the Obsession."), 
+              h('p', null, "At Scent Obsessed, we believe that a fragrance is more than just a scent—it is a silent language, a lingering memory, and a powerful statement of identity."), 
+              h('p', null, h('strong', { className: "text-white" }, "Founded by Gurbhej Singh Brar"), h('span', null, ", Scent Obsessed was born out of a singular mission: to challenge the world of luxury perfumery by creating high-concentration, long-lasting fragrances that don't just fade into the background.")), 
+              h('p', null, "Based in the heart of Punjab, we combine the boldness of our heritage with the sophistication of modern global trends. We don't believe in \"subtle.\" We believe in trails that turn heads and scents that command the room. From the first spark of Urban Ember to the untamed spirit of Savage Wind, every bottle is a result of meticulous craftsmanship and an uncompromising obsession with quality."), 
+              h('p', { className: "text-obsessed-gold font-serif italic text-lg mt-4" }, "We aren't just selling perfume. We are inviting you to find your signature. To be bold. To be unforgettable. To be Scent Obsessed.") 
+            ) 
+          ),
+          
+          h(LegalModal, { isOpen: isPrivacyOpen, onClose: () => setIsPrivacyOpen(false), title: "Privacy Policy" }, 
+            h('div', { className: "space-y-4" }, 
+              h('p', { className: "text-obsessed-gold italic" }, "Effective Date: February 25, 2026 | Last Updated: February 25, 2026"),
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "1. Introduction"),
+              h('p', null, "Welcome to Scent Obsessed (\"we,\" \"us,\" or \"our\"). We operate the website [www.scentobsessed.com] (the \"Site\"). We are committed to protecting the privacy and security of our customers and site visitors. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our Site, purchase our perfumes, or engage with our brand. By using our Site, you agree to the terms of this Privacy Policy."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "2. Information We Collect"),
+              h('p', null, "We collect information in two main ways: information you provide directly to us and information collected automatically when you use the Site."),
+              h('p', { className: "font-bold text-white mt-2" }, "A. Information You Provide Directly"),
+              h('ul', { className: "list-disc pl-5 space-y-1 text-gray-400" },
+                  h('li', null, "Personal Identifiers: Full name, email address, phone number."),
+                  h('li', null, "Shipping & Billing Information: Physical shipping address and billing address."),
+                  h('li', null, "Payment Information: Credit card numbers or other payment details. Please note: We do not store full credit card numbers on our servers. All transactions are processed through secure third-party payment gateways (such as Snapmint, Shopify Payments, PayPal)."),
+                  h('li', null, "Account Information: Username and password."),
+                  h('li', null, "Preferences: Your fragrance preferences, order history, and wish lists."),
+                  h('li', null, "Communication Data: Any information you send to us via email or contact forms.")
+              ),
+              h('p', { className: "font-bold text-white mt-4" }, "B. Information Collected Automatically (Technical Data)"),
+              h('ul', { className: "list-disc pl-5 space-y-1 text-gray-400" },
+                  h('li', null, "Device Data: IP address, browser type, operating system, device model."),
+                  h('li', null, "Usage Data: Pages viewed, time spent on pages, links clicked, referring website addresses, and browsing history on our Site."),
+                  h('li', null, "Location Data: General geographic location based on your IP address.")
+              ),
+
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "3. How We Use Your Information"),
+              h('p', null, "We use the information we collect for various business purposes, primarily to provide you with the best possible \"Scent Obsessed\" experience. Specifically, we use your data to:"),
+              h('ul', { className: "list-disc pl-5 space-y-1 text-gray-400" },
+                  h('li', null, "Fulfill Orders: Process payments, arrange shipping, and provide order confirmations and updates."),
+                  h('li', null, "Customer Support: Respond to your inquiries, resolve issues, and handle returns or exchanges."),
+                  h('li', null, "Site Improvement: Analyze how users interact with our Site to improve functionality, design, and user experience."),
+                  h('li', null, "Marketing and Communications (with your consent): Send you newsletters, emails about new scent launches, special offers, and other updates. You can opt-out of these at any time."),
+                  h('li', null, "Personalization: Tailor content and product recommendations based on your preferences and browsing history."),
+                  h('li', null, "Security and Fraud Prevention: Detect and prevent fraudulent transactions and protect the security of our Site."),
+                  h('li', null, "Legal Compliance: Comply with applicable laws, regulations, and legal processes.")
+              ),
+
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "4. Sharing Your Information"),
+              h('p', null, "We do not sell, rent, or trade your personal information to third parties for their marketing purposes. We may share your information with trusted third parties solely to operate our business, including Service Providers (payment processing, shipping, hosting), for Legal and Safety Requirements, and Business Transfers."),
+
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "5. Cookies and Tracking Technologies"),
+              h('p', null, "We use cookies, web beacons, and similar tracking technologies to collect information about your browsing activities over time via your browser. It is possible to disable cookies through your device or browser settings, but doing so may affect your ability to use certain features of the Site."),
+
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "6. Data Security"),
+              h('p', null, "We implement reasonable and appropriate administrative, technical, and physical security measures to protect your personal information. Our Site uses Secure Socket Layer (SSL) technology. However, no method of transmission over the internet is 100% secure."),
+
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "7. Contact Us"),
+              h('p', null, "If you have questions or concerns about this Privacy Policy, please contact us at: Scent Obsessed, Awinmo India, Plot No. 10, SBS Nagar, Dhandra road, Ludhiana, Punjab, 141002. Email: info@scentobsessed.com")
+            ) 
+          ),
+
+          h(LegalModal, { isOpen: isTermsOpen, onClose: () => setIsTermsOpen(false), title: "Terms & Conditions" }, 
+            h('div', { className: "space-y-4" }, 
+              h('p', { className: "text-obsessed-gold italic" }, "Last Updated: February 25, 2026"),
+              h('p', { className: "font-bold text-white uppercase tracking-wider" }, "PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY BEFORE USING THIS WEBSITE OR PURCHASING PRODUCTS."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "1. Introduction and Acceptance of Terms"),
+              h('p', null, "Welcome to Scent Obsessed. These Terms and Conditions constitute a legally binding agreement made between you and Scent Obsessed concerning your access to and use of the [www.scentobsessed.com] website. By accessing the Site, creating an account, or purchasing products, you acknowledge that you have read, understood, and agree to be bound by all of these Terms."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "2. Eligibility and Age Restrictions"),
+              h('p', null, "Access to and use of the Site by persons under the age of 18 is prohibited. If we receive reliable information that a purchaser is under 18, we reserve the right to cancel that order."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "3. Products and Fragrance Disclaimers"),
+              h('ul', { className: "list-disc pl-5 space-y-2 text-gray-400" },
+                  h('li', null, h('strong', { className: "text-white" }, "Product Accuracy: "), "We strive to display the colors, images, and descriptions of our products as accurately as possible. However, the packaging of the actual merchandise delivered may differ slightly."),
+                  h('li', null, h('strong', { className: "text-white" }, "Scent Subjectivity Disclaimer: "), "Fragrance descriptions are meant to guide you. Scent is highly subjective and reacts differently with every individual's skin chemistry. We cannot guarantee that it will smell exactly on your skin as described."),
+                  h('li', null, h('strong', { className: "text-white" }, "Allergy and Safety Warning: "), "Perfumes contain chemical and natural ingredients that may cause allergic reactions. It is your responsibility to perform a patch test before full application.")
+              ),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "4. Orders, Pricing, and Payment"),
+              h('p', null, "All prices are shown in INR and are subject to change without notice. We reserve the right at any time after receipt of your order to accept or decline your order for any reason. You give us permission to charge your provided payment method for all fees incurred."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "5. Intellectual Property Rights"),
+              h('p', null, "Unless otherwise indicated, the Site is our proprietary property and all source code, databases, functionality, software, website designs, audio, video, text, photographs, and graphics on the Site are owned or controlled by us."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "6. Limitation of Liability"),
+              h('p', { className: "uppercase text-[10px] leading-relaxed" }, "IN NO CASE SHALL SCENT OBSESSED, OUR DIRECTORS, OFFICERS, EMPLOYEES, AFFILIATES, AGENTS, CONTRACTORS, SUPPLIERS, SERVICE PROVIDERS OR LICENSORS BE LIABLE FOR ANY INJURY, LOSS, CLAIM, OR ANY DIRECT, INDIRECT, INCIDENTAL, PUNITIVE, SPECIAL, OR CONSEQUENTIAL DAMAGES OF ANY KIND ARISING FROM YOUR USE OF ANY OF THE SERVICE OR ANY PRODUCTS PROCURED USING THE SERVICE."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "7. Contact Information"),
+              h('p', null, "Scent Obsessed, Awinmo India, Plot No. 10, SBS Nagar, Dhandra road, Ludhiana, Punjab, 141002. Email: info@scentobsessed.com")
+            ) 
+          ),
+
+          h(LegalModal, { isOpen: isRefundOpen, onClose: () => setIsRefundOpen(false), title: "Refunds & Returns Policy" }, 
+            h('div', { className: "space-y-4" }, 
+              h('p', null, "Thank you for choosing Scent Obsessed. We take immense pride in the quality and craftsmanship of our fragrances. Because our products are personal care items, our return policy is designed to ensure the safety and satisfaction of all our customers."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "1. Returns & Exchanges"),
+              h('ul', { className: "list-disc pl-5 space-y-2 text-gray-400" },
+                  h('li', null, h('strong', { className: "text-white" }, "Unopened Products: "), "We accept returns or exchanges only for products that are in their original, unopened, and sealed packaging within 7 days of delivery."),
+                  h('li', null, h('strong', { className: "text-white" }, "Opened Products: "), "Due to the nature of fragrances and hygiene standards, we cannot accept returns or exchanges for bottles that have been opened, sprayed, or had their cellophane seal removed."),
+                  h('li', null, h('strong', { className: "text-white" }, "Discovery Sets: "), "Discovery or sample sets are final sale and cannot be returned.")
+              ),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "2. Damaged or Wrong Items"),
+              h('p', null, "If you receive a bottle that is broken, leaking, or if you received the wrong fragrance:"),
+              h('ul', { className: "list-disc pl-5 space-y-2 text-gray-400" },
+                  h('li', null, h('strong', { className: "text-white" }, "Mandatory Unboxing Video: "), "To process a claim for damage, we require a continuous unboxing video showing the package being opened for the first time."),
+                  h('li', null, h('strong', { className: "text-white" }, "Timeline: "), "Please report the issue to us at info@scentobsessed.in or via WhatsApp at 78149 30720 within 24 hours of delivery."),
+                  h('li', null, h('strong', { className: "text-white" }, "Resolution: "), "Once verified, we will provide a free replacement or a full refund at no extra cost to you.")
+              ),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "3. Refunds"),
+              h('p', null, "Once your unopened return is received and inspected, we will notify you of the approval or rejection of your refund. If approved, your refund will be processed to your original method of payment within 5–7 business days. For Cash on Delivery orders, refunds will be issued as Store Credit or via bank transfer."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "4. Shipping Costs for Returns"),
+              h('p', null, "If the return is due to a mistake on our part (damaged/wrong item), Scent Obsessed will bear the return shipping costs. For change-of-mind returns (unopened items), the customer is responsible for paying the return shipping fees."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "5. Cancellations"),
+              h('p', null, "You may cancel your order as long as it has not yet been dispatched. Once the order is in the hands of our delivery partner (Shiprocket/Blue Dart), it cannot be cancelled.")
+            ) 
+          ),
+
+          h(LegalModal, { isOpen: isShippingOpen, onClose: () => setIsShippingOpen(false), title: "Shipping Policy" }, 
+            h('div', { className: "space-y-4" }, 
+              h('p', null, "At Scent Obsessed, we are committed to delivering your signature fragrances in the safest and most efficient manner. Each bottle is hand-inspected and securely packaged to ensure it reaches you in pristine condition."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "1. Order Processing & Dispatch"),
+              h('p', null, "All orders are processed and dispatched within 24–48 hours (excluding Sundays and Public Holidays). You will receive an automated email and SMS notification once your order is confirmed and again when it has been handed over to our delivery partners (Shiprocket/Blue Dart/Delhivery)."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "2. Estimated Delivery Timelines"),
+              h('p', null, "Due to safety regulations, perfumes are often transported via Surface Shipping."),
+              h('ul', { className: "list-disc pl-5 space-y-1 text-gray-400" },
+                  h('li', null, "Punjab & North India: 2–4 business days."),
+                  h('li', null, "Metros (Delhi, Mumbai, Bangalore, etc.): 3–6 business days."),
+                  h('li', null, "Rest of India: 5–8 business days."),
+                  h('li', null, "Remote Areas/North East: 7–10 business days.")
+              ),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "3. Shipping Charges"),
+              h('p', null, "A flat shipping fee of ₹99 applies to all orders below ₹499. We are pleased to offer Free Shipping on all orders above ₹499."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "4. Real-Time Tracking"),
+              h('p', null, "Once dispatched, you will receive a unique Tracking ID. You can track your \"Scent Obsessed\" package directly through our website or our courier partner’s tracking portal."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "5. Packaging & Handling"),
+              h('p', null, "Your fragrance is housed in high-quality glass. To prevent damage: every bottle is encased in shock-absorbent padding, packages are sealed with tamper-evident tape, and outer boxes are marked with \"Fragile: Handle with Care\" indicators."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "6. Important: Damaged or Missing Shipments"),
+              h('p', null, "We take full responsibility for your order until it reaches your doorstep. To claim a replacement for a broken or leaking bottle, customers must provide a continuous, unedited unboxing video. Any damage or discrepancy must be reported within 24 hours of delivery via WhatsApp at 78149 30720 or Email at info@scentobsessed.in."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "7. Delivery Attempts & RTO"),
+              h('p', null, "Our courier partners will make up to three attempts to deliver your package. If the delivery is unsuccessful after three attempts, the package will be Returned to Origin (RTO). Re-shipping charges may apply for orders returned due to an incorrect address or unavailability."),
+              
+              h('h3', { className: "text-obsessed-gold font-display mt-4 mb-2 text-sm tracking-widest uppercase" }, "8. Cash on Delivery (COD)"),
+              h('p', null, "COD is available for most PIN codes across India. A nominal COD Handling Fee of ₹49 may be charged at checkout to cover additional processing costs.")
+            ) 
+          ),
 
           // SIDEBARS
-          h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => document.getElementById('our-story')?.scrollIntoView({ behavior: 'smooth' }), onOpenWheel: handleOpenWheel }),
+          // FIXED: The MobileMenu now triggers the modal for Our Story
+          h(MobileMenu, { isOpen: isMenuOpen, onClose: () => setIsMenuOpen(false), onOpenStory: () => setIsStoryOpen(true), onOpenWheel: handleOpenWheel }),
+          
           h(OrdersSidebar, { isOpen: isOrdersOpen, onClose: () => setIsOrdersOpen(false), user: user, loyaltyMl: loyaltyMl, orders: myOrders, onLogout: () => { supabase.auth.signOut(); setIsOrdersOpen(false); setLoyaltyMl(0); }, onTrackOrder: (order) => { setSelectedTrackingOrder(order); setIsTrackingModalOpen(true); }, notify: notify, hasUsedReferral: hasUsedReferral, onApplyReferral: handleApplyReferral }),
           h(CartSidebar, { isOpen: isCartOpen, onClose: handleCloseCart, cart: cart, updateQty: updateQty, proceedToCheckout: proceedToCustomCheckout, appliedPromo: appliedPromo }),
 
