@@ -374,7 +374,7 @@
             <li id="nav-orders" onclick="switchView('orders')">Orders</li>
             <li id="nav-customers" onclick="switchView('customers')">Customers</li>
             <li id="nav-marketing" onclick="switchView('marketing')">Marketing</li>
-            <li>Settings</li>
+            <li id="nav-settings" onclick="switchView('settings')">Settings</li>
         </ul>
     </div>
 
@@ -401,12 +401,20 @@
             </div>
 
             <div id="orders-view" class="hidden">
+                <div class="section-header">
+                    <h3 style="margin: 0;">Recent Orders</h3>
+                    <button class="btn-save" onclick="exportOrdersCSV()">📥 Download Orders to CSV</button>
+                </div>
                 <div id="orders-container">
                     <p class="loading-text">Fetching live orders...</p>
                 </div>
             </div>
 
             <div id="customers-view" class="hidden">
+                <div class="section-header">
+                    <h3 style="margin: 0;">Customer Directory</h3>
+                    <button class="btn-save" onclick="exportCustomersCSV()">📥 Download Customers to CSV</button>
+                </div>
                 <div id="customers-container">
                     <p class="loading-text">Fetching customer profiles...</p>
                 </div>
@@ -424,6 +432,32 @@
                 <h3 class="section-header" style="margin-top: 40px;">Spin-The-Wheel Leads</h3>
                 <div id="leads-container">
                     <p class="loading-text">Fetching wheel leads...</p>
+                </div>
+            </div>
+
+            <div id="settings-view" class="hidden">
+                <div class="section-header">
+                    <h3 style="margin: 0;">System Settings & Backup</h3>
+                </div>
+
+                <div class="order-card">
+                    <h4 style="margin-top: 0;">Database Backup</h4>
+                    <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 15px;">Securely export your Supabase
+                        data directly to your local computer for accounting and backup purposes.</p>
+                    <div style="display: flex; gap: 15px;">
+                        <button class="btn-save" onclick="exportOrdersCSV()">Download All Orders (CSV)</button>
+                        <button class="btn-save" onclick="exportCustomersCSV()">Download All Customers (CSV)</button>
+                    </div>
+                </div>
+
+                <div class="order-card" style="margin-top: 20px;">
+                    <h4 style="margin-top: 0;">Admin Credentials</h4>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;">Change the password used to access this dashboard.</p>
+                    <input type="password" id="new-admin-pass" placeholder="Enter New Password"
+                        style="width: 100%; max-width: 400px; padding: 10px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box;">
+                    <br>
+                    <button class="btn-save" style="margin-top: 15px;" onclick="updatePasswordUI()">Update
+                        Password</button>
                 </div>
             </div>
 
@@ -486,6 +520,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
+            // Pre-load data in background so CSV export is instantly ready
+            loadOrdersSilently();
+            loadCustomersSilently();
         });
 
         // --- NAVIGATION LOGIC ---
@@ -494,11 +531,13 @@
             document.getElementById('orders-view').classList.add('hidden');
             document.getElementById('customers-view').classList.add('hidden');
             document.getElementById('marketing-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
 
             document.getElementById('nav-dashboard').classList.remove('active');
             document.getElementById('nav-orders').classList.remove('active');
             document.getElementById('nav-customers').classList.remove('active');
             document.getElementById('nav-marketing').classList.remove('active');
+            document.getElementById('nav-settings').classList.remove('active');
 
             document.getElementById(`nav-${viewName}`).classList.add('active');
             document.getElementById(`${viewName}-view`).classList.remove('hidden');
@@ -515,7 +554,64 @@
             } else if (viewName === 'marketing') {
                 document.getElementById('page-title').innerText = "Marketing Hub";
                 loadMarketing();
+            } else if (viewName === 'settings') {
+                document.getElementById('page-title').innerText = "System Settings";
             }
+        }
+
+        // --- DATA EXPORT TO CSV LOGIC ---
+        function downloadCSV(csvText, filename) {
+            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportOrdersCSV() {
+            if (globalOrders.length === 0) return alert("No orders available to export. Data is still loading or database is empty.");
+
+            let csvContent = "Database ID,Order ID,Customer Name,Customer Email,Customer Phone,Amount (INR),Payment Status,Tracking Status,Date Created,Applied Promo\n";
+
+            globalOrders.forEach(order => {
+                const dateCreated = new Date(order.created_at).toLocaleDateString('en-GB');
+                // Wrap strings in quotes to avoid commas in names breaking the CSV columns
+                const safeName = `"${order.customer_name || ''}"`;
+                const safeEmail = `"${order.customer_email || ''}"`;
+                const safePromo = `"${order.applied_promo || ''}"`;
+
+                csvContent += `${order.id},${order.order_id},${safeName},${safeEmail},${order.customer_phone || ''},${order.total_amount || 0},${order.payment_status},${order.tracking_status},${dateCreated},${safePromo}\n`;
+            });
+
+            downloadCSV(csvContent, `scent_obsessed_orders_${new Date().toLocaleDateString('en-GB')}.csv`);
+        }
+
+        function exportCustomersCSV() {
+            if (globalCustomers.length === 0) return alert("No customers available to export. Data is still loading or database is empty.");
+
+            let csvContent = "Supabase ID,Full Name,Email Address,Phone Number,Loyalty ML Balance\n";
+
+            globalCustomers.forEach(customer => {
+                const name = customer.full_name || customer.name || '';
+                const safeName = `"${name}"`;
+                const safeEmail = `"${customer.email || ''}"`;
+
+                csvContent += `${customer.id},${safeName},${safeEmail},${customer.phone || ''},${customer.loyalty_ml || 0}\n`;
+            });
+
+            downloadCSV(csvContent, `scent_obsessed_customers_${new Date().toLocaleDateString('en-GB')}.csv`);
+        }
+
+        // Placeholder for future backend hookup
+        function updatePasswordUI() {
+            const newPass = document.getElementById('new-admin-pass').value;
+            if (!newPass) return alert("Please enter a password.");
+            alert("This will require a new route in server.js to update the hash. Contact developer to implement backend link.");
+            document.getElementById('new-admin-pass').value = '';
         }
 
         // --- FETCH LOGIC ---
@@ -529,6 +625,22 @@
                     document.getElementById('stat-revenue').innerHTML = `<div class="stat-number" style="color: #2ecc71;">${formattedRevenue}</div>`;
                 }
             } catch (error) { console.error(error); }
+        }
+
+        async function loadOrdersSilently() {
+            try {
+                const res = await fetch('/api/admin/orders');
+                const data = await res.json();
+                if (data.success) globalOrders = data.orders;
+            } catch (e) { }
+        }
+
+        async function loadCustomersSilently() {
+            try {
+                const res = await fetch('/api/admin/customers');
+                const data = await res.json();
+                if (data.success) globalCustomers = data.customers;
+            } catch (e) { }
         }
 
         async function loadOrders() {
@@ -638,7 +750,6 @@
                             discountVal = p.discount || p.reward || p.discount_amount || 'N/A';
                         }
 
-                        // NEW: Checks the is_used column to render Active vs Inactive
                         const statusBadge = p.is_used
                             ? `<span class="badge inactive">Inactive</span>`
                             : `<span class="badge success">Active</span>`;

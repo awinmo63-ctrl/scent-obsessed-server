@@ -73,7 +73,6 @@ app.post('/create-order', async (req, res) => {
                 customer_email: customerEmail,
                 customer_phone: cleanPhone
             },
-            // FIXED: Forced HTTPS to beat Render's proxy HTTP glitch
             order_meta: { return_url: `https://${req.get('host')}/?order_id=${orderId}` }
         }, {
             headers: {
@@ -141,12 +140,26 @@ app.post('/api/admin/login', (req, res) => {
     res.status(401).json({ error: "Invalid login" });
 });
 app.post('/api/admin/logout', (req, res) => { res.clearCookie('admin_token'); res.json({ success: true }); });
+
+// ✅ FIXED: Dashboard stats now strictly filter for real, paid revenue
 app.get('/api/admin/overview-stats', verifyAdmin, async (req, res) => {
-    const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true });
-    const { data: rev } = await supabase.from('orders').select('total_amount');
-    const total = rev ? rev.reduce((s, o) => s + (Number(o.total_amount) || 0), 0) : 0;
-    res.json({ success: true, totalOrders: count || 0, totalRevenue: total });
+    try {
+        const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+
+        // Only sum the total_amount if the payment was successful
+        const { data: paidOrders } = await supabase.from('orders')
+            .select('total_amount')
+            .in('payment_status', ['SUCCESS', 'PAID']);
+
+        const totalRealRevenue = paidOrders ? paidOrders.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0) : 0;
+
+        res.json({ success: true, totalOrders: count || 0, totalRevenue: totalRealRevenue });
+    } catch (err) {
+        console.error("Stats error:", err);
+        res.status(500).json({ success: false });
+    }
 });
+
 app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     res.json({ success: true, orders: data });
