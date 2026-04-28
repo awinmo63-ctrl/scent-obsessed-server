@@ -7,7 +7,6 @@
     <title>Admin Dashboard - Scent Obsessed</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base Styling */
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -16,7 +15,6 @@
             background-color: #f4f7f6;
         }
 
-        /* Sidebar Styling */
         .sidebar {
             width: 250px;
             background-color: #2c3e50;
@@ -66,7 +64,6 @@
             border-left: 4px solid #d4af37;
         }
 
-        /* Main Content Styling */
         .main-content {
             flex: 1;
             display: flex;
@@ -96,7 +93,6 @@
             padding: 30px;
         }
 
-        /* Dashboard Stats Layout */
         .stats-grid {
             display: flex;
             gap: 20px;
@@ -126,7 +122,6 @@
             margin: 10px 0 0 0;
         }
 
-        /* Orders View Styling */
         .order-card {
             background: white;
             border-radius: 8px;
@@ -180,6 +175,9 @@
 
         .order-section {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .order-section h4 {
@@ -217,7 +215,6 @@
             font-weight: 700;
         }
 
-        /* Data Tables Styling */
         .section-header {
             margin-top: 30px;
             margin-bottom: 10px;
@@ -258,7 +255,6 @@
             background-color: #fdfefe;
         }
 
-        /* Modal Styling */
         .modal {
             position: fixed;
             top: 0;
@@ -337,7 +333,6 @@
             font-weight: 600;
         }
 
-        /* Utilities */
         .hidden {
             display: none !important;
         }
@@ -363,11 +358,9 @@
 </head>
 
 <body>
-
     <div class="sidebar">
         <div class="brand">
-            <h2>Scent Obsessed</h2>
-            <span>ADMIN PANEL</span>
+            <h2>Scent Obsessed</h2><span>ADMIN PANEL</span>
         </div>
         <ul class="nav-links">
             <li id="nav-dashboard" class="active" onclick="switchView('dashboard')">Dashboard</li>
@@ -377,15 +370,12 @@
             <li id="nav-settings" onclick="switchView('settings')">Settings</li>
         </ul>
     </div>
-
     <div class="main-content">
         <div class="topbar">
             <h1 id="page-title">Overview</h1>
             <div style="cursor:pointer; color:#e74c3c; font-weight:600;" onclick="logout()">Logout</div>
         </div>
-
         <div class="content-area">
-
             <div id="dashboard-view">
                 <p>Welcome to the backend, bro. The command center is live.</p>
                 <div class="stats-grid">
@@ -399,68 +389,51 @@
                     </div>
                 </div>
             </div>
-
             <div id="orders-view" class="hidden">
                 <div class="section-header">
-                    <h3 style="margin: 0;">Recent Orders</h3>
-                    <button class="btn-save" onclick="exportOrdersCSV()">📥 Download Orders to CSV</button>
+                    <h3 style="margin: 0;">Recent Orders</h3><button class="btn-save" onclick="exportOrdersCSV()">📥
+                        Download Orders to CSV</button>
                 </div>
                 <div id="orders-container">
                     <p class="loading-text">Fetching live orders...</p>
                 </div>
             </div>
-
             <div id="customers-view" class="hidden">
                 <div class="section-header">
-                    <h3 style="margin: 0;">Customer Directory</h3>
-                    <button class="btn-save" onclick="exportCustomersCSV()">📥 Download Customers to CSV</button>
+                    <h3 style="margin: 0;">Customer Directory</h3><button class="btn-save"
+                        onclick="exportCustomersCSV()">📥 Download Customers to CSV</button>
                 </div>
                 <div id="customers-container">
                     <p class="loading-text">Fetching customer profiles...</p>
                 </div>
             </div>
-
             <div id="marketing-view" class="hidden">
                 <div class="section-header">
-                    <h3 style="margin: 0;">Active Promo Codes</h3>
-                    <button class="btn-save" onclick="openPromoModal()">+ Create Code</button>
+                    <h3 style="margin: 0;">Active Promo Codes</h3><button class="btn-save" onclick="openPromoModal()">+
+                        Create Code</button>
                 </div>
                 <div id="promos-container">
                     <p class="loading-text">Fetching promo codes...</p>
                 </div>
-
                 <h3 class="section-header" style="margin-top: 40px;">Spin-The-Wheel Leads</h3>
                 <div id="leads-container">
                     <p class="loading-text">Fetching wheel leads...</p>
                 </div>
             </div>
-
             <div id="settings-view" class="hidden">
                 <div class="section-header">
                     <h3 style="margin: 0;">System Settings & Backup</h3>
                 </div>
-
                 <div class="order-card">
                     <h4 style="margin-top: 0;">Database Backup</h4>
                     <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 15px;">Securely export your Supabase
-                        data directly to your local computer for accounting and backup purposes.</p>
+                        data directly to your local computer.</p>
                     <div style="display: flex; gap: 15px;">
                         <button class="btn-save" onclick="exportOrdersCSV()">Download All Orders (CSV)</button>
                         <button class="btn-save" onclick="exportCustomersCSV()">Download All Customers (CSV)</button>
                     </div>
                 </div>
-
-                <div class="order-card" style="margin-top: 20px;">
-                    <h4 style="margin-top: 0;">Admin Credentials</h4>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;">Change the password used to access this dashboard.</p>
-                    <input type="password" id="new-admin-pass" placeholder="Enter New Password"
-                        style="width: 100%; max-width: 400px; padding: 10px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box;">
-                    <br>
-                    <button class="btn-save" style="margin-top: 15px;" onclick="updatePasswordUI()">Update
-                        Password</button>
-                </div>
             </div>
-
         </div>
     </div>
 
@@ -468,45 +441,35 @@
         <div class="modal-content">
             <h3>Edit Shipping Address</h3>
             <input type="hidden" id="edit-order-id">
-            <label>Street / Block</label>
-            <input type="text" id="edit-street">
-            <label>City</label>
-            <input type="text" id="edit-city">
-            <label>State</label>
-            <input type="text" id="edit-state">
-            <label>Pincode</label>
-            <input type="text" id="edit-pincode">
+            <label>Street / Block</label><input type="text" id="edit-street">
+            <label>City</label><input type="text" id="edit-city">
+            <label>State</label><input type="text" id="edit-state">
+            <label>Pincode</label><input type="text" id="edit-pincode">
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeAddressModal()">Cancel</button>
                 <button class="btn-save" id="btn-save-address" onclick="saveAddress()">Save Changes</button>
             </div>
         </div>
     </div>
-
     <div id="promo-modal" class="modal hidden">
         <div class="modal-content">
             <h3>Create New Promo Code</h3>
-            <label>Promo Code Name</label>
-            <input type="text" id="new-promo-code" placeholder="e.g., VIP20">
-            <label>Discount Percentage (%)</label>
-            <input type="number" id="new-promo-discount" placeholder="e.g., 20">
+            <label>Promo Code Name</label><input type="text" id="new-promo-code" placeholder="e.g., VIP20">
+            <label>Discount Percentage (%)</label><input type="number" id="new-promo-discount" placeholder="e.g., 20">
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closePromoModal()">Cancel</button>
                 <button class="btn-save" id="btn-save-promo" onclick="savePromoCode()">Create Code</button>
             </div>
         </div>
     </div>
-
     <div id="customer-modal" class="modal hidden">
         <div class="modal-content">
             <h3>Edit Customer Profile</h3>
             <input type="hidden" id="edit-customer-id">
-            <label>Full Name</label>
-            <input type="text" id="edit-customer-name" placeholder="e.g., John Doe">
-            <label>Email Address</label>
-            <input type="email" id="edit-customer-email" placeholder="e.g., john@example.com">
-            <label>Phone Number</label>
-            <input type="text" id="edit-customer-phone" placeholder="e.g., 9876543210">
+            <label>Full Name</label><input type="text" id="edit-customer-name" placeholder="e.g., John Doe">
+            <label>Email Address</label><input type="email" id="edit-customer-email"
+                placeholder="e.g., john@example.com">
+            <label>Phone Number</label><input type="text" id="edit-customer-phone" placeholder="e.g., 9876543210">
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeCustomerModal()">Cancel</button>
                 <button class="btn-save" id="btn-save-customer" onclick="saveCustomer()">Save Changes</button>
@@ -520,19 +483,16 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
-            // Pre-load data in background so CSV export is instantly ready
             loadOrdersSilently();
             loadCustomersSilently();
         });
 
-        // --- NAVIGATION LOGIC ---
         function switchView(viewName) {
             document.getElementById('dashboard-view').classList.add('hidden');
             document.getElementById('orders-view').classList.add('hidden');
             document.getElementById('customers-view').classList.add('hidden');
             document.getElementById('marketing-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
-
             document.getElementById('nav-dashboard').classList.remove('active');
             document.getElementById('nav-orders').classList.remove('active');
             document.getElementById('nav-customers').classList.remove('active');
@@ -542,79 +502,45 @@
             document.getElementById(`nav-${viewName}`).classList.add('active');
             document.getElementById(`${viewName}-view`).classList.remove('hidden');
 
-            if (viewName === 'dashboard') {
-                document.getElementById('page-title').innerText = "Overview";
-                loadDashboardStats();
-            } else if (viewName === 'orders') {
-                document.getElementById('page-title').innerText = "Order Management";
-                loadOrders();
-            } else if (viewName === 'customers') {
-                document.getElementById('page-title').innerText = "Customer Directory";
-                loadCustomers();
-            } else if (viewName === 'marketing') {
-                document.getElementById('page-title').innerText = "Marketing Hub";
-                loadMarketing();
-            } else if (viewName === 'settings') {
-                document.getElementById('page-title').innerText = "System Settings";
-            }
+            if (viewName === 'dashboard') { document.getElementById('page-title').innerText = "Overview"; loadDashboardStats(); }
+            else if (viewName === 'orders') { document.getElementById('page-title').innerText = "Order Management"; loadOrders(); }
+            else if (viewName === 'customers') { document.getElementById('page-title').innerText = "Customer Directory"; loadCustomers(); }
+            else if (viewName === 'marketing') { document.getElementById('page-title').innerText = "Marketing Hub"; loadMarketing(); }
+            else if (viewName === 'settings') { document.getElementById('page-title').innerText = "System Settings"; }
         }
 
-        // --- DATA EXPORT TO CSV LOGIC ---
         function downloadCSV(csvText, filename) {
             const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.setAttribute("href", url); link.setAttribute("download", filename);
+            link.style.visibility = 'hidden'; document.body.appendChild(link);
+            link.click(); document.body.removeChild(link);
         }
 
         function exportOrdersCSV() {
-            if (globalOrders.length === 0) return alert("No orders available to export. Data is still loading or database is empty.");
-
+            if (globalOrders.length === 0) return alert("No orders available to export.");
             let csvContent = "Database ID,Order ID,Customer Name,Customer Email,Customer Phone,Amount (INR),Payment Status,Tracking Status,Date Created,Applied Promo\n";
-
             globalOrders.forEach(order => {
                 const dateCreated = new Date(order.created_at).toLocaleDateString('en-GB');
-                // Wrap strings in quotes to avoid commas in names breaking the CSV columns
                 const safeName = `"${order.customer_name || ''}"`;
                 const safeEmail = `"${order.customer_email || ''}"`;
                 const safePromo = `"${order.applied_promo || ''}"`;
-
                 csvContent += `${order.id},${order.order_id},${safeName},${safeEmail},${order.customer_phone || ''},${order.total_amount || 0},${order.payment_status},${order.tracking_status},${dateCreated},${safePromo}\n`;
             });
-
             downloadCSV(csvContent, `scent_obsessed_orders_${new Date().toLocaleDateString('en-GB')}.csv`);
         }
 
         function exportCustomersCSV() {
-            if (globalCustomers.length === 0) return alert("No customers available to export. Data is still loading or database is empty.");
-
+            if (globalCustomers.length === 0) return alert("No customers available to export.");
             let csvContent = "Supabase ID,Full Name,Email Address,Phone Number,Loyalty ML Balance\n";
-
             globalCustomers.forEach(customer => {
                 const name = customer.full_name || customer.name || '';
-                const safeName = `"${name}"`;
-                const safeEmail = `"${customer.email || ''}"`;
-
-                csvContent += `${customer.id},${safeName},${safeEmail},${customer.phone || ''},${customer.loyalty_ml || 0}\n`;
+                csvContent += `${customer.id},"${name}","${customer.email || ''}",${customer.phone || ''},${customer.loyalty_ml || 0}\n`;
             });
-
             downloadCSV(csvContent, `scent_obsessed_customers_${new Date().toLocaleDateString('en-GB')}.csv`);
         }
 
-        // Placeholder for future backend hookup
-        function updatePasswordUI() {
-            const newPass = document.getElementById('new-admin-pass').value;
-            if (!newPass) return alert("Please enter a password.");
-            alert("This will require a new route in server.js to update the hash. Contact developer to implement backend link.");
-            document.getElementById('new-admin-pass').value = '';
-        }
-
-        // --- FETCH LOGIC ---
         async function loadDashboardStats() {
             try {
                 const res = await fetch('/api/admin/overview-stats');
@@ -627,20 +553,35 @@
             } catch (error) { console.error(error); }
         }
 
-        async function loadOrdersSilently() {
-            try {
-                const res = await fetch('/api/admin/orders');
-                const data = await res.json();
-                if (data.success) globalOrders = data.orders;
-            } catch (e) { }
-        }
+        async function loadOrdersSilently() { try { const res = await fetch('/api/admin/orders'); const data = await res.json(); if (data.success) globalOrders = data.orders; } catch (e) { } }
+        async function loadCustomersSilently() { try { const res = await fetch('/api/admin/customers'); const data = await res.json(); if (data.success) globalCustomers = data.customers; } catch (e) { } }
 
-        async function loadCustomersSilently() {
+        // --- THE MAGIC ONE-CLICK DISPATCH FUNCTION ---
+        async function autoShipOrder(orderId, btnId) {
+            const btn = document.getElementById(btnId);
+            btn.innerText = "Processing Label...";
+            btn.style.opacity = "0.7";
+            btn.style.pointerEvents = "none";
+
             try {
-                const res = await fetch('/api/admin/customers');
+                const res = await fetch(`/api/admin/ship-order/${orderId}`, { method: 'POST' });
                 const data = await res.json();
-                if (data.success) globalCustomers = data.customers;
-            } catch (e) { }
+
+                if (data.success) {
+                    window.open(data.label_url, '_blank'); // Opens PDF immediately
+                    loadOrders(); // Refresh dashboard silently
+                } else {
+                    alert(`Shiprocket Error: ${data.error}`);
+                    btn.innerText = "📦 Generate Label & Ship";
+                    btn.style.opacity = "1";
+                    btn.style.pointerEvents = "auto";
+                }
+            } catch (error) {
+                alert("Network error contacting Shiprocket API.");
+                btn.innerText = "📦 Generate Label & Ship";
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            }
         }
 
         async function loadOrders() {
@@ -668,6 +609,32 @@
 
                         const statusClass = (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') ? 'success' : 'pending';
 
+                        // Render Shiprocket buttons ONLY for paid orders
+                        let actionHtml = '';
+                        if (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') {
+                            if (order.tracking_status === 'PREPARING' || order.tracking_status === 'PACKED') {
+                                actionHtml = `
+                                    <div style="margin-top: 15px; border-top: 1px solid #ecf0f1; padding-top: 15px;">
+                                        <button id="btn-ship-${order.id}" class="btn-save" style="width:100%; background:#2c3e50;" onclick="autoShipOrder('${order.order_id}', 'btn-ship-${order.id}')">
+                                            📦 Generate Label & Ship
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (order.tracking_status === 'SHIPPED') {
+                                actionHtml = `
+                                    <div style="margin-top: 15px; border-top: 1px solid #ecf0f1; padding-top: 15px; display:flex; justify-content:space-between; align-items:center;">
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="font-size:0.75rem; color:#7f8c8d; text-transform:uppercase; font-weight:600;">Tracking Number</span>
+                                            <span style="font-family:monospace; color:#2980b9; font-weight:bold;">${order.awb_code || 'Processing...'}</span>
+                                        </div>
+                                        <button class="btn-save" style="background:#3498db; padding: 8px 15px;" onclick="window.open('${order.label_url}', '_blank')">
+                                            📄 Print Label
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }
+
                         htmlTemplate += `
                             <div class="order-card">
                                 <div class="order-header">
@@ -685,6 +652,7 @@
                                         <h4>📦 Items</h4>
                                         <ul class="item-list">${itemsHtml}</ul>
                                         <div class="total-price">Total: ₹${order.total_amount || 0}</div>
+                                        ${actionHtml}
                                     </div>
                                 </div>
                             </div>
@@ -703,234 +671,96 @@
 
                 if (data.success) {
                     globalCustomers = data.customers;
-
-                    if (globalCustomers.length === 0) {
-                        container.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No profiles found in the database yet.</p>';
-                        return;
-                    }
-
+                    if (globalCustomers.length === 0) { container.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No profiles found in the database yet.</p>'; return; }
                     let rows = '';
                     globalCustomers.forEach(c => {
                         const custName = c.full_name || c.name || '';
-                        rows += `<tr>
-                            <td>${c.id || 'N/A'}</td>
-                            <td><strong>${custName || 'N/A'}</strong></td>
-                            <td>${c.email || 'N/A'}</td>
-                            <td>${c.phone || 'N/A'}</td>
-                            <td><span class="edit-link" onclick="openCustomerModal('${c.id}')">[Edit]</span></td>
-                        </tr>`;
+                        rows += `<tr><td>${c.id || 'N/A'}</td><td><strong>${custName || 'N/A'}</strong></td><td>${c.email || 'N/A'}</td><td>${c.phone || 'N/A'}</td><td><span class="edit-link" onclick="openCustomerModal('${c.id}')">[Edit]</span></td></tr>`;
                     });
-                    container.innerHTML = `<table class="data-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>`;
-                } else {
-                    container.innerHTML = `<span style="color: red;">Database Error: Profiles table might be empty or missing columns.</span>`;
-                }
-            } catch (error) {
-                container.innerHTML = '<span style="color: red;">Failed to connect to the server.</span>';
-            }
+                    container.innerHTML = `<table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+                } else { container.innerHTML = `<span style="color: red;">Database Error.</span>`; }
+            } catch (error) { container.innerHTML = '<span style="color: red;">Failed to connect to the server.</span>'; }
         }
 
         async function loadMarketing() {
             const promosContainer = document.getElementById('promos-container');
             const leadsContainer = document.getElementById('leads-container');
-
             try {
                 const res = await fetch('/api/admin/marketing');
                 const data = await res.json();
-
                 if (data.success) {
                     let promoRows = '';
                     data.promos.forEach(p => {
-                        let discountVal = 'N/A';
-                        if (p.discount_percentage !== undefined && p.discount_percentage !== null) {
-                            discountVal = `${p.discount_percentage}%`;
-                        } else {
-                            discountVal = p.discount || p.reward || p.discount_amount || 'N/A';
-                        }
-
-                        const statusBadge = p.is_used
-                            ? `<span class="badge inactive">Inactive</span>`
-                            : `<span class="badge success">Active</span>`;
-
-                        promoRows += `<tr>
-                            <td><strong>${p.code || p.promo_code || 'N/A'}</strong></td>
-                            <td>${discountVal}</td>
-                            <td style="display:flex; gap:10px; align-items:center;">
-                                ${statusBadge}
-                                <span class="edit-link" style="color:#e74c3c; margin:0;" onclick="deletePromo(${p.id}, '${p.code}')">[Delete]</span>
-                            </td>
-                        </tr>`;
+                        let discountVal = (p.discount_percentage !== undefined && p.discount_percentage !== null) ? `${p.discount_percentage}%` : 'N/A';
+                        const statusBadge = p.is_used ? `<span class="badge inactive">Inactive</span>` : `<span class="badge success">Active</span>`;
+                        promoRows += `<tr><td><strong>${p.code || 'N/A'}</strong></td><td>${discountVal}</td><td style="display:flex; gap:10px; align-items:center;">${statusBadge}<span class="edit-link" style="color:#e74c3c; margin:0;" onclick="deletePromo(${p.id}, '${p.code}')">[Delete]</span></td></tr>`;
                     });
-                    promosContainer.innerHTML = promoRows ? `<table class="data-table">
-                        <thead><tr><th>Code</th><th>Discount (%)</th><th>Status</th></tr></thead>
-                        <tbody>${promoRows}</tbody>
-                    </table>` : '<p>No promo codes found.</p>';
+                    promosContainer.innerHTML = promoRows ? `<table class="data-table"><thead><tr><th>Code</th><th>Discount (%)</th><th>Status</th></tr></thead><tbody>${promoRows}</tbody></table>` : '<p>No promo codes found.</p>';
 
                     let leadRows = '';
                     data.leads.forEach(l => {
                         const formattedDate = new Date(l.created_at).toLocaleDateString();
-                        const prize = l.prize_won || l.prize || l.reward_won || '<span style="color:#95a5a6; font-style:italic;">Not Recorded</span>';
-                        leadRows += `<tr>
-                            <td><strong>${l.phone || 'N/A'}</strong></td>
-                            <td>${prize}</td>
-                            <td>${formattedDate}</td>
-                        </tr>`;
+                        const prize = l.prize_won || '<span style="color:#95a5a6; font-style:italic;">Not Recorded</span>';
+                        leadRows += `<tr><td><strong>${l.phone || 'N/A'}</strong></td><td>${prize}</td><td>${formattedDate}</td></tr>`;
                     });
-                    leadsContainer.innerHTML = leadRows ? `<table class="data-table">
-                        <thead><tr><th>Phone Number</th><th>Prize Won</th><th>Date Collected</th></tr></thead>
-                        <tbody>${leadRows}</tbody>
-                    </table>` : '<p>No leads found yet.</p>';
+                    leadsContainer.innerHTML = leadRows ? `<table class="data-table"><thead><tr><th>Phone Number</th><th>Prize Won</th><th>Date Collected</th></tr></thead><tbody>${leadRows}</tbody></table>` : '<p>No leads found yet.</p>';
                 }
-            } catch (error) {
-                promosContainer.innerHTML = '<span style="color: red;">Failed to load marketing data.</span>';
-            }
+            } catch (error) { promosContainer.innerHTML = '<span style="color: red;">Failed to load marketing data.</span>'; }
         }
 
-        // --- 1. ADDRESS MODAL LOGIC ---
+        // Modal Logic (Address, Promo, Customer) kept identical...
         function openAddressModal(orderId) {
             const order = globalOrders.find(o => o.id === orderId);
             if (!order) return;
             let addr = {};
             try { addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : (order.shipping_address || {}); } catch (e) { }
-
-            document.getElementById('edit-order-id').value = order.id;
-            document.getElementById('edit-street').value = addr.street || '';
-            document.getElementById('edit-city').value = addr.city || '';
-            document.getElementById('edit-state').value = addr.state || '';
-            document.getElementById('edit-pincode').value = addr.pincode || '';
-            document.getElementById('address-modal').classList.remove('hidden');
+            document.getElementById('edit-order-id').value = order.id; document.getElementById('edit-street').value = addr.street || ''; document.getElementById('edit-city').value = addr.city || ''; document.getElementById('edit-state').value = addr.state || ''; document.getElementById('edit-pincode').value = addr.pincode || ''; document.getElementById('address-modal').classList.remove('hidden');
         }
-
         function closeAddressModal() { document.getElementById('address-modal').classList.add('hidden'); }
-
         async function saveAddress() {
             const orderId = document.getElementById('edit-order-id').value;
-            const newAddress = {
-                street: document.getElementById('edit-street').value,
-                city: document.getElementById('edit-city').value,
-                state: document.getElementById('edit-state').value,
-                pincode: document.getElementById('edit-pincode').value
-            };
-
+            const newAddress = { street: document.getElementById('edit-street').value, city: document.getElementById('edit-city').value, state: document.getElementById('edit-state').value, pincode: document.getElementById('edit-pincode').value };
             try {
                 document.getElementById('btn-save-address').innerText = "Saving...";
-                const res = await fetch(`/api/admin/orders/${orderId}/address`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ shipping_address: newAddress })
-                });
-                if ((await res.json()).success) {
-                    closeAddressModal();
-                    loadOrders();
-                }
-            } catch (error) { alert('Connection error.'); } finally {
-                document.getElementById('btn-save-address').innerText = "Save Changes";
-            }
+                const res = await fetch(`/api/admin/orders/${orderId}/address`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ shipping_address: newAddress }) });
+                if ((await res.json()).success) { closeAddressModal(); loadOrders(); }
+            } catch (error) { alert('Connection error.'); } finally { document.getElementById('btn-save-address').innerText = "Save Changes"; }
         }
 
-        // --- 2. PROMO CODE MODAL & DELETE LOGIC ---
-        function openPromoModal() {
-            document.getElementById('new-promo-code').value = '';
-            document.getElementById('new-promo-discount').value = '';
-            document.getElementById('promo-modal').classList.remove('hidden');
-        }
-
+        function openPromoModal() { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-discount').value = ''; document.getElementById('promo-modal').classList.remove('hidden'); }
         function closePromoModal() { document.getElementById('promo-modal').classList.add('hidden'); }
-
         async function savePromoCode() {
-            const codeInput = document.getElementById('new-promo-code').value.trim();
-            const discountInput = document.getElementById('new-promo-discount').value.trim();
-
-            if (!codeInput || !discountInput) {
-                alert("Please fill in both fields.");
-                return;
-            }
-
+            const codeInput = document.getElementById('new-promo-code').value.trim(); const discountInput = document.getElementById('new-promo-discount').value.trim();
+            if (!codeInput || !discountInput) return alert("Please fill in both fields.");
             try {
                 document.getElementById('btn-save-promo').innerText = "Creating...";
-                const response = await fetch('/api/admin/promo-codes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: codeInput, discount: discountInput })
-                });
-
-                if ((await response.json()).success) {
-                    closePromoModal();
-                    loadMarketing();
-                } else {
-                    alert("Failed to create code. Check server logs.");
-                }
-            } catch (error) { alert("Connection error."); } finally {
-                document.getElementById('btn-save-promo').innerText = "Create Code";
-            }
+                const response = await fetch('/api/admin/promo-codes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: codeInput, discount: discountInput }) });
+                if ((await response.json()).success) { closePromoModal(); loadMarketing(); } else { alert("Failed to create code."); }
+            } catch (error) { alert("Connection error."); } finally { document.getElementById('btn-save-promo').innerText = "Create Code"; }
         }
-
         async function deletePromo(id, codeName) {
-            if (!confirm(`Are you sure you want to delete the promo code: ${codeName}?`)) return;
-            try {
-                const response = await fetch(`/api/admin/promo-codes/${id}`, { method: 'DELETE' });
-                if ((await response.json()).success) {
-                    loadMarketing();
-                } else {
-                    alert("Failed to delete promo code.");
-                }
-            } catch (error) { alert("Connection error."); }
+            if (!confirm(`Delete promo code: ${codeName}?`)) return;
+            try { const response = await fetch(`/api/admin/promo-codes/${id}`, { method: 'DELETE' }); if ((await response.json()).success) { loadMarketing(); } else { alert("Failed to delete promo."); } } catch (error) { alert("Connection error."); }
         }
 
-        // --- 3. CUSTOMER MODAL LOGIC ---
         function openCustomerModal(id) {
             const customer = globalCustomers.find(c => String(c.id) === String(id));
             if (!customer) return;
-
-            document.getElementById('edit-customer-id').value = customer.id;
-            document.getElementById('edit-customer-name').value = customer.full_name || customer.name || '';
-            document.getElementById('edit-customer-email').value = customer.email || '';
-            document.getElementById('edit-customer-phone').value = customer.phone || '';
-            document.getElementById('customer-modal').classList.remove('hidden');
+            document.getElementById('edit-customer-id').value = customer.id; document.getElementById('edit-customer-name').value = customer.full_name || customer.name || ''; document.getElementById('edit-customer-email').value = customer.email || ''; document.getElementById('edit-customer-phone').value = customer.phone || ''; document.getElementById('customer-modal').classList.remove('hidden');
         }
-
         function closeCustomerModal() { document.getElementById('customer-modal').classList.add('hidden'); }
-
         async function saveCustomer() {
-            const id = document.getElementById('edit-customer-id').value;
-            const name = document.getElementById('edit-customer-name').value.trim();
-            const email = document.getElementById('edit-customer-email').value.trim();
-            const phone = document.getElementById('edit-customer-phone').value.trim();
-
+            const id = document.getElementById('edit-customer-id').value; const name = document.getElementById('edit-customer-name').value.trim(); const email = document.getElementById('edit-customer-email').value.trim(); const phone = document.getElementById('edit-customer-phone').value.trim();
             const customer = globalCustomers.find(c => String(c.id) === String(id));
-            let payload = { email, phone };
-            if (customer && customer.hasOwnProperty('full_name')) {
-                payload.full_name = name;
-            } else {
-                payload.name = name;
-            }
-
+            let payload = { email, phone }; if (customer && customer.hasOwnProperty('full_name')) { payload.full_name = name; } else { payload.name = name; }
             try {
                 document.getElementById('btn-save-customer').innerText = "Saving...";
-                const response = await fetch(`/api/admin/customers/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if ((await response.json()).success) {
-                    closeCustomerModal();
-                    loadCustomers();
-                } else {
-                    alert("Failed to update profile.");
-                }
-            } catch (error) { alert("Connection error."); } finally {
-                document.getElementById('btn-save-customer').innerText = "Save Changes";
-            }
+                const response = await fetch(`/api/admin/customers/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if ((await response.json()).success) { closeCustomerModal(); loadCustomers(); } else { alert("Failed to update profile."); }
+            } catch (error) { alert("Connection error."); } finally { document.getElementById('btn-save-customer').innerText = "Save Changes"; }
         }
 
-        // --- LOGOUT FUNCTION ---
-        async function logout() {
-            await fetch('/api/admin/logout', { method: 'POST' });
-            window.location.href = '/login.html';
-        }
+        async function logout() { await fetch('/api/admin/logout', { method: 'POST' }); window.location.href = '/login.html'; }
     </script>
 </body>
 
