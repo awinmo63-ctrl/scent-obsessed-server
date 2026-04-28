@@ -556,33 +556,25 @@
         async function loadOrdersSilently() { try { const res = await fetch('/api/admin/orders'); const data = await res.json(); if (data.success) globalOrders = data.orders; } catch (e) { } }
         async function loadCustomersSilently() { try { const res = await fetch('/api/admin/customers'); const data = await res.json(); if (data.success) globalCustomers = data.customers; } catch (e) { } }
 
-        // --- THE MAGIC ONE-CLICK DISPATCH FUNCTION (UPGRADED ERROR DISPLAY) ---
-        async function autoShipOrder(orderId, btnId) {
-            const btn = document.getElementById(btnId);
-            btn.innerText = "Processing Label...";
-            btn.style.opacity = "0.7";
-            btn.style.pointerEvents = "none";
+        // --- NEW: Manually Save AWB Function ---
+        async function saveManualAWB(orderId) {
+            const awbInput = document.getElementById(`awb-input-${orderId}`).value.trim();
+            if (!awbInput) return alert("Please paste the AWB number from Shiprocket first.");
 
             try {
-                const res = await fetch(`/api/admin/ship-order/${orderId}`, { method: 'POST' });
+                const res = await fetch(`/api/admin/orders/${orderId}/awb`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ awb_code: awbInput })
+                });
                 const data = await res.json();
-
                 if (data.success) {
-                    window.open(data.label_url, '_blank');
-                    loadOrders();
+                    loadOrders(); // Refresh the UI
                 } else {
-                    // Extract exactly what Shiprocket complained about
-                    const detailStr = data.details ? (typeof data.details === 'string' ? data.details : JSON.stringify(data.details, null, 2)) : '';
-                    alert(`Shiprocket Error: ${data.error}\n\nReason: ${detailStr}\n\nCheck your Shiprocket Wallet Balance and Pickup Location verification.`);
-                    btn.innerText = "📦 Generate Label & Ship";
-                    btn.style.opacity = "1";
-                    btn.style.pointerEvents = "auto";
+                    alert("Failed to save AWB tracking number.");
                 }
-            } catch (error) {
-                alert("Network error contacting API.");
-                btn.innerText = "📦 Generate Label & Ship";
-                btn.style.opacity = "1";
-                btn.style.pointerEvents = "auto";
+            } catch (err) {
+                alert("Network error.");
             }
         }
 
@@ -611,14 +603,22 @@
 
                         const statusClass = (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') ? 'success' : 'pending';
 
+                        // 🔥 UPDATED: Semi-Automated workflow UI
                         let actionHtml = '';
                         if (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') {
                             if (order.tracking_status === 'PREPARING' || order.tracking_status === 'PACKED') {
                                 actionHtml = `
                                     <div style="margin-top: 15px; border-top: 1px solid #ecf0f1; padding-top: 15px;">
-                                        <button id="btn-ship-${order.id}" class="btn-save" style="width:100%; background:#2c3e50;" onclick="autoShipOrder('${order.order_id}', 'btn-ship-${order.id}')">
-                                            📦 Generate Label & Ship
+                                        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">Order data is waiting in Shiprocket. Click below to assign courier, then paste the tracking number back here.</p>
+                                        <button class="btn-save" style="width:100%; background:#8e44ad; margin-bottom: 10px;" onclick="window.open('https://app.shiprocket.in/seller/orders/new', '_blank')">
+                                            🚀 Open Shiprocket Dashboard
                                         </button>
+                                        <div style="display:flex; gap:10px;">
+                                            <input type="text" id="awb-input-${order.order_id}" placeholder="Paste AWB tracking number..." style="flex:1; padding:8px; border:1px solid #bdc3c7; border-radius:4px; font-family:monospace;">
+                                            <button class="btn-save" style="background:#2ecc71; padding: 8px 15px;" onclick="saveManualAWB('${order.order_id}')">
+                                                Save
+                                            </button>
+                                        </div>
                                     </div>
                                 `;
                             } else if (order.tracking_status === 'SHIPPED') {
@@ -626,10 +626,10 @@
                                     <div style="margin-top: 15px; border-top: 1px solid #ecf0f1; padding-top: 15px; display:flex; justify-content:space-between; align-items:center;">
                                         <div style="display:flex; flex-direction:column;">
                                             <span style="font-size:0.75rem; color:#7f8c8d; text-transform:uppercase; font-weight:600;">Tracking Number</span>
-                                            <span style="font-family:monospace; color:#2980b9; font-weight:bold;">${order.awb_code || 'Processing...'}</span>
+                                            <span style="font-family:monospace; color:#2980b9; font-weight:bold; font-size:1.1rem;">${order.awb_code || 'N/A'}</span>
                                         </div>
-                                        <button class="btn-save" style="background:#3498db; padding: 8px 15px;" onclick="window.open('${order.label_url}', '_blank')">
-                                            📄 Print Label
+                                        <button class="btn-save" style="background:#e67e22; padding: 8px 15px;" onclick="window.open('https://app.shiprocket.in/seller/shipments/ready-to-ship', '_blank')">
+                                            📦 Print Label
                                         </button>
                                     </div>
                                 `;

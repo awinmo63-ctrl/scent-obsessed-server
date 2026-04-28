@@ -10,17 +10,13 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- SUPABASE ---
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
-
 if (!process.env.SUPABASE_URL || !supaKey) {
     console.error("❌ ERROR: Supabase URL or Key is missing!");
     process.exit(1);
 }
-
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
-// --- CASHFREE LIVE CONFIG ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const CF_URL = "https://api.cashfree.com/pg";
@@ -44,7 +40,6 @@ const verifyAdmin = (req, res, next) => {
 // ==========================================
 // --- SHIPROCKET AUTOMATION LOGIC ---
 // ==========================================
-
 async function pushToShiprocket(orderData) {
     try {
         const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', {
@@ -93,98 +88,13 @@ async function pushToShiprocket(orderData) {
         const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', orderPayload, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
-
         return orderRes.data;
     } catch (error) { throw error; }
 }
 
 // ==========================================
-// --- ONE-CLICK DISPATCH API (WITH SMART COURIER ASSIGNMENT) ---
-// ==========================================
-
-app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
-    try {
-        const { data: order } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
-        if (!order) return res.status(404).json({ error: "Order not found in database" });
-
-        // 1. Authenticate Shiprocket
-        const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', { email: process.env.SHIPROCKET_EMAIL, password: process.env.SHIPROCKET_PASSWORD });
-        const token = authRes.data.token;
-        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
-        let shipmentId = order.shiprocket_shipment_id;
-        let deliveryPincode = "000000";
-
-        try {
-            const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
-            if (addr && addr.pincode) deliveryPincode = addr.pincode;
-        } catch (e) { }
-
-        // Fallback: If shipment ID isn't saved, grab it dynamically
-        if (!shipmentId) {
-            const searchRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/orders?search=${req.params.orderId}`, { headers });
-            if (searchRes.data && searchRes.data.data && searchRes.data.data.length > 0) {
-                shipmentId = searchRes.data.data[0].shipments[0]?.id || searchRes.data.data[0].shipment_id;
-            } else {
-                return res.status(400).json({ error: "Order not found in Shiprocket.", details: "Make sure the order was pushed successfully first." });
-            }
-        }
-
-        let awbCode = order.awb_code;
-
-        // 2. Auto-Assign Courier (SMART MODE)
-        if (!awbCode) {
-            try {
-                // Ask Shiprocket who the best courier is for this route
-                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '141002'; // Derived from your screenshot
-                const serviceRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${deliveryPincode}&weight=0.5&cod=0`, { headers });
-
-                let bestCourierId = null;
-                if (serviceRes.data && serviceRes.data.data && serviceRes.data.data.available_courier_companies && serviceRes.data.data.available_courier_companies.length > 0) {
-                    // Grab the top recommended courier ID
-                    bestCourierId = serviceRes.data.data.available_courier_companies[0].courier_company_id;
-                }
-
-                // Force Shiprocket to use the best courier
-                const payload = { shipment_id: shipmentId };
-                if (bestCourierId) payload.courier_id = bestCourierId;
-
-                const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', payload, { headers });
-
-                if (awbRes.data.awb_assign_status === 1) {
-                    awbCode = awbRes.data.response.data.awb_code;
-                } else {
-                    return res.status(400).json({ error: "AWB Assignment Failed", details: awbRes.data });
-                }
-            } catch (awbErr) {
-                return res.status(400).json({ error: "Courier Assignment Rejected", details: awbErr.response?.data?.message || awbErr.response?.data || awbErr.message });
-            }
-        }
-
-        // 3. Generate Label PDF
-        try {
-            const labelRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/generate/label', { shipment_id: [shipmentId] }, { headers });
-            const labelUrl = labelRes.data.label_created === 1 ? labelRes.data.label_url : null;
-
-            if (!labelUrl) return res.status(400).json({ error: "AWB Generated, but label is still rendering.", details: "Try clicking the button again in 60 seconds." });
-
-            // 4. Update Database
-            await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: awbCode, label_url: labelUrl, shiprocket_shipment_id: shipmentId }).eq('order_id', req.params.orderId);
-            res.json({ success: true, label_url: labelUrl, awb_code: awbCode });
-        } catch (labelErr) {
-            return res.status(400).json({ error: "Label PDF Error", details: labelErr.response?.data?.message || labelErr.message });
-        }
-
-    } catch (error) {
-        console.error(error.response?.data || error.message);
-        res.status(500).json({ error: "Server/Authentication Error", details: error.response?.data || error.message });
-    }
-});
-
-// ==========================================
 // --- CHECKOUT LOGIC ---
 // ==========================================
-
 app.post('/create-order', async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
@@ -229,8 +139,8 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
                 }
 
                 try {
-                    const srData = await pushToShiprocket(orderData);
-                    await supabase.from('orders').update({ tracking_status: 'PACKED', shiprocket_shipment_id: srData.shipment_id }).eq('order_id', orderId);
+                    await pushToShiprocket(orderData);
+                    // Just keeping it at PREPARING so the admin can manually insert AWB later
                 } catch (srError) { console.log("Shiprocket push failed silently."); }
             }
             return res.json({ status: 'SUCCESS' });
@@ -290,16 +200,14 @@ app.put('/api/admin/orders/:id/address', verifyAdmin, async (req, res) => {
     await supabase.from('orders').update({ shipping_address: req.body.shipping_address }).eq('id', req.params.id);
     res.json({ success: true });
 });
-app.get('/admin', verifyAdmin, (req, res) => { res.sendFile(path.join(__dirname, 'private-views', 'admin.html')); });
 
-app.get('/api/admin/force-shiprocket/:orderId', verifyAdmin, async (req, res) => {
+// 🔥 NEW: Save the AWB manually from the dashboard
+app.put('/api/admin/orders/:orderId/awb', verifyAdmin, async (req, res) => {
     try {
-        const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
-        if (!orderData) return res.status(404).json({ error: "Order not found in Supabase" });
-        const srData = await pushToShiprocket(orderData);
-        await supabase.from('orders').update({ tracking_status: 'PACKED', shiprocket_shipment_id: srData.shipment_id }).eq('order_id', req.params.orderId);
-        res.json({ success: true, message: "Order pushed to Shiprocket!" });
-    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+        await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: req.body.awb_code }).eq('order_id', req.params.orderId);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
+app.get('/admin', verifyAdmin, (req, res) => { res.sendFile(path.join(__dirname, 'private-views', 'admin.html')); });
 app.listen(PORT, () => { console.log(`✅ Scent Obsessed Fortress online at port ${PORT}`); });
