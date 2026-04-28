@@ -96,7 +96,7 @@ async function pushToShiprocket(orderData) {
             billing_address: addr.street || 'Address not provided',
             billing_city: addr.city || 'City not provided',
             billing_pincode: addr.pincode || '000000',
-            billing_state: addr.state || 'Punjab', // Fallback to avoid empty state rejection
+            billing_state: addr.state || 'Punjab',
             billing_country: "India",
             billing_email: orderData.customer_email || 'info@scentobsessed.in',
             billing_phone: orderData.customer_phone || '9999999999',
@@ -111,7 +111,8 @@ async function pushToShiprocket(orderData) {
             weight: 0.5
         };
 
-        const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/ad-hoc', orderPayload, {
+        // 🔥 FIXED: Removed the hyphen from 'adhoc' so Shiprocket doesn't 404
+        const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', orderPayload, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
 
@@ -122,9 +123,8 @@ async function pushToShiprocket(orderData) {
 }
 
 // ==========================================
-// --- DIAGNOSTIC ROUTE (NEW) ---
+// --- DIAGNOSTIC ROUTE ---
 // ==========================================
-// This route will force the push to Shiprocket and print the exact error on your screen.
 app.get('/api/admin/force-shiprocket/:orderId', async (req, res) => {
     try {
         const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
@@ -132,7 +132,6 @@ app.get('/api/admin/force-shiprocket/:orderId', async (req, res) => {
 
         const srData = await pushToShiprocket(orderData);
 
-        // If successful, update tracking to PACKED
         await supabase.from('orders').update({ tracking_status: 'PACKED' }).eq('order_id', req.params.orderId);
         res.json({ success: true, message: "Order instantly pushed to Shiprocket!", data: srData });
     } catch (err) {
