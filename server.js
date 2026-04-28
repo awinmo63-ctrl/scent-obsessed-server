@@ -1,262 +1,173 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = 5000;
 
+// --- SUPABASE ---
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+// --- CASHFREE LIVE CONFIG (PRODUCTION) ---
+const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
+const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
+const CF_URL = "https://api.cashfree.com/pg";
+
+console.log("💳 Cashfree configured in LIVE PRODUCTION mode");
+
+// --- AUTH & CONFIG ---
+const JWT_SECRET = 'super_secret_scent_obsessed_key_123';
+const ADMIN_USERNAME = 'admin';
+const adminPasswordHash = bcrypt.hashSync('admin123', 10);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const verifyAdmin = (req, res, next) => {
+    const token = req.cookies.admin_token;
+    if (!token) return res.redirect('/login.html');
+    try { jwt.verify(token, JWT_SECRET); next(); }
+    catch (err) { res.clearCookie('admin_token'); return res.redirect('/login.html'); }
+};
 
-// --- SHIPROCKET DISPATCHER ---
-async function pushToShiprocket(orderRecord) {
-    try {
-        console.log(`[SHIPROCKET] Initiating dispatch for Order ${orderRecord.order_id}...`);
-
-        // 1. Generate Security Token
-        const authRes = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: process.env.SHIPROCKET_EMAIL,
-                password: process.env.SHIPROCKET_PASSWORD
-            })
-        });
-        const authData = await authRes.json();
-
-        if (!authData.token) {
-            console.error("[SHIPROCKET] Auth Failed. Check your API Email/Password in Render.");
-            return;
-        }
-
-        // 2. Safely Parse Address
-        let addressObj = { street: 'Address not provided', city: 'Unknown', state: 'Unknown', pincode: '000000' };
-        try {
-            const parsed = JSON.parse(orderRecord.shipping_address);
-            if (parsed.street) addressObj = parsed;
-        } catch (e) {
-            console.warn("[SHIPROCKET] Falling back to raw address string.");
-            addressObj.street = orderRecord.shipping_address;
-        }
-
-        // 3. Format Cart Items securely
-        const srItems = orderRecord.cart_items.map(item => ({
-            name: item.name,
-            sku: item.id,
-            units: item.qty,
-            selling_price: parseInt(item.price.replace(/[^0-9]/g, ''), 10) || 0,
-            discount: "0",
-            tax: "0",
-            hsn: ""
-        }));
-
-        // 4. Sanitize Customer Data
-        const nameParts = (orderRecord.customer_name || 'Customer').trim().split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ".";
-
-        let cleanPhone = (orderRecord.customer_phone || "0000000000").replace(/\D/g, '');
-        if (cleanPhone.length < 10) cleanPhone = "9999999999";
-
-        const date = new Date();
-        const dateString = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-
-        // 5. Master Payload
-        const payload = {
-            order_id: orderRecord.order_id,
-            order_date: dateString,
-            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "warehouse",
-            billing_customer_name: firstName,
-            billing_last_name: lastName,
-            billing_address: addressObj.street,
-            billing_city: addressObj.city,
-            billing_pincode: addressObj.pincode,
-            billing_state: addressObj.state,
-            billing_country: "India",
-            billing_email: orderRecord.customer_email || "no-reply@scentobsessed.in",
-            billing_phone: cleanPhone,
-            shipping_is_billing: true,
-            order_items: srItems,
-            payment_method: "Prepaid",
-            sub_total: orderRecord.total_amount,
-            length: 15,
-            breadth: 15,
-            height: 10,
-            weight: 0.5
-        };
-
-        // 6. Send to Shiprocket (URL TYPO FIXED HERE: adhoc instead of ad-hoc)
-        const createRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const createData = await createRes.json();
-
-        if (createData.order_id) {
-            console.log(`[SHIPROCKET] Success! Manifest generated. Shiprocket ID: ${createData.order_id}`);
-        } else {
-            console.error("[SHIPROCKET] Failed to create manifest:", JSON.stringify(createData, null, 2));
-        }
-
-    } catch (err) {
-        console.error("[SHIPROCKET] Fatal Error:", err.message);
-    }
-}
+// ==========================================
+// --- CASHFREE PAYMENT LOGIC (RAW LIVE API) ---
+// ==========================================
 
 app.post('/create-order', async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
         const orderId = 'ORDER_' + Date.now();
+        const cleanPhone = customerPhone ? customerPhone.replace(/\D/g, '').slice(-10) : "9999999999";
 
-        const { error: dbError } = await supabase
-            .from('orders')
-            .insert([
-                {
-                    order_id: orderId,
-                    customer_name: customerName,
-                    customer_phone: customerPhone,
-                    customer_email: customerEmail,
-                    shipping_address: shippingAddress,
-                    total_amount: orderAmount,
-                    payment_status: 'PENDING',
-                    reward_ml: rewardMl || 0,
-                    claimed_reward_ml: claimedRewardMl || 0,
-                    cart_items: cartItems || [],
-                    tracking_status: 'PREPARING',
-                    applied_promo: appliedPromo || null
-                }
-            ]);
+        await supabase.from('orders').insert([{
+            order_id: orderId, customer_name: customerName, customer_phone: cleanPhone,
+            customer_email: customerEmail, shipping_address: shippingAddress,
+            total_amount: orderAmount, payment_status: 'PENDING', reward_ml: rewardMl,
+            claimed_reward_ml: claimedRewardMl, cart_items: cartItems, tracking_status: 'PREPARING', applied_promo: appliedPromo
+        }]);
 
-        if (dbError) {
-            console.error("Database Error:", dbError);
-            return res.status(500).json({ error: 'Failed to save order to database' });
-        }
-
-        const requestBody = {
-            order_amount: orderAmount,
-            order_currency: "INR",
-            order_id: orderId,
-            customer_details: {
-                customer_id: 'CUST_' + Date.now(),
-                customer_phone: customerPhone,
-                customer_name: customerName,
-                customer_email: customerEmail
-            },
-            order_meta: {
-                return_url: "https://scentobsessed.in/?order_id={order_id}"
-            }
-        };
-
-        const response = await fetch('https://api.cashfree.com/pg/orders', {
+        const response = await fetch(`${CF_URL}/orders`, {
             method: 'POST',
             headers: {
-                'accept': 'application/json',
-                'x-client-id': process.env.CASHFREE_APP_ID,
-                'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+                'x-client-id': CF_CLIENT_ID,
+                'x-client-secret': CF_SECRET_KEY,
                 'x-api-version': '2023-08-01',
-                'content-type': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                order_amount: parseFloat(orderAmount).toFixed(2),
+                order_currency: "INR",
+                order_id: orderId,
+                customer_details: {
+                    customer_id: customerEmail.replace(/[^a-zA-Z0-9_-]/g, '') || "GUEST",
+                    customer_name: customerName || "Guest",
+                    customer_email: customerEmail,
+                    customer_phone: cleanPhone
+                },
+                order_meta: { return_url: `${req.protocol}://${req.get('host')}/?order_id=${orderId}` }
+            })
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            console.error("Cashfree API Error:", data);
-            return res.status(500).json({ error: 'Cashfree API Error' });
+        if (data.payment_session_id) {
+            console.log(`✅ LIVE Session Created: ${orderId}`);
+            res.json({ payment_session_id: data.payment_session_id, order_id: orderId });
+        } else {
+            console.error("❌ Cashfree LIVE API Error:", data);
+            res.status(400).json(data);
         }
-
-        res.json(data);
-
     } catch (error) {
-        console.error('Server Error:', error.message);
-        res.status(500).json({ error: 'Failed to initialize checkout' });
+        console.error("❌ Server Error:", error.message);
+        res.status(500).json({ error: "Checkout failed" });
     }
 });
 
 app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
-        const response = await fetch(`https://api.cashfree.com/pg/orders/${req.params.orderId}`, {
-            headers: {
-                'accept': 'application/json',
-                'x-client-id': process.env.CASHFREE_APP_ID,
-                'x-client-secret': process.env.CASHFREE_SECRET_KEY,
-                'x-api-version': '2023-08-01'
-            }
+        const { orderId } = req.params;
+        const response = await fetch(`${CF_URL}/orders/${orderId}/payments`, {
+            headers: { 'x-client-id': CF_CLIENT_ID, 'x-client-secret': CF_SECRET_KEY, 'x-api-version': '2023-08-01' }
         });
-        const data = await response.json();
-        res.json({ status: data.order_status });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to verify payment with bank' });
-    }
-});
+        const payments = await response.json();
+        const isPaid = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
 
-app.post('/webhook', async (req, res) => {
-    try {
-        const paymentStatus = req.body.data.payment.payment_status;
-        const orderId = req.body.data.order.order_id;
+        if (isPaid) {
+            await supabase.from('orders').update({ payment_status: 'SUCCESS' }).eq('order_id', orderId);
+            const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
 
-        if (paymentStatus === 'SUCCESS') {
-            const { error } = await supabase.from('orders').update({ payment_status: 'PAID' }).eq('order_id', orderId);
+            if (orderData) {
+                // Burn the single-use promo code
+                if (orderData.applied_promo) {
+                    await supabase.from('promo_codes').update({ is_used: true }).eq('code', orderData.applied_promo);
+                }
 
-            if (!error) {
-                console.log(`[SUCCESS] Order ${orderId} marked as PAID.`);
-                const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
-
-                if (orderData && orderData.customer_email) {
-
-                    // Trigger Shiprocket Automation
-                    await pushToShiprocket(orderData);
-
-                    const { data: profileData } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
-                    if (profileData) {
-                        const newTotal = profileData.loyalty_ml + (orderData.reward_ml || 0) - (orderData.claimed_reward_ml || 0);
-                        await supabase.from('profiles').update({ loyalty_ml: newTotal }).eq('email', orderData.customer_email);
-                    }
-
-                    if (orderData.applied_promo) {
-                        const promo = orderData.applied_promo;
-
-                        if (promo.startsWith('SO-')) {
-                            const refIdPart = promo.substring(3);
-                            const { data: allProfiles } = await supabase.from('profiles').select('id, email, loyalty_ml');
-                            const refUser = allProfiles?.find(p => p.id.toUpperCase().startsWith(refIdPart));
-
-                            if (refUser && refUser.email !== orderData.customer_email) {
-                                const { data: pastRefOrders } = await supabase
-                                    .from('orders').select('id').eq('customer_email', orderData.customer_email)
-                                    .like('applied_promo', 'SO-%').eq('payment_status', 'PAID').neq('order_id', orderId);
-
-                                if (!pastRefOrders || pastRefOrders.length === 0) {
-                                    await supabase.from('profiles').update({ loyalty_ml: refUser.loyalty_ml + 10 }).eq('id', refUser.id);
-                                    console.log(`[REFERRAL] 10 ML poured into ${refUser.email}'s vessel!`);
-                                }
-                            }
-                        } else {
-                            await supabase.from('promo_codes').update({ is_used: true, used_by_email: orderData.customer_email }).eq('code', promo);
-                            console.log(`[VIP BURN] Code ${promo} was successfully used and destroyed.`);
-                        }
-                    }
+                // Update Loyalty ML
+                const { data: profile } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
+                if (profile) {
+                    const newMl = Math.max(0, (profile.loyalty_ml || 0) - (orderData.claimed_reward_ml || 0)) + (orderData.reward_ml || 0);
+                    await supabase.from('profiles').update({ loyalty_ml: newMl }).eq('email', orderData.customer_email);
                 }
             }
+            return res.json({ status: 'SUCCESS' });
         }
-        res.status(200).send('Webhook Received');
-    } catch (error) {
-        console.error("Webhook failed:", error.message);
-        res.status(500).send('Webhook Error');
-    }
+        res.json({ status: 'FAILED' });
+    } catch (err) { res.status(500).json({ error: "Verify failed" }); }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Scent Obsessed secure backend running on port ${PORT}`);
+// --- ADMIN ROUTES ---
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
+        const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: '8h' });
+        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8 * 60 * 60 * 1000 });
+        return res.json({ success: true, redirectUrl: '/admin' });
+    }
+    res.status(401).json({ error: "Invalid login" });
 });
+app.post('/api/admin/logout', (req, res) => { res.clearCookie('admin_token'); res.json({ success: true }); });
+app.get('/api/admin/overview-stats', verifyAdmin, async (req, res) => {
+    const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+    const { data: rev } = await supabase.from('orders').select('total_amount');
+    const total = rev ? rev.reduce((s, o) => s + (Number(o.total_amount) || 0), 0) : 0;
+    res.json({ success: true, totalOrders: count || 0, totalRevenue: total });
+});
+app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
+    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    res.json({ success: true, orders: data });
+});
+app.get('/api/admin/customers', verifyAdmin, async (req, res) => {
+    const { data } = await supabase.from('profiles').select('*');
+    res.json({ success: true, customers: data });
+});
+app.get('/api/admin/marketing', verifyAdmin, async (req, res) => {
+    const { data: promos } = await supabase.from('promo_codes').select('*').order('id', { ascending: false });
+    const { data: leads } = await supabase.from('wheel_leads').select('*').order('created_at', { ascending: false });
+    res.json({ success: true, promos, leads });
+});
+app.post('/api/admin/promo-codes', verifyAdmin, async (req, res) => {
+    const { code, discount } = req.body;
+    await supabase.from('promo_codes').insert([{ code: code.toUpperCase(), discount_percentage: parseInt(discount), is_used: false }]);
+    res.json({ success: true });
+});
+app.delete('/api/admin/promo-codes/:id', verifyAdmin, async (req, res) => {
+    const { error } = await supabase.from('promo_codes').delete().eq('id', req.params.id);
+    res.json({ success: !error });
+});
+app.put('/api/admin/customers/:id', verifyAdmin, async (req, res) => {
+    await supabase.from('profiles').update(req.body).eq('id', req.params.id);
+    res.json({ success: true });
+});
+app.put('/api/admin/orders/:id/address', verifyAdmin, async (req, res) => {
+    await supabase.from('orders').update({ shipping_address: req.body.shipping_address }).eq('id', req.params.id);
+    res.json({ success: true });
+});
+app.get('/admin', verifyAdmin, (req, res) => { res.sendFile(path.join(__dirname, 'private-views', 'admin.html')); });
+app.listen(PORT, () => { console.log(`✅ Scent Obsessed Fortress online at http://localhost:${PORT}`); });
