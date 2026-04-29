@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios');
+const axios = require('axios'); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,17 +13,17 @@ const PORT = process.env.PORT || 5000;
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 if (!process.env.SUPABASE_URL || !supaKey) {
     console.error("❌ ERROR: Supabase URL or Key is missing!");
-    process.exit(1);
+    process.exit(1); 
 }
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
-const CF_URL = "https://api.cashfree.com/pg";
+const CF_URL = "https://api.cashfree.com/pg"; 
 
 const JWT_SECRET = 'super_secret_scent_obsessed_key_123';
 const ADMIN_USERNAME = 'admin';
-const adminPasswordHash = bcrypt.hashSync('admin123', 10);
+const adminPasswordHash = bcrypt.hashSync('admin123', 10); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const verifyAdmin = (req, res, next) => {
     const token = req.cookies.admin_token;
     if (!token) return res.redirect('/login.html');
-    try { jwt.verify(token, JWT_SECRET); next(); }
+    try { jwt.verify(token, JWT_SECRET); next(); } 
     catch (err) { res.clearCookie('admin_token'); return res.redirect('/login.html'); }
 };
 
@@ -73,7 +73,7 @@ async function pushToShiprocket(orderData) {
             billing_address: addr.street || 'Address not provided',
             billing_city: addr.city || 'City not provided',
             billing_pincode: addr.pincode || '000000',
-            billing_state: addr.state || 'Punjab',
+            billing_state: addr.state || 'Punjab', 
             billing_country: "India",
             billing_email: orderData.customer_email || 'info@scentobsessed.in',
             billing_phone: orderData.customer_phone || '9999999999',
@@ -81,8 +81,8 @@ async function pushToShiprocket(orderData) {
             order_items: shiprocketItems,
             payment_method: "Prepaid",
             sub_total: orderData.total_amount,
-            discount: orderDiscount,
-            length: 15, breadth: 15, height: 15, weight: 0.5
+            discount: orderDiscount, 
+            length: 15, breadth: 15, height: 15, weight: 0.5 
         };
 
         const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', orderPayload, {
@@ -121,17 +121,17 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
         const response = await axios.get(`${CF_URL}/orders/${orderId}/payments`, { headers: { 'x-client-id': CF_CLIENT_ID, 'x-client-secret': CF_SECRET_KEY, 'x-api-version': '2023-08-01' } });
-
+        
         const payments = response.data || [];
         const isPaid = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
 
         if (isPaid) {
             await supabase.from('orders').update({ payment_status: 'SUCCESS' }).eq('order_id', orderId);
             const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
-
+            
             if (orderData) {
                 if (orderData.applied_promo) await supabase.from('promo_codes').update({ is_used: true }).eq('code', orderData.applied_promo);
-
+                
                 const { data: profile } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                 if (profile) {
                     const newMl = Math.max(0, (profile.loyalty_ml || 0) - (orderData.claimed_reward_ml || 0)) + (orderData.reward_ml || 0);
@@ -140,7 +140,6 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
 
                 try {
                     await pushToShiprocket(orderData);
-                    // Just keeping it at PREPARING so the admin can manually insert AWB later
                 } catch (srError) { console.log("Shiprocket push failed silently."); }
             }
             return res.json({ status: 'SUCCESS' });
@@ -154,7 +153,7 @@ app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
         const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: '8h' });
-        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8 * 60 * 60 * 1000 });
+        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8*60*60*1000 });
         return res.json({ success: true, redirectUrl: '/admin' });
     }
     res.status(401).json({ error: "Invalid login" });
@@ -196,12 +195,24 @@ app.put('/api/admin/customers/:id', verifyAdmin, async (req, res) => {
     await supabase.from('profiles').update(req.body).eq('id', req.params.id);
     res.json({ success: true });
 });
+
+// Existing Edit Address Route
 app.put('/api/admin/orders/:id/address', verifyAdmin, async (req, res) => {
     await supabase.from('orders').update({ shipping_address: req.body.shipping_address }).eq('id', req.params.id);
     res.json({ success: true });
 });
 
-// 🔥 NEW: Save the AWB manually from the dashboard
+// 🔥 NEW: Edit Customer Phone Route for Orders
+app.put('/api/admin/orders/:id/phone', verifyAdmin, async (req, res) => {
+    try {
+        await supabase.from('orders').update({ customer_phone: req.body.customer_phone }).eq('id', req.params.id);
+        res.json({ success: true });
+    } catch(err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// Save AWB Route
 app.put('/api/admin/orders/:orderId/awb', verifyAdmin, async (req, res) => {
     try {
         await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: req.body.awb_code }).eq('order_id', req.params.orderId);

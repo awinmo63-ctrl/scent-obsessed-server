@@ -451,6 +451,22 @@
             </div>
         </div>
     </div>
+
+    <div id="order-phone-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Edit Contact Number</h3>
+            <p style="font-size: 0.8rem; color: #7f8c8d; margin-top: 5px;">Update the customer's phone number for
+                Shiprocket delivery.</p>
+            <input type="hidden" id="edit-phone-order-id">
+            <label>Phone Number</label>
+            <input type="text" id="edit-order-phone" placeholder="e.g., 9876543210">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeOrderPhoneModal()">Cancel</button>
+                <button class="btn-save" id="btn-save-order-phone" onclick="saveOrderPhone()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <div id="promo-modal" class="modal hidden">
         <div class="modal-content">
             <h3>Create New Promo Code</h3>
@@ -556,26 +572,13 @@
         async function loadOrdersSilently() { try { const res = await fetch('/api/admin/orders'); const data = await res.json(); if (data.success) globalOrders = data.orders; } catch (e) { } }
         async function loadCustomersSilently() { try { const res = await fetch('/api/admin/customers'); const data = await res.json(); if (data.success) globalCustomers = data.customers; } catch (e) { } }
 
-        // --- NEW: Manually Save AWB Function ---
         async function saveManualAWB(orderId) {
             const awbInput = document.getElementById(`awb-input-${orderId}`).value.trim();
             if (!awbInput) return alert("Please paste the AWB number from Shiprocket first.");
-
             try {
-                const res = await fetch(`/api/admin/orders/${orderId}/awb`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ awb_code: awbInput })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    loadOrders(); // Refresh the UI
-                } else {
-                    alert("Failed to save AWB tracking number.");
-                }
-            } catch (err) {
-                alert("Network error.");
-            }
+                const res = await fetch(`/api/admin/orders/${orderId}/awb`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ awb_code: awbInput }) });
+                if ((await res.json()).success) { loadOrders(); } else { alert("Failed to save AWB."); }
+            } catch (err) { alert("Network error."); }
         }
 
         async function loadOrders() {
@@ -603,7 +606,6 @@
 
                         const statusClass = (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') ? 'success' : 'pending';
 
-                        // 🔥 UPDATED: Semi-Automated workflow UI
                         let actionHtml = '';
                         if (order.payment_status === 'SUCCESS' || order.payment_status === 'PAID') {
                             if (order.tracking_status === 'PREPARING' || order.tracking_status === 'PACKED') {
@@ -615,9 +617,7 @@
                                         </button>
                                         <div style="display:flex; gap:10px;">
                                             <input type="text" id="awb-input-${order.order_id}" placeholder="Paste AWB tracking number..." style="flex:1; padding:8px; border:1px solid #bdc3c7; border-radius:4px; font-family:monospace;">
-                                            <button class="btn-save" style="background:#2ecc71; padding: 8px 15px;" onclick="saveManualAWB('${order.order_id}')">
-                                                Save
-                                            </button>
+                                            <button class="btn-save" style="background:#2ecc71; padding: 8px 15px;" onclick="saveManualAWB('${order.order_id}')">Save</button>
                                         </div>
                                     </div>
                                 `;
@@ -628,9 +628,7 @@
                                             <span style="font-size:0.75rem; color:#7f8c8d; text-transform:uppercase; font-weight:600;">Tracking Number</span>
                                             <span style="font-family:monospace; color:#2980b9; font-weight:bold; font-size:1.1rem;">${order.awb_code || 'N/A'}</span>
                                         </div>
-                                        <button class="btn-save" style="background:#e67e22; padding: 8px 15px;" onclick="window.open('https://app.shiprocket.in/seller/shipments/ready-to-ship', '_blank')">
-                                            📦 Print Label
-                                        </button>
+                                        <button class="btn-save" style="background:#e67e22; padding: 8px 15px;" onclick="window.open('https://app.shiprocket.in/seller/shipments/ready-to-ship', '_blank')">📦 Print Label</button>
                                     </div>
                                 `;
                             }
@@ -646,7 +644,7 @@
                                     <div class="order-section">
                                         <h4>👤 Customer Details</h4>
                                         <p><strong>Name:</strong> ${order.customer_name || 'N/A'}</p>
-                                        <p><strong>Phone:</strong> ${order.customer_phone || 'N/A'}</p>
+                                        <p><strong>Phone:</strong> ${order.customer_phone || 'N/A'} <span class="edit-link" onclick="openOrderPhoneModal(${order.id})">[Edit]</span></p>
                                         <p><strong>Ship To:</strong> ${addressStr} <span class="edit-link" onclick="openAddressModal(${order.id})">[Edit]</span></p>
                                     </div>
                                     <div class="order-section">
@@ -669,7 +667,6 @@
             try {
                 const res = await fetch('/api/admin/customers');
                 const data = await res.json();
-
                 if (data.success) {
                     globalCustomers = data.customers;
                     if (globalCustomers.length === 0) { container.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No profiles found in the database yet.</p>'; return; }
@@ -709,7 +706,7 @@
             } catch (error) { promosContainer.innerHTML = '<span style="color: red;">Failed to load marketing data.</span>'; }
         }
 
-        // Modal Logic
+        // --- Address Modal Logic ---
         function openAddressModal(orderId) {
             const order = globalOrders.find(o => o.id === orderId);
             if (!order) return;
@@ -728,6 +725,26 @@
             } catch (error) { alert('Connection error.'); } finally { document.getElementById('btn-save-address').innerText = "Save Changes"; }
         }
 
+        // --- NEW: Phone Modal Logic ---
+        function openOrderPhoneModal(orderId) {
+            const order = globalOrders.find(o => o.id === orderId);
+            if (!order) return;
+            document.getElementById('edit-phone-order-id').value = order.id;
+            document.getElementById('edit-order-phone').value = order.customer_phone || '';
+            document.getElementById('order-phone-modal').classList.remove('hidden');
+        }
+        function closeOrderPhoneModal() { document.getElementById('order-phone-modal').classList.add('hidden'); }
+        async function saveOrderPhone() {
+            const orderId = document.getElementById('edit-phone-order-id').value;
+            const newPhone = document.getElementById('edit-order-phone').value.trim();
+            try {
+                document.getElementById('btn-save-order-phone').innerText = "Saving...";
+                const res = await fetch(`/api/admin/orders/${orderId}/phone`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer_phone: newPhone }) });
+                if ((await res.json()).success) { closeOrderPhoneModal(); loadOrders(); }
+            } catch (error) { alert('Connection error.'); } finally { document.getElementById('btn-save-order-phone').innerText = "Save Changes"; }
+        }
+
+        // --- Promo Modal Logic ---
         function openPromoModal() { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-discount').value = ''; document.getElementById('promo-modal').classList.remove('hidden'); }
         function closePromoModal() { document.getElementById('promo-modal').classList.add('hidden'); }
         async function savePromoCode() {
@@ -744,6 +761,7 @@
             try { const response = await fetch(`/api/admin/promo-codes/${id}`, { method: 'DELETE' }); if ((await response.json()).success) { loadMarketing(); } else { alert("Failed to delete promo."); } } catch (error) { alert("Connection error."); }
         }
 
+        // --- Customer Modal Logic ---
         function openCustomerModal(id) {
             const customer = globalCustomers.find(c => String(c.id) === String(id));
             if (!customer) return;
