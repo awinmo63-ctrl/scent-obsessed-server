@@ -6,17 +6,52 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios'); 
+const rateLimit = require('express-rate-limit'); // 🔥 THE BOUNCER
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// 🔥 CRUCIAL FOR RENDER: Tell Express to trust the proxy so the rate limiter reads the real user IPs, not Render's internal IP.
+app.set('trust proxy', 1); 
+
+// ==========================================
+// --- SECURITY: RATE LIMITERS ---
+// ==========================================
+
+// Global Bouncer: Max 300 requests per 15 minutes per IP
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 300, 
+    message: { error: "Too many requests from this IP, please try again after 15 minutes." },
+    standardHeaders: true, 
+    legacyHeaders: false, 
+});
+
+// Strict Checkout Bouncer: Max 10 checkout attempts per 10 minutes per IP (Stops spam/fraud)
+const checkoutLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 10,
+    message: { error: "Too many checkout attempts. Please wait a few minutes." },
+});
+
+// Strict Login Bouncer: Stops hackers from guessing admin passwords
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: "Too many login attempts. Please try again later." }
+});
+
+// --- SUPABASE ---
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+
 if (!process.env.SUPABASE_URL || !supaKey) {
     console.error("❌ ERROR: Supabase URL or Key is missing!");
     process.exit(1); 
 }
+
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 
+// --- CASHFREE LIVE CONFIG ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const CF_URL = "https://api.cashfree.com/pg"; 
@@ -28,6 +63,10 @@ const adminPasswordHash = bcrypt.hashSync('admin123', 10);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Apply the Global Bouncer to ALL routes
+app.use(globalLimiter);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const verifyAdmin = (req, res, next) => {
@@ -40,6 +79,7 @@ const verifyAdmin = (req, res, next) => {
 // ==========================================
 // --- SHIPROCKET AUTOMATION LOGIC ---
 // ==========================================
+
 async function pushToShiprocket(orderData) {
     try {
         const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', {
@@ -88,14 +128,92 @@ async function pushToShiprocket(orderData) {
         const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', orderPayload, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
+
         return orderRes.data;
     } catch (error) { throw error; }
 }
 
 // ==========================================
+// --- ONE-CLICK DISPATCH API (SMART MODE) ---
+// ==========================================
+
+app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
+    try {
+        const { data: order } = await supabase.from('orders').select('*').eq('order_id', req.params.orderId).single();
+        if (!order) return res.status(404).json({ error: "Order not found in database" });
+
+        const authRes = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', { email: process.env.SHIPROCKET_EMAIL, password: process.env.SHIPROCKET_PASSWORD });
+        const token = authRes.data.token;
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+        let shipmentId = order.shiprocket_shipment_id;
+        let deliveryPincode = "000000";
+        
+        try {
+            const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+            if(addr && addr.pincode) deliveryPincode = addr.pincode;
+        } catch(e) {}
+
+        if (!shipmentId) {
+            const searchRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/orders?search=${req.params.orderId}`, { headers });
+            if (searchRes.data && searchRes.data.data && searchRes.data.data.length > 0) {
+                shipmentId = searchRes.data.data[0].shipments[0]?.id || searchRes.data.data[0].shipment_id;
+            } else {
+                return res.status(400).json({ error: "Order not found in Shiprocket.", details: "Make sure the order was pushed successfully first." });
+            }
+        }
+
+        let awbCode = order.awb_code;
+        
+        if (!awbCode) {
+            try {
+                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '141002'; 
+                const serviceRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${deliveryPincode}&weight=0.5&cod=0`, { headers });
+                
+                let bestCourierId = null;
+                if (serviceRes.data && serviceRes.data.data && serviceRes.data.data.available_courier_companies && serviceRes.data.data.available_courier_companies.length > 0) {
+                    bestCourierId = serviceRes.data.data.available_courier_companies[0].courier_company_id;
+                }
+
+                const payload = { shipment_id: shipmentId };
+                if (bestCourierId) payload.courier_id = bestCourierId;
+
+                const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', payload, { headers });
+                
+                if(awbRes.data.awb_assign_status === 1) {
+                    awbCode = awbRes.data.response.data.awb_code;
+                } else {
+                    return res.status(400).json({ error: "AWB Assignment Failed", details: awbRes.data });
+                }
+            } catch (awbErr) {
+                return res.status(400).json({ error: "Courier Assignment Rejected", details: awbErr.response?.data?.message || awbErr.response?.data || awbErr.message });
+            }
+        }
+
+        try {
+            const labelRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/generate/label', { shipment_id: [shipmentId] }, { headers });
+            const labelUrl = labelRes.data.label_created === 1 ? labelRes.data.label_url : null;
+            
+            if (!labelUrl) return res.status(400).json({ error: "AWB Generated, but label is still rendering.", details: "Try clicking the button again in 60 seconds." });
+
+            await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: awbCode, label_url: labelUrl, shiprocket_shipment_id: shipmentId }).eq('order_id', req.params.orderId);
+            res.json({ success: true, label_url: labelUrl, awb_code: awbCode });
+        } catch (labelErr) {
+            return res.status(400).json({ error: "Label PDF Error", details: labelErr.response?.data?.message || labelErr.message });
+        }
+
+    } catch (error) {
+        console.error(error.response?.data || error.message);
+        res.status(500).json({ error: "Server/Authentication Error", details: error.response?.data || error.message });
+    }
+});
+
+// ==========================================
 // --- CHECKOUT LOGIC ---
 // ==========================================
-app.post('/create-order', async (req, res) => {
+
+// 🔥 Apply the strict checkout bouncer here
+app.post('/create-order', checkoutLimiter, async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
         const orderId = 'ORDER_' + Date.now();
@@ -149,7 +267,9 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
 });
 
 // --- ADMIN ROUTES ---
-app.post('/api/admin/login', (req, res) => {
+
+// 🔥 Apply the strict login bouncer here
+app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
         const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: '8h' });
@@ -158,6 +278,7 @@ app.post('/api/admin/login', (req, res) => {
     }
     res.status(401).json({ error: "Invalid login" });
 });
+
 app.post('/api/admin/logout', (req, res) => { res.clearCookie('admin_token'); res.json({ success: true }); });
 
 app.get('/api/admin/overview-stats', verifyAdmin, async (req, res) => {
@@ -196,13 +317,11 @@ app.put('/api/admin/customers/:id', verifyAdmin, async (req, res) => {
     res.json({ success: true });
 });
 
-// Existing Edit Address Route
 app.put('/api/admin/orders/:id/address', verifyAdmin, async (req, res) => {
     await supabase.from('orders').update({ shipping_address: req.body.shipping_address }).eq('id', req.params.id);
     res.json({ success: true });
 });
 
-// 🔥 NEW: Edit Customer Phone Route for Orders
 app.put('/api/admin/orders/:id/phone', verifyAdmin, async (req, res) => {
     try {
         await supabase.from('orders').update({ customer_phone: req.body.customer_phone }).eq('id', req.params.id);
@@ -212,7 +331,6 @@ app.put('/api/admin/orders/:id/phone', verifyAdmin, async (req, res) => {
     }
 });
 
-// Save AWB Route
 app.put('/api/admin/orders/:orderId/awb', verifyAdmin, async (req, res) => {
     try {
         await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: req.body.awb_code }).eq('order_id', req.params.orderId);
