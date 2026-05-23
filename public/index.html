@@ -211,12 +211,6 @@
       );
     };
 
-    const Floating3DToggle = ({ is3DMode, onToggle3D }) => {
-      return h('button', { onClick: onToggle3D, className: `fixed bottom-6 md:bottom-8 right-4 md:right-8 z-[55] flex items-center gap-2 border px-3 py-2 md:px-4 md:py-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.9)] pointer-events-auto scale-90 md:scale-100 origin-bottom-right ${is3DMode ? 'border-obsessed-gold text-obsessed-gold bg-obsessed-gold/10' : 'border-gray-500 text-gray-300 bg-[#111]/80 hover:border-obsessed-gold hover:text-obsessed-gold'}` },
-        h(Box, { size: 16 }), h('span', { className: "text-[9px] md:text-[10px] font-sans tracking-widest uppercase font-bold" }, is3DMode ? "3D Active" : "View 3D")
-      );
-    };
-
     const RewardModal = ({ isOpen, onClose, onSelect }) => {
       if (!isOpen) return null;
       return h('div', { className: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in pointer-events-auto" },
@@ -636,11 +630,17 @@
       );
     };
 
-    const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user }) => {
+    const Navigation = ({ onSearchClick, onCartClick, onOrdersClick, onMenuClick, cartItemCount, user, is3DMode, onToggle3D }) => {
       return h('nav', { className: "fixed top-[26px] md:top-[34px] left-0 right-0 z-[60] flex justify-between items-center px-4 md:px-8 py-4 md:py-6 mix-blend-difference text-obsessed-cream pointer-events-none" },
         h('div', { className: "flex-1 flex justify-start pointer-events-auto" }, h('button', { className: "hover:text-obsessed-gold transition-colors p-2 -ml-2", onClick: onMenuClick }, h(Menu, { size: 24, strokeWidth: 1 }))),
         h('div', { className: "flex-[2] text-center pointer-events-none flex flex-col items-center justify-center select-none" }, h('h1', { className: "font-display text-[1.1rem] sm:text-lg md:text-2xl tracking-[0.2em] md:tracking-[0.3em] font-bold text-obsessed-gold whitespace-nowrap" }, "SCENT OBSESSED"), h('p', { className: "font-sans text-[0.45rem] sm:text-[0.5rem] md:text-[0.6rem] tracking-[0.4em] md:tracking-[0.5em] mt-1 text-white uppercase opacity-70 hidden sm:block" }, "EAU DE PARFUM")),
-        h('div', { className: "flex-1 flex justify-end gap-1 sm:gap-2 md:gap-4 pointer-events-auto items-center relative z-10" }, h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors p-2" }, h(Search, { size: 20, strokeWidth: 1 })), h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors p-2 ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 })), h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative p-2 -mr-2" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute top-0 right-0 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount)))
+        h('div', { className: "flex-1 flex justify-end gap-1 sm:gap-2 md:gap-4 pointer-events-auto items-center relative z-10" },
+          // 🔥 The new 3D toggle button location!
+          h('button', { onClick: onToggle3D, className: `hover:text-obsessed-gold transition-colors p-2 ${is3DMode ? 'text-obsessed-gold' : 'text-white'}`, title: "Toggle 3D View" }, h(Box, { size: 20, strokeWidth: 1 })),
+          h('button', { onClick: onSearchClick, className: "hover:text-obsessed-gold transition-colors p-2" }, h(Search, { size: 20, strokeWidth: 1 })),
+          h('button', { onClick: onOrdersClick, className: `hover:text-obsessed-gold transition-colors p-2 ${user ? 'text-obsessed-gold' : 'text-white'}` }, h(User, { size: 20, strokeWidth: 1 })),
+          h('button', { onClick: onCartClick, className: "hover:text-obsessed-gold transition-colors relative p-2 -mr-2" }, h(ShoppingBag, { size: 20, strokeWidth: 1 }), cartItemCount > 0 && h('span', { className: "absolute top-0 right-0 bg-obsessed-gold text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" }, cartItemCount))
+        )
       );
     };
 
@@ -925,7 +925,7 @@
         h(TrackingModal, { isOpen: isTrackingModalOpen, onClose: () => setIsTrackingModalOpen(false), order: selectedTrackingOrder }),
         h(SearchOverlay, { isOpen: isSearchOpen, onClose: () => { setIsSearchOpen(false); setSearchQuery(""); }, searchQuery, onSearch: setSearchQuery }),
 
-        // --- LEGAL & STORY MODALS (RESTORED TO ORIGINAL FULL DATA) ---
+        // --- LEGAL & STORY MODALS ---
 
         h(LegalModal, { isOpen: isStoryOpen, onClose: () => setIsStoryOpen(false), title: "Our Story" },
           h('div', { className: "space-y-6 text-center md:text-left flex flex-col items-center md:items-start" },
@@ -1210,8 +1210,19 @@
 
         // FLOATING ELEMENTS
         h(FloatingLoyaltyVessel, { user: user, loyaltyMl: loyaltyMl, showShine: showShine, onClaim: handleClaimClick, cart: cart }),
-        h(Floating3DToggle, { is3DMode, onToggle3D: () => setIs3DMode(!is3DMode) }),
-        h(Navigation, { onSearchClick: () => setIsSearchOpen(!isSearchOpen), onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); }, onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); }, onMenuClick: () => setIsMenuOpen(true), cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0), user: user }),
+
+        // 🔥 The 3D Toggle button is now inside the Navigation component!
+
+        h(Navigation, {
+          onSearchClick: () => setIsSearchOpen(!isSearchOpen),
+          onCartClick: () => { setIsOrdersOpen(false); setIsCartOpen(true); },
+          onOrdersClick: () => { setIsCartOpen(false); setIsOrdersOpen(true); },
+          onMenuClick: () => setIsMenuOpen(true),
+          cartItemCount: cart.reduce((acc, item) => acc + item.qty, 0),
+          user: user,
+          is3DMode: is3DMode,
+          onToggle3D: () => setIs3DMode(!is3DMode)
+        }),
 
         // MAIN VISUALS & SCROLLING CONTENT
         h(VisualsLayer, { products: displayedProducts, activeIndex: activeSection, is3DMode, isSidebarActive: isSidebarActive || isCheckoutActive }),
@@ -1257,7 +1268,6 @@
               h('h4', { className: "font-sans text-xs text-obsessed-gold tracking-[0.2em] uppercase mb-6" }, "Concierge"),
               h('a', { href: "https://mail.google.com/mail/?view=cm&fs=1&to=info@scentobsessed.in", target: "_blank", rel: "noopener noreferrer", className: "font-sans text-sm text-gray-400 hover:text-white transition-colors block mt-4 uppercase tracking-widest text-[10px]" }, "info@scentobsessed.in"),
 
-              // FIXED: The footer phone number link now dynamically opens the dialer on mobile, and WhatsApp Web on Desktop
               h('a', {
                 href: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "tel:+917814930720" : "https://wa.me/917814930720",
                 target: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "_self" : "_blank",
@@ -1403,7 +1413,7 @@
       color: #d4af37;
     }
 
-    /* Mobile Responsiveness for Chat Widget */
+    /* Mobile Responsiveness */
     @media (max-width: 640px) {
       #chat-window {
         width: calc(100% - 40px);
