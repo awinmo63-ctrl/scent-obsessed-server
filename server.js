@@ -5,14 +5,15 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios'); 
+const axios = require('axios');
 const rateLimit = require('express-rate-limit'); // 🔥 THE BOUNCER
+const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🔥 THE AI BRAIN
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // 🔥 CRUCIAL FOR RENDER: Tell Express to trust the proxy so the rate limiter reads the real user IPs, not Render's internal IP.
-app.set('trust proxy', 1); 
+app.set('trust proxy', 1);
 
 // ==========================================
 // --- SECURITY: RATE LIMITERS ---
@@ -20,11 +21,11 @@ app.set('trust proxy', 1);
 
 // Global Bouncer: Max 300 requests per 15 minutes per IP
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 300, 
+    windowMs: 15 * 60 * 1000,
+    max: 300,
     message: { error: "Too many requests from this IP, please try again after 15 minutes." },
-    standardHeaders: true, 
-    legacyHeaders: false, 
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 // Strict Checkout Bouncer: Max 10 checkout attempts per 10 minutes per IP (Stops spam/fraud)
@@ -41,12 +42,19 @@ const loginLimiter = rateLimit({
     message: { error: "Too many login attempts. Please try again later." }
 });
 
+// Strict Chat Bouncer: Protects your AI API from spam
+const chatLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 20,
+    message: { error: "Chat limit reached. Please contact our showroom on WhatsApp for further assistance." }
+});
+
 // --- SUPABASE ---
 const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
 
 if (!process.env.SUPABASE_URL || !supaKey) {
     console.error("❌ ERROR: Supabase URL or Key is missing!");
-    process.exit(1); 
+    process.exit(1);
 }
 
 const supabase = createClient(process.env.SUPABASE_URL, supaKey);
@@ -54,11 +62,11 @@ const supabase = createClient(process.env.SUPABASE_URL, supaKey);
 // --- CASHFREE LIVE CONFIG ---
 const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
-const CF_URL = "https://api.cashfree.com/pg"; 
+const CF_URL = "https://api.cashfree.com/pg";
 
 const JWT_SECRET = 'super_secret_scent_obsessed_key_123';
 const ADMIN_USERNAME = 'admin';
-const adminPasswordHash = bcrypt.hashSync('admin123', 10); 
+const adminPasswordHash = bcrypt.hashSync('admin123', 10);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -72,7 +80,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const verifyAdmin = (req, res, next) => {
     const token = req.cookies.admin_token;
     if (!token) return res.redirect('/login.html');
-    try { jwt.verify(token, JWT_SECRET); next(); } 
+    try { jwt.verify(token, JWT_SECRET); next(); }
     catch (err) { res.clearCookie('admin_token'); return res.redirect('/login.html'); }
 };
 
@@ -113,7 +121,7 @@ async function pushToShiprocket(orderData) {
             billing_address: addr.street || 'Address not provided',
             billing_city: addr.city || 'City not provided',
             billing_pincode: addr.pincode || '000000',
-            billing_state: addr.state || 'Punjab', 
+            billing_state: addr.state || 'Punjab',
             billing_country: "India",
             billing_email: orderData.customer_email || 'info@scentobsessed.in',
             billing_phone: orderData.customer_phone || '9999999999',
@@ -121,8 +129,8 @@ async function pushToShiprocket(orderData) {
             order_items: shiprocketItems,
             payment_method: "Prepaid",
             sub_total: orderData.total_amount,
-            discount: orderDiscount, 
-            length: 15, breadth: 15, height: 15, weight: 0.5 
+            discount: orderDiscount,
+            length: 15, breadth: 15, height: 15, weight: 0.5
         };
 
         const orderRes = await axios.post('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', orderPayload, {
@@ -148,11 +156,11 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
 
         let shipmentId = order.shiprocket_shipment_id;
         let deliveryPincode = "000000";
-        
+
         try {
             const addr = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
-            if(addr && addr.pincode) deliveryPincode = addr.pincode;
-        } catch(e) {}
+            if (addr && addr.pincode) deliveryPincode = addr.pincode;
+        } catch (e) { }
 
         if (!shipmentId) {
             const searchRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/orders?search=${req.params.orderId}`, { headers });
@@ -164,12 +172,12 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
         }
 
         let awbCode = order.awb_code;
-        
+
         if (!awbCode) {
             try {
-                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '141002'; 
+                const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || '141002';
                 const serviceRes = await axios.get(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${deliveryPincode}&weight=0.5&cod=0`, { headers });
-                
+
                 let bestCourierId = null;
                 if (serviceRes.data && serviceRes.data.data && serviceRes.data.data.available_courier_companies && serviceRes.data.data.available_courier_companies.length > 0) {
                     bestCourierId = serviceRes.data.data.available_courier_companies[0].courier_company_id;
@@ -179,8 +187,8 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
                 if (bestCourierId) payload.courier_id = bestCourierId;
 
                 const awbRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', payload, { headers });
-                
-                if(awbRes.data.awb_assign_status === 1) {
+
+                if (awbRes.data.awb_assign_status === 1) {
                     awbCode = awbRes.data.response.data.awb_code;
                 } else {
                     return res.status(400).json({ error: "AWB Assignment Failed", details: awbRes.data });
@@ -193,7 +201,7 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
         try {
             const labelRes = await axios.post('https://apiv2.shiprocket.in/v1/external/courier/generate/label', { shipment_id: [shipmentId] }, { headers });
             const labelUrl = labelRes.data.label_created === 1 ? labelRes.data.label_url : null;
-            
+
             if (!labelUrl) return res.status(400).json({ error: "AWB Generated, but label is still rendering.", details: "Try clicking the button again in 60 seconds." });
 
             await supabase.from('orders').update({ tracking_status: 'SHIPPED', awb_code: awbCode, label_url: labelUrl, shiprocket_shipment_id: shipmentId }).eq('order_id', req.params.orderId);
@@ -239,17 +247,17 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
         const response = await axios.get(`${CF_URL}/orders/${orderId}/payments`, { headers: { 'x-client-id': CF_CLIENT_ID, 'x-client-secret': CF_SECRET_KEY, 'x-api-version': '2023-08-01' } });
-        
+
         const payments = response.data || [];
         const isPaid = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
 
         if (isPaid) {
             await supabase.from('orders').update({ payment_status: 'SUCCESS' }).eq('order_id', orderId);
             const { data: orderData } = await supabase.from('orders').select('*').eq('order_id', orderId).single();
-            
+
             if (orderData) {
                 if (orderData.applied_promo) await supabase.from('promo_codes').update({ is_used: true }).eq('code', orderData.applied_promo);
-                
+
                 const { data: profile } = await supabase.from('profiles').select('loyalty_ml').eq('email', orderData.customer_email).single();
                 if (profile) {
                     const newMl = Math.max(0, (profile.loyalty_ml || 0) - (orderData.claimed_reward_ml || 0)) + (orderData.reward_ml || 0);
@@ -266,6 +274,38 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Verify failed" }); }
 });
 
+// ==========================================
+// --- AI CUSTOMER CONCIERGE (GEMINI) ---
+// ==========================================
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const systemInstruction = `You are the elite digital concierge for Scent Obsessed, a luxury perfume brand operating out of Ludhiana. 
+Your Tone: Professional, sophisticated, and deeply knowledgeable about luxury fragrance. Speak like a high-end boutique manager.
+Zone 1 (Products): Our flagship Extrait de Parfums are 'Flora Essence', 'Blue Monarch', 'Savage Wind', and 'Urban Ember'. All 50ml bottles are strictly ₹2,499.
+Zone 2 (Logistics): We handle all logistics via secure Shiprocket dispatch (standard 3-5 business days). Payments are secured via Cashfree. We are partnered with Dare Elevate for our digital presence.
+Zone 3 (Rules): Keep answers concise (under 3 sentences). NEVER invent shipping times or discount codes. Prices are non-negotiable. If a user asks about another brand or a complex refund issue, politely advise them to email info@scentobsessed.in.`;
+
+let aiModel;
+if (process.env.GEMINI_API_KEY) {
+    aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction });
+}
+
+app.post('/api/chat', chatLimiter, async (req, res) => {
+    try {
+        if (!aiModel) return res.status(500).json({ error: "AI Concierge is currently offline. Key missing." });
+
+        const userMessage = req.body.message;
+        if (!userMessage) return res.status(400).json({ error: "Message is required." });
+
+        const result = await aiModel.generateContent(userMessage);
+        const responseText = result.response.text();
+        res.json({ reply: responseText });
+    } catch (error) {
+        console.error("Gemini API Error:", error.message);
+        res.status(500).json({ error: "Our concierge is currently stepping away. Please try again in a moment." });
+    }
+});
+
 // --- ADMIN ROUTES ---
 
 // 🔥 Apply the strict login bouncer here
@@ -273,7 +313,7 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
         const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: '8h' });
-        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8*60*60*1000 });
+        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8 * 60 * 60 * 1000 });
         return res.json({ success: true, redirectUrl: '/admin' });
     }
     res.status(401).json({ error: "Invalid login" });
@@ -326,7 +366,7 @@ app.put('/api/admin/orders/:id/phone', verifyAdmin, async (req, res) => {
     try {
         await supabase.from('orders').update({ customer_phone: req.body.customer_phone }).eq('id', req.params.id);
         res.json({ success: true });
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({ success: false });
     }
 });
