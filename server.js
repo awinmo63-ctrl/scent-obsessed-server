@@ -12,14 +12,13 @@ const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🔥 THE AI 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 🔥 CRUCIAL FOR RENDER: Tell Express to trust the proxy so the rate limiter reads the real user IPs, not Render's internal IP.
+// 🔥 CRUCIAL FOR RENDER: Trust the proxy
 app.set('trust proxy', 1);
 
 // ==========================================
 // --- SECURITY: RATE LIMITERS ---
 // ==========================================
 
-// Global Bouncer: Max 300 requests per 15 minutes per IP
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
@@ -28,21 +27,18 @@ const globalLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// Strict Checkout Bouncer: Max 10 checkout attempts per 10 minutes per IP (Stops spam/fraud)
 const checkoutLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 10,
     message: { error: "Too many checkout attempts. Please wait a few minutes." },
 });
 
-// Strict Login Bouncer: Stops hackers from guessing admin passwords
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
     message: { error: "Too many login attempts. Please try again later." }
 });
 
-// Strict Chat Bouncer: Protects your AI API from spam
 const chatLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
     max: 20,
@@ -71,10 +67,7 @@ const adminPasswordHash = bcrypt.hashSync('admin123', 10);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Apply the Global Bouncer to ALL routes
 app.use(globalLimiter);
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 const verifyAdmin = (req, res, next) => {
@@ -220,7 +213,6 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
 // --- CHECKOUT LOGIC ---
 // ==========================================
 
-// 🔥 Apply the strict checkout bouncer here
 app.post('/create-order', checkoutLimiter, async (req, res) => {
     try {
         const { orderAmount, customerName, customerPhone, customerEmail, shippingAddress, rewardMl, claimedRewardMl, cartItems, appliedPromo } = req.body;
@@ -279,6 +271,8 @@ app.get('/api/verify-payment/:orderId', async (req, res) => {
 // ==========================================
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// 🔥 The Zone Data is safely hardcoded right here
 const systemInstruction = `You are the elite digital concierge for Scent Obsessed, a luxury perfume brand operating out of Ludhiana. 
 Your Tone: Professional, sophisticated, and deeply knowledgeable about luxury fragrance. Speak like a high-end boutique manager.
 Zone 1 (Products): Our flagship Extrait de Parfums are 'Flora Essence', 'Blue Monarch', 'Savage Wind', and 'Urban Ember'. All 50ml bottles are strictly ₹2,499.
@@ -287,7 +281,8 @@ Zone 3 (Rules): Keep answers concise (under 3 sentences). NEVER invent shipping 
 
 let aiModel;
 if (process.env.GEMINI_API_KEY) {
-    aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction });
+    // 🔥 FIX: Upgraded from the retired 1.5 model to the active 2.5 engine
+    aiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction });
 }
 
 app.post('/api/chat', chatLimiter, async (req, res) => {
@@ -306,9 +301,10 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
     }
 });
 
+// ==========================================
 // --- ADMIN ROUTES ---
+// ==========================================
 
-// 🔥 Apply the strict login bouncer here
 app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
@@ -334,24 +330,29 @@ app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     res.json({ success: true, orders: data });
 });
+
 app.get('/api/admin/customers', verifyAdmin, async (req, res) => {
     const { data } = await supabase.from('profiles').select('*');
     res.json({ success: true, customers: data });
 });
+
 app.get('/api/admin/marketing', verifyAdmin, async (req, res) => {
     const { data: promos } = await supabase.from('promo_codes').select('*').order('id', { ascending: false });
     const { data: leads } = await supabase.from('wheel_leads').select('*').order('created_at', { ascending: false });
     res.json({ success: true, promos, leads });
 });
+
 app.post('/api/admin/promo-codes', verifyAdmin, async (req, res) => {
     const { code, discount } = req.body;
     await supabase.from('promo_codes').insert([{ code: code.toUpperCase(), discount_percentage: parseInt(discount), is_used: false }]);
     res.json({ success: true });
 });
+
 app.delete('/api/admin/promo-codes/:id', verifyAdmin, async (req, res) => {
     const { error } = await supabase.from('promo_codes').delete().eq('id', req.params.id);
     res.json({ success: !error });
 });
+
 app.put('/api/admin/customers/:id', verifyAdmin, async (req, res) => {
     await supabase.from('profiles').update(req.body).eq('id', req.params.id);
     res.json({ success: true });
