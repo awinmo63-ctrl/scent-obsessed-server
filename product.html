@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scent Obsessed — Fragrance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<style>
+  :root{
+    --bone:#F4EFE7; --bone-2:#ECE4D6; --ink:#1A1714; --ink-soft:#2C2822;
+    --muted:#6F675B; --line:#DED4C4; --cognac:#8A5A2C; --cognac-2:#B27E48;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bone); color:var(--ink); font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+  .display{font-family:'Fraunces',serif; font-optical-sizing:auto}
+  .eyebrow{font-size:11px; letter-spacing:.32em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  a{color:inherit; text-decoration:none}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 40px}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:16px 30px; background:var(--ink); color:var(--bone); font-size:12px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; border:1px solid var(--ink); transition:.4s cubic-bezier(.2,.7,.2,1); cursor:pointer}
+  .btn:hover{background:transparent; color:var(--ink)}
+  .btn.block{width:100%}
+
+  .announce{background:var(--ink); color:#CDBFA6; text-align:center; padding:9px 0; font-size:11px; letter-spacing:.28em; text-transform:uppercase}
+  nav{position:sticky; top:0; z-index:50; background:rgba(244,239,231,.82); backdrop-filter:blur(14px); border-bottom:1px solid var(--line)}
+  .nav-in{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; height:74px}
+  .nav-links{display:flex; gap:34px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:500}
+  .nav-links a{color:var(--ink-soft)}
+  .nav-links a:hover{color:var(--cognac)}
+  .brand{font-size:21px; letter-spacing:.42em; text-transform:uppercase; font-weight:500; text-align:center; padding-left:.42em}
+  .nav-right{display:flex; gap:26px; justify-content:flex-end; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; color:var(--ink-soft)}
+  .nav-right span{cursor:pointer} .nav-right span:hover{color:var(--cognac)}
+
+  .crumb{padding:26px 0 0; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+  .crumb a:hover{color:var(--cognac)}
+
+  .pd{display:grid; grid-template-columns:1.05fr .95fr; gap:60px; padding:34px 0 90px; align-items:start}
+  .visual{position:sticky; top:100px}
+  .stage{position:relative; background:linear-gradient(160deg,#fff,var(--bone-2)); border:1px solid var(--line); height:600px; display:flex; align-items:center; justify-content:center; overflow:hidden}
+  .stage .halo{position:absolute; width:420px; height:420px; border-radius:50%; background:radial-gradient(circle at 50% 40%,#fff7ea 0%, transparent 68%); filter:blur(4px)}
+  .stage img{max-height:520px; z-index:2; filter:drop-shadow(0 44px 50px rgba(26,23,20,.3))}
+  .stage model-viewer{width:100%; height:100%; --poster-color:transparent; background:transparent; z-index:2}
+  .stage .no{position:absolute; top:20px; left:22px; font-size:11px; letter-spacing:.2em; color:var(--muted); z-index:3}
+  .toggles{display:flex; gap:10px; margin-top:14px}
+  .toggles button{flex:1; padding:12px; background:transparent; border:1px solid var(--line); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:.3s; font-family:inherit}
+  .toggles button.active{background:var(--ink); color:var(--bone); border-color:var(--ink)}
+
+  .info .tag{color:var(--cognac); font-size:12px; letter-spacing:.2em; text-transform:uppercase; font-weight:600; margin-bottom:14px}
+  .info h1{font-size:clamp(40px,5vw,66px); font-weight:400; line-height:1; letter-spacing:-.01em; margin-bottom:20px}
+  .info .price{font-family:'Fraunces',serif; font-size:26px; margin-bottom:24px}
+  .info .price small{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-family:'Manrope',sans-serif; margin-left:10px}
+  .info .intro{color:var(--muted); font-size:16px; line-height:1.75; max-width:460px; margin-bottom:30px}
+  .buyrow{display:flex; gap:14px; align-items:stretch; margin-bottom:16px; max-width:460px}
+  .qty{display:flex; align-items:center; border:1px solid var(--ink); }
+  .qty button{width:46px; background:transparent; border:none; font-size:18px; cursor:pointer; color:var(--ink)}
+  .qty span{width:40px; text-align:center; font-family:'Fraunces',serif}
+  .ship-line{font-size:12px; letter-spacing:.06em; color:var(--muted); margin-bottom:40px}
+  .ship-line b{color:var(--ink); font-weight:600}
+
+  .specs{display:flex; gap:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); max-width:460px; margin-bottom:44px}
+  .specs .s{flex:1; padding:20px 0; border-right:1px solid var(--line)}
+  .specs .s:last-child{border-right:none}
+  .specs .s .k{font-family:'Fraunces',serif; font-size:22px}
+  .specs .s .v{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-top:4px}
+
+  .notes h3{font-family:'Fraunces',serif; font-size:14px; letter-spacing:.04em; text-transform:uppercase; color:var(--cognac); margin-bottom:24px}
+  .pyramid{display:flex; flex-direction:column; gap:0}
+  .layer{display:grid; grid-template-columns:90px 1fr; gap:20px; padding:20px 0; border-top:1px solid var(--line); align-items:baseline}
+  .layer:last-child{border-bottom:1px solid var(--line)}
+  .layer .lname{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+  .layer .lval{font-family:'Fraunces',serif; font-size:19px; line-height:1.4}
+
+  .composition{background:var(--ink); color:var(--bone); padding:110px 0}
+  .composition .eyebrow{color:var(--cognac-2)}
+  .composition h2{font-family:'Fraunces',serif; font-size:clamp(28px,3.4vw,40px); font-weight:300; margin:22px 0 34px; max-width:760px; letter-spacing:-.01em}
+  .composition p{color:#C9BFB0; font-size:16px; line-height:1.85; max-width:720px; white-space:pre-line}
+
+  .related{padding:100px 0}
+  .related .sec-head{display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:44px}
+  .related h2{font-family:'Fraunces',serif; font-size:34px; font-weight:400}
+  .rgrid{display:grid; grid-template-columns:repeat(3,1fr); border-left:1px solid var(--line)}
+  .rcard{border-right:1px solid var(--line); border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:28px 24px; cursor:pointer; transition:.4s}
+  .rcard:hover{background:#fff}
+  .rcard .ri{height:230px; display:flex; align-items:center; justify-content:center; margin-bottom:18px}
+  .rcard .ri img{max-height:220px; filter:drop-shadow(0 20px 24px rgba(26,23,20,.2)); transition:.5s}
+  .rcard:hover .ri img{transform:translateY(-8px)}
+  .rcard .rt{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--cognac); margin-bottom:6px}
+  .rcard h4{font-family:'Fraunces',serif; font-size:20px; font-weight:500}
+  .rcard .rp{font-family:'Fraunces',serif; margin-top:10px; color:var(--muted)}
+
+  footer{background:var(--ink); color:#B7AD9E; padding:80px 0 40px}
+  .foot-grid{display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; padding-bottom:50px; border-bottom:1px solid #35302A}
+  footer .fbrand{font-family:'Fraunces',serif; font-size:30px; color:var(--bone); letter-spacing:.06em}
+  footer .fbrand+p{margin-top:16px; max-width:280px; font-size:14px; line-height:1.7}
+  footer h5{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--bone); margin-bottom:20px}
+  footer ul{list-style:none; display:flex; flex-direction:column; gap:12px; font-size:14px}
+  footer ul a:hover{color:var(--cognac-2)}
+  .foot-bot{display:flex; justify-content:space-between; padding-top:24px; font-size:12px; color:#7C7367}
+
+  .toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bone); padding:16px 28px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:0; transition:.4s; z-index:100; pointer-events:none}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:960px){
+    .wrap{padding:0 22px}
+    .nav-links,.nav-right{display:none}
+    .nav-in{grid-template-columns:1fr}
+    .pd{grid-template-columns:1fr; gap:34px}
+    .visual{position:static}
+    .stage{height:440px}
+    .rgrid{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="announce">Extrait de Parfum · 30% Concentration &nbsp;✦&nbsp; Complimentary Secure Shipping Across India</div>
+
+<nav>
+  <div class="wrap nav-in">
+    <div class="nav-links">
+      <a href="index.html#collection">The Collection</a>
+      <a href="index.html#story">Maison</a>
+      <a href="index.html#loyalty">Loyalty</a>
+    </div>
+    <a class="brand" href="index.html">Scent Obsessed</a>
+    <div class="nav-right">
+      <span>Search</span><span>Account</span><span id="cartCount">Cart&nbsp;(0)</span>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap crumb"><a href="index.html">Home</a> &nbsp;/&nbsp; <a href="index.html#collection">Collection</a> &nbsp;/&nbsp; <span id="crumbName">Fragrance</span></div>
+
+<main class="wrap pd">
+  <div class="visual">
+    <div class="stage">
+      <div class="no" id="stageNo">N° 01</div>
+      <div class="halo"></div>
+      <img id="stageImg" src="" alt="">
+      <model-viewer id="stageModel" style="display:none" camera-controls auto-rotate disable-zoom interaction-prompt="none" shadow-intensity="0.6" exposure="1"></model-viewer>
+    </div>
+    <div class="toggles">
+      <button id="tImg" class="active" onclick="showImg()">Flacon</button>
+      <button id="t3d" onclick="show3D()">View in 3D</button>
+    </div>
+  </div>
+
+  <div class="info">
+    <div class="tag" id="pTag">Tagline</div>
+    <h1 class="display" id="pName">Product</h1>
+    <div class="price"><span id="pPrice">₹ 2,499</span><small>50ml · Extrait</small></div>
+    <p class="intro" id="pIntro"></p>
+
+    <div class="buyrow">
+      <div class="qty">
+        <button onclick="chg(-1)">−</button><span id="qty">1</span><button onclick="chg(1)">+</button>
+      </div>
+      <button class="btn block" onclick="addToCart()">Add to Cart</button>
+    </div>
+    <div class="ship-line">Ships in <b>3–5 business days</b> · Tracked &amp; insured · Complimentary across India</div>
+
+    <div class="specs">
+      <div class="s"><div class="k display">30%</div><div class="v">Concentration</div></div>
+      <div class="s"><div class="k display">50ml</div><div class="v">Volume</div></div>
+      <div class="s"><div class="k display">8h+</div><div class="v">Longevity</div></div>
+    </div>
+
+    <div class="notes">
+      <h3>The Notes</h3>
+      <div class="pyramid">
+        <div class="layer"><div class="lname">Top</div><div class="lval display" id="nTop"></div></div>
+        <div class="layer"><div class="lname">Heart</div><div class="lval display" id="nHeart"></div></div>
+        <div class="layer"><div class="lname">Base</div><div class="lval display" id="nBase"></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<section class="composition">
+  <div class="wrap">
+    <p class="eyebrow">The Composition</p>
+    <h2 id="cHead"></h2>
+    <p id="cNarr"></p>
+  </div>
+</section>
+
+<section class="related wrap">
+  <div class="sec-head"><h2 class="display">Complete the <em>Collection</em></h2><a class="eyebrow" href="index.html#collection">View all →</a></div>
+  <div class="rgrid" id="related"></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><div class="fbrand">Scent Obsessed</div><p>Extrait de parfum, handcrafted in Ludhiana for those who intend to be unforgettable.</p></div>
+      <div><h5>Shop</h5><ul id="footShop"></ul></div>
+      <div><h5>Maison</h5><ul><li><a href="index.html#story">Our Craft</a></li><li><a href="index.html#loyalty">Loyalty</a></li></ul></div>
+      <div><h5>Care</h5><ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+    </div>
+    <div class="foot-bot"><span>© 2026 Scent Obsessed</span><span>Secured by Cashfree · Delivered by Shiprocket</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PRODUCTS = {
+    'blue-monarch': { no:'01', name:'Blue Monarch', tag:'Rule Your Realm', price:'₹ 2,499',
+      img:'blue_monarch.png', model:'blue_monarch.glb', orientation:'0deg -90deg 0deg',
+      intro:'A fragrance for those who write their own rules — a tribute to absolute freedom, power, and timeless elegance.',
+      notes:{ top:'Zesty Citrus · Cool Mint', heart:'Aromatic Ginger · Warm Nutmeg', base:'Sandalwood · Vetiver · Smoky Incense' },
+      head:'A reign cemented in sandalwood, vetiver, and smoke.',
+      narrative:"Ascend to a new level of sophistication with Blue Monarch. The experience begins with an invigorating burst of zesty citrus and cool mint, instantly awakening the senses.\n\nAs the scent unfolds, it reveals a magnetic heart of aromatic ginger and warm nutmeg — a perfect balance between sharp freshness and spicy depth.\n\nThe reign is cemented in its base: a profound blend of rich sandalwood, earthy vetiver, and a touch of smoky incense that leaves a trail of undeniable authority." },
+    'urban-ember': { no:'02', name:'Urban Ember', tag:'Ignite Your Presence', price:'₹ 2,499',
+      img:'urban_ember.png', model:'urban_ember.glb', orientation:'0deg -90deg 0deg',
+      intro:'For the modern trailblazer who commands attention without saying a word — the electric energy of the city at twilight.',
+      notes:{ top:'Bergamot · Lavender · Black Pepper · Cinnamon', heart:'Port Wine · Leather · Mimosa', base:'Warm Smoke · Amber Dry-down' },
+      head:'Port wine, leather, and a lasting smoky impression.',
+      narrative:"Capture the electric energy of the city at twilight. The journey begins with a vibrant spark — fresh Bergamot and Lavender collide with the fiery heat of Black Pepper and Cinnamon Leaves.\n\nAs the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of Port Wine blends seamlessly with rugged Leather and the soft allure of Mimosa Flower.\n\nFinally, the dry down leaves a lasting, smoky impression." },
+    'flora-essence': { no:'03', name:'Flora Essence', tag:'The Scent of Sunlight', price:'₹ 2,499',
+      img:'flora_essence.jpeg', model:'flora_essence.glb', orientation:'0deg 0deg 0deg',
+      intro:'A fragrance that celebrates light, nature, and pure optimism — the golden glow of a blooming garden at dawn.',
+      notes:{ top:'Mandarin Essence', heart:'Magnolia · Grandiflorum Jasmine', base:'Creamy Sandalwood' },
+      head:'Opulent yet airy — jasmine and magnolia over sandalwood.',
+      narrative:"Capture the golden glow of a blooming garden at dawn. The experience opens with a burst of liquid sunshine — zesty Mandarin Essence provides an immediate, uplifting rush of citrus energy.\n\nAs the scent warms on the skin, it unveils a lush, botanical heart: the creamy richness of Magnolia blends effortlessly with the hypnotic depth of Grandiflorum Jasmine.\n\nGrounding this ethereal bouquet is a smooth base of Sandalwood, adding a warm, woody texture that lingers close to the skin." },
+    'savage-wind': { no:'04', name:'Savage Wind', tag:'Unleash the Storm', price:'₹ 2,499',
+      img:'savage_wind.png', model:'savage_wind.glb', orientation:'0deg 0deg 0deg',
+      intro:'A powerful force of nature, designed for the free spirit who refuses to be tamed.',
+      notes:{ top:'Crisp Bergamot', heart:'Nutmeg · Lavender', base:'Vanilla Absolute · Smoke' },
+      head:'A dark overdose of vanilla absolute, wrapped in smoke.',
+      narrative:"Experience the rush of the untamed. The scent opens with a gust of crisp, electric freshness — Bergamot hits the skin like a cool breeze.\n\nBut the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction — a rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness." }
+  };
+
+  const CART_KEY = 'scent_obsessed_cart';
+  const params = new URLSearchParams(location.search);
+  let id = params.get('id');
+  if(!PRODUCTS[id]) id = 'blue-monarch';
+  const p = PRODUCTS[id];
+  let quantity = 1;
+
+  // populate
+  document.title = 'Scent Obsessed — ' + p.name;
+  document.getElementById('crumbName').textContent = p.name;
+  document.getElementById('stageNo').textContent = 'N° ' + p.no;
+  document.getElementById('stageImg').src = p.img;
+  document.getElementById('stageImg').alt = p.name;
+  document.getElementById('pTag').textContent = p.tag;
+  document.getElementById('pName').textContent = p.name;
+  document.getElementById('pPrice').textContent = p.price;
+  document.getElementById('pIntro').textContent = p.intro;
+  document.getElementById('nTop').textContent = p.notes.top;
+  document.getElementById('nHeart').textContent = p.notes.heart;
+  document.getElementById('nBase').textContent = p.notes.base;
+  document.getElementById('cHead').textContent = p.head;
+  document.getElementById('cNarr').textContent = p.narrative;
+
+  const mv = document.getElementById('stageModel');
+  mv.setAttribute('src', p.model);
+  mv.setAttribute('orientation', p.orientation);
+
+  function showImg(){ document.getElementById('stageImg').style.display='block'; mv.style.display='none';
+    document.getElementById('tImg').classList.add('active'); document.getElementById('t3d').classList.remove('active'); }
+  function show3D(){ document.getElementById('stageImg').style.display='none'; mv.style.display='block';
+    document.getElementById('t3d').classList.add('active'); document.getElementById('tImg').classList.remove('active'); }
+
+  function chg(d){ quantity=Math.max(1,quantity+d); document.getElementById('qty').textContent=quantity; }
+
+  function getCart(){ try{ return JSON.parse(localStorage.getItem(CART_KEY))||[]; }catch(e){ return []; } }
+  function setCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); updateCount(); }
+  function updateCount(){ const n=getCart().reduce((s,i)=>s+(i.qty||0),0); document.getElementById('cartCount').innerHTML='Cart&nbsp;('+n+')'; }
+
+  function addToCart(){
+    const cart=getCart();
+    const existing=cart.find(i=>i.id===id && !i.isReward);
+    if(existing){ existing.qty+=quantity; }
+    else{ cart.push({ id:id, name:p.name, price:p.price, imageUrl:p.img, qty:quantity }); }
+    setCart(cart);
+    toast(p.name+' added to cart');
+  }
+
+  let tt;
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2600); }
+
+  // related + footer shop
+  const rel=document.getElementById('related'); const footShop=document.getElementById('footShop');
+  Object.entries(PRODUCTS).forEach(([pid,pr])=>{
+    const li=document.createElement('li'); li.innerHTML='<a href="product.html?id='+pid+'">'+pr.name+'</a>'; footShop.appendChild(li);
+    if(pid===id) return;
+    const div=document.createElement('div'); div.className='rcard'; div.onclick=()=>location.href='product.html?id='+pid;
+    div.innerHTML='<div class="ri"><img src="'+pr.img+'" alt="'+pr.name+'"></div><div class="rt">'+pr.tag+'</div><h4 class="display">'+pr.name+'</h4><div class="rp">'+pr.price+'</div>';
+    rel.appendChild(div);
+  });
+
+  updateCount();
+</script>
+</body>
+</html>
