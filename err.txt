@@ -1,0 +1,1 @@
+rm: cannot remove '.git/index.lock': Operation not permitted

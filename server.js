@@ -60,9 +60,20 @@ const CF_CLIENT_ID = process.env.CASHFREE_APP_ID;
 const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const CF_URL = "https://api.cashfree.com/pg";
 
-const JWT_SECRET = 'super_secret_scent_obsessed_key_123';
-const ADMIN_USERNAME = 'admin';
-const adminPasswordHash = bcrypt.hashSync('admin123', 10);
+// --- ADMIN AUTH (secrets pulled from env; safe fallbacks with loud warnings) ---
+const crypto = require('crypto');
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.JWT_SECRET) {
+    console.warn("⚠️  JWT_SECRET not set — using a random per-boot secret. Admin sessions will reset on every restart. Set JWT_SECRET in your environment.");
+}
+
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
+    ? process.env.ADMIN_PASSWORD_HASH
+    : bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'admin123', 10);
+if (!process.env.ADMIN_PASSWORD_HASH && !process.env.ADMIN_PASSWORD) {
+    console.warn("⚠️  Admin password not set in env — falling back to an INSECURE default. Set ADMIN_PASSWORD_HASH before going live.");
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -309,7 +320,7 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USERNAME && bcrypt.compareSync(password, adminPasswordHash)) {
         const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: '8h' });
-        res.cookie('admin_token', token, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 8 * 60 * 60 * 1000 });
+        res.cookie('admin_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 8 * 60 * 60 * 1000 });
         return res.json({ success: true, redirectUrl: '/admin' });
     }
     res.status(401).json({ error: "Invalid login" });
