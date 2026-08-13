@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scent Obsessed — Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#F4EFE7; --bone-2:#ECE4D6; --ink:#1A1714; --ink-soft:#2C2822;
+    --muted:#6F675B; --line:#DED4C4; --cognac:#8A5A2C; --cognac-2:#B27E48;
+    --shadow:0 40px 80px -30px rgba(26,23,20,.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bone); color:var(--ink);
+    font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Fraunces',serif; font-optical-sizing:auto;}
+  .eyebrow{font-size:11px; letter-spacing:.32em; text-transform:uppercase; color:var(--muted); font-weight:600;}
+  a{color:inherit; text-decoration:none}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 40px}
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; padding:15px 30px;
+    background:var(--ink); color:var(--bone); font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; font-weight:600; border:1px solid var(--ink);
+    transition:.4s cubic-bezier(.2,.7,.2,1); cursor:pointer;
+  }
+  .btn:hover{background:transparent; color:var(--ink)}
+  .btn.ghost{background:transparent; color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink); color:var(--bone)}
+
+  /* announcement */
+  .announce{background:var(--ink); color:var(--bone); overflow:hidden; white-space:nowrap; padding:9px 0}
+  .announce .track{display:inline-block; animation:marq 30s linear infinite; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#CDBFA6}
+  @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:50; background:rgba(244,239,231,.82); backdrop-filter:blur(14px); border-bottom:1px solid var(--line)}
+  .nav-in{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; height:74px}
+  .nav-links{display:flex; gap:34px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:500}
+  .nav-links a{position:relative; padding:4px 0; color:var(--ink-soft)}
+  .nav-links a::after{content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--cognac); transition:.4s}
+  .nav-links a:hover::after{width:100%}
+  .brand{font-size:21px; letter-spacing:.42em; text-transform:uppercase; font-weight:500; text-align:center; padding-left:.42em}
+  .nav-right{display:flex; gap:26px; justify-content:flex-end; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; color:var(--ink-soft)}
+  .nav-right span{cursor:pointer; transition:.3s} .nav-right span:hover{color:var(--cognac)}
+
+  /* hero */
+  .hero{position:relative; padding:70px 0 40px}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center}
+  .hero h1{font-size:clamp(46px,7vw,104px); line-height:.94; font-weight:400; letter-spacing:-.01em}
+  .hero h1 em{font-style:italic; color:var(--cognac)}
+  .hero .lede{max-width:430px; margin:30px 0 38px; color:var(--muted); font-size:16px; line-height:1.7}
+  .hero-cta{display:flex; gap:16px; align-items:center; flex-wrap:wrap}
+  .hero-visual{position:relative; height:600px; display:flex; align-items:center; justify-content:center}
+  .halo{position:absolute; width:440px; height:440px; border-radius:50%;
+    background:radial-gradient(circle at 50% 40%, #fff8ec 0%, var(--bone-2) 55%, transparent 72%);
+    filter:blur(6px)}
+  .hero-bottle{position:relative; max-height:560px; z-index:2; filter:drop-shadow(0 50px 60px rgba(26,23,20,.35)); animation:float 7s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  .hero-mark{position:absolute; right:-6px; top:50%; transform:translateY(-50%) rotate(90deg); transform-origin:center; font-size:11px; letter-spacing:.4em; text-transform:uppercase; color:var(--muted)}
+
+  .meta-row{display:flex; gap:60px; border-top:1px solid var(--line); margin-top:20px; padding-top:26px}
+  .meta-row .cell .k{font-family:'Fraunces',serif; font-size:26px}
+  .meta-row .cell .v{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-top:4px}
+
+  /* section head */
+  .sec{padding:110px 0}
+  .sec-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:56px; border-bottom:1px solid var(--line); padding-bottom:24px}
+  .sec-head h2{font-size:clamp(30px,4vw,52px); font-weight:400; letter-spacing:-.01em}
+  .sec-head h2 em{font-style:italic; color:var(--cognac)}
+
+  /* collection */
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-left:1px solid var(--line)}
+  .card{border-right:1px solid var(--line); border-bottom:1px solid var(--line); border-top:1px solid var(--line); padding:34px 26px 30px; position:relative; transition:.5s; cursor:pointer}
+  .card:hover{background:#fff}
+  .card .idx{position:absolute; top:18px; right:22px; font-size:11px; color:var(--muted); letter-spacing:.1em}
+  .card-img{height:300px; display:flex; align-items:center; justify-content:center; margin-bottom:24px}
+  .card-img img{max-height:290px; max-width:100%; filter:drop-shadow(0 24px 30px rgba(26,23,20,.22)); transition:.6s cubic-bezier(.2,.7,.2,1)}
+  .card:hover .card-img img{transform:translateY(-10px) scale(1.04)}
+  .card h3{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:6px}
+  .card .tag{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--cognac); margin-bottom:16px}
+  .card .price{display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:16px; margin-top:6px}
+  .card .price .amt{font-family:'Fraunces',serif; font-size:18px}
+  .card .price .add{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); transition:.3s}
+  .card:hover .price .add{color:var(--ink)}
+
+  /* story band */
+  .story{background:var(--ink); color:var(--bone); padding:130px 0}
+  .story .eyebrow{color:var(--cognac-2)}
+  .story blockquote{font-family:'Fraunces',serif; font-size:clamp(28px,3.6vw,46px); line-height:1.28; font-weight:300; max-width:940px; margin:28px 0 0; letter-spacing:-.01em}
+  .story blockquote em{font-style:italic; color:var(--cognac-2)}
+  .story .sig{margin-top:40px; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#9C9285}
+
+  /* pillars */
+  .pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid var(--line)}
+  .pillar{padding:50px 34px; border-right:1px solid var(--line)}
+  .pillar:last-child{border-right:none}
+  .pillar .n{font-family:'Fraunces',serif; font-size:15px; color:var(--cognac); margin-bottom:22px}
+  .pillar h4{font-family:'Fraunces',serif; font-size:24px; font-weight:500; margin-bottom:12px}
+  .pillar p{color:var(--muted); font-size:14px; line-height:1.7}
+
+  /* loyalty */
+  .loyal{display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; background:var(--bone-2); border:1px solid var(--line); padding:70px}
+  .vessel{height:260px; display:flex; align-items:center; justify-content:center; position:relative}
+  .vessel .ring{width:220px; height:220px; border-radius:50%; border:1px solid var(--cognac); display:flex; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(circle,#fff,transparent)}
+  .vessel .ring .big{font-family:'Fraunces',serif; font-size:52px; color:var(--cognac)}
+  .vessel .ring .sm{font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted)}
+  .loyal h3{font-family:'Fraunces',serif; font-size:38px; font-weight:400; margin-bottom:16px; letter-spacing:-.01em}
+  .loyal p{color:var(--muted); line-height:1.75; margin-bottom:28px; max-width:400px}
+
+  /* footer */
+  footer{background:var(--ink); color:#B7AD9E; padding:90px 0 40px; margin-top:0}
+  .foot-grid{display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; padding-bottom:60px; border-bottom:1px solid #35302A}
+  footer .fbrand{font-family:'Fraunces',serif; font-size:30px; color:var(--bone); letter-spacing:.06em}
+  footer .fbrand+p{margin-top:16px; max-width:280px; font-size:14px; line-height:1.7}
+  footer h5{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--bone); margin-bottom:20px}
+  footer ul{list-style:none; display:flex; flex-direction:column; gap:12px; font-size:14px}
+  footer ul a:hover{color:var(--cognac-2)}
+  .foot-bot{display:flex; justify-content:space-between; padding-top:26px; font-size:12px; letter-spacing:.08em; color:#7C7367}
+
+  .reveal{opacity:0; transform:translateY(28px); transition:.9s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:none}
+
+  @media(max-width:960px){
+    .wrap{padding:0 22px}
+    .nav-links,.nav-right{display:none}
+    .nav-in{grid-template-columns:1fr}
+    .hero-grid{grid-template-columns:1fr} .hero-visual{height:420px; order:-1}
+    .hero-bottle{max-height:380px}
+    .grid4{grid-template-columns:1fr 1fr}
+    .pillars{grid-template-columns:1fr}
+    .loyal{grid-template-columns:1fr; padding:40px}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="announce"><span class="track">EXTRAIT DE PARFUM · 30% CONCENTRATION &nbsp;✦&nbsp; COMPLIMENTARY SECURE SHIPPING ACROSS INDIA &nbsp;✦&nbsp; HANDCRAFTED IN LUDHIANA &nbsp;✦&nbsp; EXTRAIT DE PARFUM · 30% CONCENTRATION &nbsp;✦&nbsp; COMPLIMENTARY SECURE SHIPPING ACROSS INDIA &nbsp;✦&nbsp; HANDCRAFTED IN LUDHIANA &nbsp;✦&nbsp;</span></div>
+
+<nav>
+  <div class="wrap nav-in">
+    <div class="nav-links">
+      <a href="#collection">The Collection</a>
+      <a href="#story">Maison</a>
+      <a href="#loyalty">Loyalty</a>
+    </div>
+    <div class="brand">Scent Obsessed</div>
+    <div class="nav-right">
+      <span>Search</span><span>Account</span><span>Cart&nbsp;(0)</span>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow reveal">Maison de Parfum · Est. Ludhiana</p>
+      <h1 class="display reveal" style="margin-top:22px">The art of <em>obsession</em>, bottled.</h1>
+      <p class="lede reveal">Four extrait de parfums composed for those who refuse to be forgettable. Uncompromising concentration. A trail that lingers long after you leave the room.</p>
+      <div class="hero-cta reveal">
+        <a class="btn" href="#collection">Explore the Collection</a>
+        <a class="btn ghost" href="#story">Our Craft</a>
+      </div>
+      <div class="meta-row reveal">
+        <div class="cell"><div class="k display">30%</div><div class="v">Extrait concentration</div></div>
+        <div class="cell"><div class="k display">50ml</div><div class="v">Hand-filled flacon</div></div>
+        <div class="cell"><div class="k display">04</div><div class="v">Signature compositions</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="halo"></div>
+      <img class="hero-bottle" src="transparent_bottle.png" alt="Scent Obsessed flacon"
+           onerror="this.onerror=null;this.src='blue_monarch.png'">
+      <div class="hero-mark">N° 01 — 04</div>
+    </div>
+  </div>
+</header>
+
+<section class="sec" id="collection">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="display">The <em>Collection</em></h2>
+      <p class="eyebrow">Four ways to be remembered</p>
+    </div>
+    <div class="grid4">
+      <div class="card reveal" onclick="location.href='product.html?id=blue-monarch'">
+        <span class="idx">N° 01</span>
+        <div class="card-img"><img src="blue_monarch.png" alt="Blue Monarch"></div>
+        <div class="tag">Rule Your Realm</div>
+        <h3 class="display">Blue Monarch</h3>
+        <div class="price"><span class="amt">₹ 2,499</span><span class="add">Add — +</span></div>
+      </div>
+      <div class="card reveal" onclick="location.href='product.html?id=urban-ember'">
+        <span class="idx">N° 02</span>
+        <div class="card-img"><img src="urban_ember.png" alt="Urban Ember"></div>
+        <div class="tag">Ignite Your Presence</div>
+        <h3 class="display">Urban Ember</h3>
+        <div class="price"><span class="amt">₹ 2,499</span><span class="add">Add — +</span></div>
+      </div>
+      <div class="card reveal" onclick="location.href='product.html?id=flora-essence'">
+        <span class="idx">N° 03</span>
+        <div class="card-img"><img src="flora_essence.jpeg" alt="Flora Essence"></div>
+        <div class="tag">The Scent of Sunlight</div>
+        <h3 class="display">Flora Essence</h3>
+        <div class="price"><span class="amt">₹ 2,499</span><span class="add">Add — +</span></div>
+      </div>
+      <div class="card reveal" onclick="location.href='product.html?id=savage-wind'">
+        <span class="idx">N° 04</span>
+        <div class="card-img"><img src="savage_wind.png" alt="Savage Wind"></div>
+        <div class="tag">Unleash the Storm</div>
+        <h3 class="display">Savage Wind</h3>
+        <div class="price"><span class="amt">₹ 2,499</span><span class="add">Add — +</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="story" id="story">
+  <div class="wrap">
+    <p class="eyebrow reveal">The Maison</p>
+    <blockquote class="reveal">We don't make perfume to please a room. We make it to <em>haunt</em> one — a signature so complete that people remember you by the air you left behind.</blockquote>
+    <p class="sig reveal">— Scent Obsessed, Extrait de Parfum</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="pillars">
+      <div class="pillar reveal"><div class="n display">01</div><h4 class="display">True Extrait</h4><p>A 30% fragrance concentration — not eau de parfum. Richer, deeper, and built to last the entire day on skin.</p></div>
+      <div class="pillar reveal"><div class="n display">02</div><h4 class="display">Secure Dispatch</h4><p>Every order handled through tracked, insured Shiprocket delivery. Complimentary shipping on all dossiers across India.</p></div>
+      <div class="pillar reveal"><div class="n display">03</div><h4 class="display">The Loyalty Vessel</h4><p>Every acquisition fills your vessel. Reach 100ml and a signature flacon is poured, complimentary, into your collection.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="loyalty" style="padding-top:0">
+  <div class="wrap">
+    <div class="loyal reveal">
+      <div class="vessel"><div class="ring"><div class="big display">100</div><div class="sm">ML — Vessel</div></div></div>
+      <div>
+        <p class="eyebrow" style="margin-bottom:14px">Members Only</p>
+        <h3 class="display">Rewarded for your obsession.</h3>
+        <p>Join the house and every purchase pours volume into your Loyalty Vessel. Refer a friend, earn 10ml. Fill it, and claim a full flacon on us — our way of keeping the obsessed close.</p>
+        <a class="btn" href="#">Join the House</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="fbrand">Scent Obsessed</div>
+        <p>Extrait de parfum, handcrafted in Ludhiana for those who intend to be unforgettable.</p>
+      </div>
+      <div><h5>Shop</h5><ul><li><a href="#">Blue Monarch</a></li><li><a href="#">Urban Ember</a></li><li><a href="#">Flora Essence</a></li><li><a href="#">Savage Wind</a></li></ul></div>
+      <div><h5>Maison</h5><ul><li><a href="#">Our Craft</a></li><li><a href="#">Loyalty</a></li><li><a href="#">Concierge</a></li></ul></div>
+      <div><h5>Care</h5><ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li></ul></div>
+    </div>
+    <div class="foot-bot"><span>© 2026 Scent Obsessed</span><span>Secured by Cashfree · Delivered by Shiprocket</span></div>
+  </div>
+</footer>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.14});
+  document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(i%4*70)+'ms';io.observe(el)});
+</script>
+</body>
+</html>
