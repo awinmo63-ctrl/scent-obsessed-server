@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Scent Obsessed | Extrait de Parfum · 30% Concentration</title>
-<meta name="description" content="Scent Obsessed crafts extrait de parfum at 30% concentration — 50ml hand-filled flacons, ₹2,499. Free tracked shipping across India. Four signature compositions." />
+<title>Scent Obsessed | 100ml Extrait de Parfum</title>
+<meta name="description" content="Scent Obsessed crafts hand-filled 100ml extrait de parfum, ₹2,499. Free shipping over ₹499, Cash on Delivery available across India. Four signature compositions." />
 <meta name="theme-color" content="#F4EFE7" />
 <meta property="og:title" content="Scent Obsessed | Extrait de Parfum" />
-<meta property="og:description" content="30% concentration extrait de parfum, hand-filled in Ludhiana. Free tracked shipping across India." />
+<meta property="og:description" content="Hand-filled 100ml extrait de parfum from Ludhiana. Free shipping over ₹499, COD available." />
 <meta property="og:image" content="/blue_monarch.png" />
 <meta property="og:type" content="website" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -18,10 +18,10 @@
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","itemListElement":[
-{"@type":"ListItem","position":1,"item":{"@type":"Product","name":"Blue Monarch","description":"Fresh & woody extrait de parfum, 30% concentration, 50ml.","image":"https://scentobsessed.in/blue_monarch.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=blue-monarch"}}},
-{"@type":"ListItem","position":2,"item":{"@type":"Product","name":"Urban Ember","description":"Spicy & leathery extrait de parfum, 30% concentration, 50ml.","image":"https://scentobsessed.in/urban_ember.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=urban-ember"}}},
-{"@type":"ListItem","position":3,"item":{"@type":"Product","name":"Flora Essence","description":"Floral & bright extrait de parfum, 30% concentration, 50ml.","image":"https://scentobsessed.in/flora_essence.jpeg","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=flora-essence"}}},
-{"@type":"ListItem","position":4,"item":{"@type":"Product","name":"Savage Wind","description":"Sweet & smoky extrait de parfum, 30% concentration, 50ml.","image":"https://scentobsessed.in/savage_wind.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=savage-wind"}}}]}
+{"@type":"ListItem","position":1,"item":{"@type":"Product","name":"Blue Monarch","description":"Fresh & woody extrait de parfum, 100ml hand-filled flacon.","image":"https://scentobsessed.in/blue_monarch.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=blue-monarch"}}},
+{"@type":"ListItem","position":2,"item":{"@type":"Product","name":"Urban Ember","description":"Spicy & leathery extrait de parfum, 100ml hand-filled flacon.","image":"https://scentobsessed.in/urban_ember.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=urban-ember"}}},
+{"@type":"ListItem","position":3,"item":{"@type":"Product","name":"Flora Essence","description":"Floral & bright extrait de parfum, 100ml hand-filled flacon.","image":"https://scentobsessed.in/flora_essence.jpeg","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=flora-essence"}}},
+{"@type":"ListItem","position":4,"item":{"@type":"Product","name":"Savage Wind","description":"Spicy & woody extrait de parfum, 100ml hand-filled flacon.","image":"https://scentobsessed.in/savage_wind.png","brand":{"@type":"Brand","name":"Scent Obsessed"},"offers":{"@type":"Offer","price":"2499","priceCurrency":"INR","availability":"https://schema.org/InStock","url":"https://scentobsessed.in/?product=savage-wind"}}}]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -291,9 +291,10 @@ footer ul span:hover{color:var(--cognac2)}
 .rev .who{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 @media(min-width:760px){
  .wrap{padding:0 40px}
- .nav-in{height:74px}.burger{display:none}.nav-links{display:flex}
- .brand{font-size:19px;letter-spacing:.4em;position:absolute;left:50%;transform:translateX(-50%)}
- nav .wrap{position:relative}
+ .nav-in{height:74px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px}
+ .burger{display:none}.nav-links{display:flex;gap:20px;font-size:11px;letter-spacing:.11em}
+ .brand{font-size:17px;letter-spacing:.34em;justify-self:center;white-space:nowrap}
+ .nav-right{justify-self:end}
  .nav-right button{font-size:12px}
  .hero{padding:60px 0 30px}
  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center}
@@ -355,7 +356,7 @@ const supabase = createClient(
 );
 
 const CART_KEY='scent_obsessed_cart', ML_PER_BOTTLE=10, REWARD_ML=100, GIFT_THRESHOLD=4999;
-const WHATSAPP='';   // <-- put your WhatsApp number here e.g. '919876543210' to show the WhatsApp link
+const WHATSAPP='917814930720';
 
 /* Reviews are loaded from the database and only appear once you have
    approved them in Admin → Reviews. Nothing is ever hard-coded here. */
@@ -393,12 +394,16 @@ const PRODUCTS = [
 
 const FAQ_CATS=['The Fragrance','Ordering & Delivery','Getting Started'];
 const FAQS=[
- {c:0,q:'What is extrait de parfum, and why does it matter?',a:'Extrait de parfum carries roughly 30% fragrance oil. Eau de parfum typically carries 15–20%, and eau de toilette 5–15%. Higher concentration means the scent sits closer to true, projects longer, and needs fewer sprays — which is why a 50ml extrait outlasts a far larger bottle of EDT.'},
- {c:0,q:'How long will it last on skin?',a:'Expect 8 hours or more on skin, longer on fabric. Longevity varies with skin type, weather, and where you apply — pulse points and clothing hold a fragrance longest.'},
- {c:1,q:'How long does delivery take?',a:'Orders are dispatched within 24–48 hours and typically arrive in 3–5 business days anywhere in India. Every parcel ships tracked and insured through Shiprocket, and shipping is complimentary on all orders.'},
- {c:1,q:'Can I return a fragrance?',a:'Unopened, sealed flacons can be returned within 7 days of delivery. If a parcel arrives damaged, send us photographs within 48 hours and we will replace it at no cost. Opened bottles cannot be returned for hygiene reasons.'},
- {c:0,q:'Are these authentic and safe to wear?',a:'Every flacon is composed and hand-filled by us in Ludhiana in small batches. Nothing is resold or decanted from other houses. If your skin is sensitive, spray once on the inner wrist and wait a few hours before fuller wear.'},
- {c:2,q:'Which fragrance should I choose?',a:'If you want fresh and versatile, choose Blue Monarch. For something warm and dressed-up at night, Urban Ember. For a bright, floral daytime signature, Flora Essence. For sweet, smoky vanilla depth, Savage Wind.'}
+ {c:0,q:'What is extrait de parfum, and why does it matter?',a:'Extrait de parfum is the most concentrated tier of fragrance — richer and longer-lasting than eau de parfum, which sits well below it. It stays closer to true on skin and needs fewer sprays, which is why a 100ml extrait goes a very long way.'},
+ {c:0,q:'How big is the bottle?',a:'Every fragrance comes in a 100ml flacon at ₹2,499 — that works out to ₹25 per ml, against ₹120–₹240 per ml for most designer bottles sold in India.'},
+ {c:0,q:'Are these authentic and safe to wear?',a:'Every flacon is composed and hand-filled by us in Ludhiana in small batches, then hand-inspected before dispatch. Nothing is resold or decanted from other houses. If your skin is sensitive, spray once on the inner wrist and wait a few hours before fuller wear.'},
+ {c:1,q:'How long does delivery take?',a:'Orders are dispatched within 24–48 hours, excluding Sundays and public holidays. Because fragrance travels by surface shipping for safety, delivery takes roughly 2–4 business days in Punjab and North India, 3–6 days to metros, 5–8 days across the rest of India, and 7–10 days to remote areas and the North East.'},
+ {c:1,q:'What does shipping cost?',a:'Shipping is complimentary on all orders above ₹499. Below that a flat fee of ₹99 applies. Every parcel ships tracked and insured through Shiprocket with Blue Dart or Delhivery, and you receive a tracking ID once it is dispatched.'},
+ {c:1,q:'Do you offer Cash on Delivery?',a:'Yes. COD is available across most PIN codes in India. A nominal COD handling fee of ₹49 may be added at checkout to cover processing costs.'},
+ {c:1,q:'Can I return or cancel?',a:'Unopened, sealed flacons can be returned within 7 days of delivery. Opened or sprayed bottles cannot be returned for hygiene reasons, and discovery sets are final sale. You can cancel any time before dispatch — once the parcel is with our courier it cannot be cancelled.'},
+ {c:1,q:'What if my bottle arrives broken or wrong?',a:'We will replace it or refund you in full at no cost. We do need a continuous, unedited unboxing video showing the package being opened for the first time, and the issue reported within 24 hours of delivery — email info@scentobsessed.in or WhatsApp 78149 30720.'},
+ {c:2,q:'Which fragrance should I choose?',a:'Take the Find Your Scent quiz — four questions and about a minute. If you would rather decide yourself: Blue Monarch for fresh citrus and woods, Urban Ember for leather and tobacco at night, Flora Essence for peony and rose by day, Savage Wind for pepper, vetiver and warm woods.'},
+ {c:2,q:'How should I store it?',a:'Keep the flacon away from direct sunlight, heat and humidity — a drawer or closed cupboard is ideal. Stored properly, an extrait holds its character for years.'}
 ];
 
 const money=(n)=>'₹ '+(Number(n)||0).toLocaleString('en-IN');
@@ -442,7 +447,7 @@ async function resolvePromo(raw,notify){
 }
 
 const Announce=()=>h('div',{className:'announce'},
-  h('span',{className:'track'},('✦ 30% EXTRAIT DE PARFUM ✦ FREE TRACKED SHIPPING ACROSS INDIA ✦ HAND-FILLED IN LUDHIANA ').repeat(4)));
+  h('span',{className:'track'},('✦ 100ML EXTRAIT DE PARFUM ✦ FREE SHIPPING OVER ₹499 ✦ CASH ON DELIVERY AVAILABLE ✦ HAND-FILLED IN LUDHIANA ').repeat(4)));
 
 const Nav=({cartCount,onCart,onAccount,onHome,onMenu})=>h('nav',null,
   h('div',{className:'wrap nav-in'},
@@ -451,26 +456,25 @@ const Nav=({cartCount,onCart,onAccount,onHome,onMenu})=>h('nav',null,
       h('a',{onClick:()=>onHome('collection')},'Collection'),
       h('a',{onClick:()=>onHome('guide')},'Find Your Scent'),
       h('a',{onClick:()=>onHome('reviews')},'Reviews'),
-      h('a',{onClick:()=>onHome('story')},'Maison'),
-      h('a',{onClick:()=>onHome('faq')},'FAQ')),
+      h('a',{onClick:()=>onHome('story')},'Maison')),
     h('div',{className:'brand',onClick:()=>onHome()},'Scent Obsessed'),
     h('div',{className:'nav-right'},
       h('button',{onClick:onAccount},'Account'),
       h('button',{onClick:onCart},'Cart ('+cartCount+')'))));
 
 const TrustBar=()=>h('div',{className:'trustbar'},h('div',{className:'wrap tg'},
-  h('div',{className:'ti'},h('b',null,'Free shipping'),' · tracked & insured'),
-  h('div',{className:'ti'},h('b',null,'30% extrait'),' · 8h+ longevity'),
-  h('div',{className:'ti'},h('b',null,'Secure payment'),' · UPI, cards, netbanking')));
+  h('div',{className:'ti'},h('b',null,'Free shipping over ₹499'),' · tracked & insured'),
+  h('div',{className:'ti'},h('b',null,'Cash on Delivery'),' · available across India'),
+  h('div',{className:'ti'},h('b',null,'100ml extrait'),' · hand-filled in Ludhiana')));
 
 const QUIZ=[
  {q:'When will you wear it most?',a:[{t:'Daytime — work, errands, sunlight',s:{'flora-essence':2,'blue-monarch':2}},
    {t:'Evening — dinners, nights out',s:{'urban-ember':2,'savage-wind':2}},
    {t:'Both, I want one signature',s:{'blue-monarch':2,'savage-wind':1}}]},
  {q:'Which of these appeals most?',a:[{t:'Citrus, mint, clean air',s:{'blue-monarch':3}},
-   {t:'Leather, spice, smoke',s:{'urban-ember':3}},
-   {t:'Jasmine, magnolia, sunlight',s:{'flora-essence':3}},
-   {t:'Vanilla, warmth, sweetness',s:{'savage-wind':3}}]},
+   {t:'Leather, tobacco, spice',s:{'urban-ember':3}},
+   {t:'Peony, rose, soft florals',s:{'flora-essence':3}},
+   {t:'Pepper, vetiver, warm woods',s:{'savage-wind':3}}]},
  {q:'How should people notice it?',a:[{t:'Subtle — they lean in to catch it',s:{'flora-essence':2,'blue-monarch':1}},
    {t:'Confident — noticed across a room',s:{'urban-ember':2,'savage-wind':2}}]},
  {q:'Pick a mood.',a:[{t:'Composed and in control',s:{'blue-monarch':2}},
@@ -533,13 +537,13 @@ const ScentQuiz=({onOpen,onAdd,notify})=>{
 
 const Comparison=()=>h('div',{className:'cmp'},
   h('div',{className:'cmprow hd'},h('div',null,''),h('div',{className:'us'},'Scent Obsessed'),h('div',null,'Typical designer EDP')),
-  [['Fragrance oil concentration','30% — extrait','15–20% — eau de parfum'],
-   ['Typical wear time','8h+ on skin','4–6h on skin'],
-   ['Bottle size','50ml','50–100ml'],
+  [['Concentration','Extrait de parfum','Eau de parfum'],
+   ['Bottle size','100ml','50–100ml'],
    ['Typical price in India','₹2,499','₹6,000–₹12,000'],
-   ['Cost per ml','₹50','₹120–₹240'],
+   ['Cost per ml','₹25','₹120–₹240'],
    ['Made','Hand-filled, small batch, Ludhiana','Mass produced'],
-   ['Shipping','Free, tracked, insured','Varies']
+   ['Cash on Delivery','Available','Rarely'],
+   ['Shipping','Free over ₹499, tracked & insured','Varies']
   ].map((r,i)=>h('div',{className:'cmprow',key:i},
     h('div',{style:{color:'var(--muted)',fontSize:'12px'}},r[0]),
     h('div',{className:'us'},r[1]),h('div',null,r[2]))));
@@ -607,18 +611,18 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,
     h('div',null,
       h('p',{className:'eyebrow'},'Maison de Parfum · Ludhiana'),
       h('h1',{className:'display'},'The art of ',h('em',null,'obsession'),', bottled.'),
-      h('p',{className:'lede'},'Four extrait de parfums at 30% concentration — the tier above eau de parfum. Hand-filled in small batches for people who intend to be remembered.'),
+      h('p',{className:'lede'},'Four extrait de parfums in generous 100ml flacons — the tier above eau de parfum. Hand-filled in small batches for people who intend to be remembered.'),
       h('div',{className:'hero-cta'},
         h('button',{className:'btn',onClick:()=>document.getElementById('collection').scrollIntoView({behavior:'smooth'})},'Shop the Collection'),
         h('button',{className:'btn ghost',onClick:()=>document.getElementById('guide').scrollIntoView({behavior:'smooth'})},'Find Your Scent')),
       h('div',{className:'meta-row'},
         h('div',null,h('div',{className:'k display'},'30%'),h('div',{className:'v'},'Extrait concentration')),
-        h('div',null,h('div',{className:'k display'},'50ml'),h('div',{className:'v'},'Hand-filled flacon')),
-        h('div',null,h('div',{className:'k display'},'₹50'),h('div',{className:'v'},'Per ml'))))
+        h('div',null,h('div',{className:'k display'},'100ml'),h('div',{className:'v'},'Hand-filled flacon')),
+        h('div',null,h('div',{className:'k display'},'₹25'),h('div',{className:'v'},'Per ml'))))
   )),
   h(TrustBar),
   h('section',{className:'sec',id:'collection'},h('div',{className:'wrap'},
-    h('div',{className:'sec-head'},h('h2',{className:'display'},'The ',h('em',null,'Collection')),h('p',{className:'eyebrow'},'₹2,499 · 50ml · free shipping')),
+    h('div',{className:'sec-head'},h('h2',{className:'display'},'The ',h('em',null,'Collection')),h('p',{className:'eyebrow'},'₹2,499 · 100ml · free shipping over ₹499')),
     h('div',{className:'grid4'},PRODUCTS.map(p=>h('div',{key:p.id,className:'card',onClick:()=>onOpen(p.id)},
       h('span',{className:'idx'},'N° '+p.no),
       h('div',{className:'card-img'},h('img',{src:p.img,alt:p.name,loading:'lazy',decoding:'async'})),
@@ -663,7 +667,7 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,
       h('p',{className:'eyebrow'},'The tier above eau de parfum')),
     h(Comparison),
     h('p',{style:{fontSize:'12px',color:'var(--muted)',marginTop:'12px',lineHeight:1.6}},
-      'Comparison uses typical published concentrations for designer eau de parfum. Wear time varies with skin and climate.'))),
+      'Prices for designer eau de parfum are typical Indian retail ranges and vary by house and retailer. Wear time varies with skin and climate.'))),
   h('section',{className:'sec'},h('div',{className:'wrap'},h('div',{className:'pillars'},
     h('div',{className:'pillar'},h('div',{className:'n display'},'01'),h('h4',{className:'display'},'True Extrait'),h('p',null,'30% fragrance concentration — not eau de parfum. Richer, deeper, and built to last the entire day on skin.')),
     h('div',{className:'pillar'},h('div',{className:'n display'},'02'),h('h4',{className:'display'},'Secure Dispatch'),h('p',null,'Tracked, insured Shiprocket delivery in 3–5 business days. Shipping is complimentary on every order.')),
@@ -694,16 +698,16 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
       h('div',{className:'info'},
         h('div',{className:'tag'},p.tagline),
         h('h1',{className:'display'},p.name),
-        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,'50ml · Extrait de Parfum')),
-        h('div',{className:'perml'},'₹50 per ml · 30% concentration · '+p.character),
+        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,'100ml · Extrait de Parfum')),
+        h('div',{className:'perml'},'₹25 per ml · 100ml · '+p.character),
         h('p',{className:'intro'},p.intro),
         h('div',{className:'buyrow'},
           h('div',{className:'qty'},h('button',{onClick:()=>setQty(Math.max(1,qty-1))},'−'),h('span',null,qty),h('button',{onClick:()=>setQty(qty+1)},'+')),
           h('button',{className:'btn block',onClick:()=>onAdd(p,qty)},'Add to Cart')),
-        h('div',{className:'ship-line'},h('b',null,'Free tracked shipping'),' · Dispatched in 24–48 hrs · Delivered in 3–5 days · Sealed returns within 7 days'),
+        h('div',{className:'ship-line'},h('b',null,'Free shipping over ₹499'),' · Cash on Delivery available · Dispatched in 24–48 hrs · Sealed returns within 7 days'),
         h('div',{className:'specs'},
           h('div',{className:'s'},h('div',{className:'k display'},'30%'),h('div',{className:'v'},'Concentration')),
-          h('div',{className:'s'},h('div',{className:'k display'},'50ml'),h('div',{className:'v'},'Volume')),
+          h('div',{className:'s'},h('div',{className:'k display'},'100ml'),h('div',{className:'v'},'Volume')),
           h('div',{className:'s'},h('div',{className:'k display'},'8h+'),h('div',{className:'v'},'Longevity'))),
         h('div',{className:'notes'},h('h3',null,'The Notes'),
           h('div',{className:'layer'},h('div',{className:'lname'},'Top'),h('div',{className:'lval'},p.notes.top)),
@@ -718,7 +722,7 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
         h('div',{className:'tag'},x.tagline),h('h3',{className:'display'},x.name),
         h('div',{className:'price'},h('span',{className:'amt'},x.price),h('span',{className:'addbtn'},'View'))))))),
     h('div',{className:'buybar'},
-      h('div',{className:'bp'},h('div',{className:'bn display'},p.price),h('div',{className:'bs'},'50ml · Free ship')),
+      h('div',{className:'bp'},h('div',{className:'bn display'},p.price),h('div',{className:'bs'},'100ml · Free over ₹499')),
       h('button',{className:'btn',onClick:()=>onAdd(p,qty)},'Add to Cart')));
 };
 
@@ -761,8 +765,8 @@ const CartDrawer=({open,onClose,cart,updateQty,removeItem,promo,onCheckout})=>{
         (function(){
           const need=GIFT_THRESHOLD-finalTotal;
           return finalTotal>=GIFT_THRESHOLD
-            ? h('div',{className:'gift'},'✦ A complimentary 5ml discovery vial is included with this order')
-            : h('div',{className:'gift'},'Add '+money(need)+' more for a complimentary 5ml discovery vial',
+            ? h('div',{className:'gift'},'✦ A complimentary discovery vial is included with this order')
+            : h('div',{className:'gift'},'Add '+money(need)+' more for a complimentary discovery vial',
                 h('div',{className:'gbar'},h('i',{style:{width:Math.min(100,finalTotal/GIFT_THRESHOLD*100)+'%'}})));
         })(),
         discount>0&&h('div',{className:'saveline'},'You’re saving '+money(discount)+' on this order'),
@@ -954,12 +958,12 @@ const Tracking=({order,onClose})=>{
 const Legal=({topic,onClose})=>{
   if(!topic) return null;
   const C={
-    shipping:{t:'Shipping & Delivery',b:'Orders are dispatched within 24–48 hours and typically arrive in 3–5 business days across India. Every parcel ships tracked and insured via Shiprocket, and shipping is complimentary on all orders. Couriers make up to three delivery attempts; after three unsuccessful attempts the parcel returns to origin.'},
-    returns:{t:'Returns & Refunds',b:'Unopened, sealed flacons may be returned within 7 days of delivery. Opened bottles cannot be returned for hygiene reasons. If your parcel arrives damaged, send photographs within 48 hours and we will replace it at no cost. Approved refunds are processed to the original payment method within 5–7 business days.'},
-    contact:{t:'Contact Us',b:'Write to info@scentobsessed.in and our team will respond within one business day. We are based in Ludhiana, Punjab, India.'},
-    privacy:{t:'Privacy',b:'We collect only what is needed to fulfil your order — name, contact details, and delivery address. Payment is processed by Cashfree; we never see or store your card details. We do not sell your data. To have your data removed, email info@scentobsessed.in.'},
-    terms:{t:'Terms of Service',b:'By placing an order you confirm the details provided are accurate. Prices are in INR and inclusive of applicable taxes. We may cancel and fully refund an order if a product is unavailable or the delivery address is unserviceable. Promotional codes are single-use unless stated otherwise and cannot be combined.'},
-    loyalty:{t:'Loyalty Programme',b:'Every acquisition pours 10ml into your Loyalty Vessel. Refer a friend and earn 10ml more when they complete their first order. At 100ml you may claim any signature flacon, complimentary. Vessel volume has no cash value.'}
+    shipping:{t:'Shipping & Delivery',b:'Orders are dispatched within 24–48 hours, excluding Sundays and public holidays. Fragrance travels by surface shipping for safety, so delivery takes about 2–4 business days in Punjab and North India, 3–6 days to metros, 5–8 days across the rest of India, and 7–10 days to remote areas and the North East. Shipping is free on orders above ₹499; a flat ₹99 applies below that. Every parcel is tracked, insured and sealed with tamper-evident tape. Couriers make up to three delivery attempts before the parcel is returned to origin; re-shipping charges may apply for incorrect addresses. Cash on Delivery is available across most PIN codes, with a ₹49 handling fee.'},
+    returns:{t:'Returns & Refunds',b:'Unopened, sealed flacons may be returned within 7 days of delivery. Opened or sprayed bottles cannot be returned for hygiene reasons, and discovery sets are final sale. If your parcel arrives broken, leaking or with the wrong fragrance, report it within 24 hours with a continuous, unedited unboxing video — we will replace it or refund you in full at no cost. Approved refunds are processed to the original payment method within 5–7 business days; COD orders are refunded as store credit or by bank transfer. We cover return shipping when the fault is ours; change-of-mind returns are at your cost.'},
+    contact:{t:'Contact Us',b:'Email info@scentobsessed.in or WhatsApp 78149 30720 and our team will respond within one business day. We are based in Ludhiana, Punjab, India.'},
+    privacy:{t:'Privacy',b:'We collect only what is needed to fulfil your order — name, contact details, and delivery address. Payment is processed by Cashfree; we never see or store your card details. Delivery details are shared with Shiprocket and its courier partners solely to deliver your order. We do not sell your data. To have your data removed, email info@scentobsessed.in.'},
+    terms:{t:'Terms of Service',b:'By placing an order you confirm the details provided are accurate. Prices are in INR and inclusive of applicable taxes. We may cancel and fully refund an order if a product is unavailable or the delivery address is unserviceable. Promotional codes are single-use unless stated otherwise and cannot be combined. Fragrance is for external use only — discontinue use if irritation occurs and keep away from eyes, sunlight and children. Governed by the laws of India, with jurisdiction in Ludhiana, Punjab.'},
+    loyalty:{t:'Loyalty Programme',b:'Every completed order pours 10ml into your Loyalty Vessel. Refer a friend and earn a further 10ml once they complete their first order. At 100ml you may claim one complimentary flacon. Vessel volume has no cash value, is non-transferable, and may be modified or discontinued with notice.'}
   }[topic];
   return h(Modal,{onClose},h('h2',{className:'display'},C.t),
     h('p',{style:{textAlign:'left'}},C.b),h('button',{className:'btn ghost block',onClick:onClose},'Close'));
@@ -1131,7 +1135,7 @@ const App=()=>{
       h('div',{className:'loyal'},
         h('div',null,h('div',{className:'ring'},
           h('div',{className:'fill',style:{height:Math.min(100,loyaltyMl)+'%'}}),
-          h('div',{className:'big'},user?loyaltyMl:'10'),h('div',{className:'sm'},user?'ML — Your Vessel':'ML per order'))),
+          h('div',{className:'big'},user?Math.min(100,loyaltyMl):'10'),h('div',{className:'sm'},user?'ML — Your Vessel':'ML per order'))),
         h('div',null,
           h('p',{className:'eyebrow',style:{marginBottom:'12px'}},'Loyalty'),
           h('h3',{className:'display'},'Rewarded for your obsession.'),
