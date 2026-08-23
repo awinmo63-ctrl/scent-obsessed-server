@@ -75,12 +75,26 @@ const verifyAdmin = (req, res, next) => {
 // --- SERVER-SIDE PRICING (source of truth) ---
 // Browser-submitted amounts are NEVER trusted.
 // ==========================================
-const CATALOG = {
+// Fallback only — used if the products table is unreachable, so checkout never dies.
+const FALLBACK_CATALOG = {
     'blue-monarch': { name: 'Blue Monarch', price: 2499 },
     'urban-ember':  { name: 'Urban Ember',  price: 2499 },
     'flora-essence':{ name: 'Flora Essence',price: 2499 },
     'savage-wind':  { name: 'Savage Wind',  price: 2499 }
 };
+let _catalogCache = null, _catalogAt = 0;
+async function getCatalog(force) {
+    if (!force && _catalogCache && (Date.now() - _catalogAt) < 60000) return _catalogCache;
+    try {
+        const { data } = await supabase.from('products').select('id,name,price,is_active');
+        if (data && data.length) {
+            const map = {};
+            data.forEach(p => { if (p.is_active !== false) map[p.id] = { name: p.name, price: Number(p.price) || 0 }; });
+            if (Object.keys(map).length) { _catalogCache = map; _catalogAt = Date.now(); return map; }
+        }
+    } catch (e) { console.error('Catalog load failed, using fallback:', e.message); }
+    return FALLBACK_CATALOG;
+}
 const SPECIAL_PROMOS = {
     VIP1499: { type: 'FIXED_PRICE', pricePerItem: 1499 },
     VIP720:  { type: 'FIXED_PRICE', pricePerItem: 720  },
@@ -108,6 +122,7 @@ async function resolvePromoServer(code) {
 
 /** Recompute the true payable amount from the catalog. Returns {amount, rewardMl, claimedMl, items} */
 async function computeOrder(cartItems, promoCode, customerEmail) {
+    const CATALOG = await getCatalog();
     const items = Array.isArray(cartItems) ? cartItems : [];
     let subtotal = 0, paidUnits = 0, rewardCount = 0;
     const clean = [];
@@ -620,6 +635,72 @@ app.get('/api/admin/newsletter', verifyAdmin, async (req, res) => {
         const { data } = await supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false }).limit(2000);
         res.json({ success: true, subscribers: data || [] });
     } catch (e) { res.json({ success: true, subscribers: [] }); }
+});
+
+
+// ==========================================
+// --- PRODUCTS (public read, admin manage) ---
+// ==========================================
+const PRODUCT_FIELDS = ['id','no','name','tagline','price','volume_ml','img','model','orientation',
+    'character','wear','intro','note_top','note_heart','note_base','head','narrative','is_active','sort_order'];
+
+function cleanProduct(body) {
+    const out = {};
+    PRODUCT_FIELDS.forEach(f => { if (body[f] !== undefined) out[f] = body[f]; });
+    if (out.id) out.id = String(out.id).toLowerCase().trim().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    if (out.price !== undefined) out.price = Math.max(0, parseInt(out.price, 10) || 0);
+    if (out.volume_ml !== undefined) out.volume_ml = Math.max(1, parseInt(out.volume_ml, 10) || 100);
+    if (out.sort_order !== undefined) out.sort_order = parseInt(out.sort_order, 10) || 100;
+    if (out.is_active !== undefined) out.is_active = !!out.is_active;
+    return out;
+}
+
+// public storefront feed
+app.get('/api/products', async (req, res) => {
+    try {
+        const { data } = await supabase.from('products').select('*')
+            .eq('is_active', true).order('sort_order', { ascending: true });
+        res.json({ success: true, products: data || [] });
+    } catch (e) { res.json({ success: true, products: [] }); }
+});
+
+app.get('/api/admin/products', verifyAdmin, async (req, res) => {
+    try {
+        const { data } = await supabase.from('products').select('*').order('sort_order', { ascending: true });
+        res.json({ success: true, products: data || [] });
+    } catch (e) { res.json({ success: true, products: [] }); }
+});
+
+app.post('/api/admin/products', verifyAdmin, async (req, res) => {
+    try {
+        const p = cleanProduct(req.body);
+        if (!p.id || !p.name || !p.price) return res.status(400).json({ error: 'A URL id, name and price are required.' });
+        const { error } = await supabase.from('products').insert([p]);
+        if (error) return res.status(400).json({ error: error.message });
+        await getCatalog(true);
+        res.json({ success: true, id: p.id });
+    } catch (e) { res.status(500).json({ error: 'Could not create product' }); }
+});
+
+app.put('/api/admin/products/:id', verifyAdmin, async (req, res) => {
+    try {
+        const p = cleanProduct(req.body);
+        delete p.id;                                    // the slug is the key, never rewritten here
+        const { error } = await supabase.from('products').update(p).eq('id', req.params.id);
+        if (error) return res.status(400).json({ error: error.message });
+        await getCatalog(true);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: 'Could not update product' }); }
+});
+
+app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
+    try {
+        // soft-delete keeps past orders readable
+        const { error } = await supabase.from('products').update({ is_active: false }).eq('id', req.params.id);
+        if (error) return res.status(400).json({ error: error.message });
+        await getCatalog(true);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: 'Could not archive product' }); }
 });
 
 // ==========================================

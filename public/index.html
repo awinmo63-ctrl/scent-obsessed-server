@@ -362,7 +362,7 @@ const WHATSAPP='917814930720';
    approved them in Admin → Reviews. Nothing is ever hard-coded here. */
 
 const PRODUCTS = [
-  { id:'blue-monarch', no:'01', name:'Blue Monarch', tagline:'Rule Your Realm', price:'₹ 2,499', priceNum:2499,
+  { id:'blue-monarch', volume:'100ml', no:'01', name:'Blue Monarch', tagline:'Rule Your Realm', price:'₹ 2,499', priceNum:2499,
     img:'blue_monarch.png', model:'blue_monarch.glb', orientation:'0deg -90deg 0deg',
     character:'Fresh & Woody', wear:'Day to evening',
     intro:'A fragrance for those who write their own rules — a tribute to absolute freedom, power, and timeless elegance.',
@@ -371,7 +371,7 @@ const PRODUCTS = [
       base:'Incense · Amber · Cedar · Sandalwood · Patchouli · Labdanum · Amberwood'},
     head:'A reign cemented in amberwood, incense and sandalwood.',
     narrative:"Ascend to a new level of sophistication with Blue Monarch. The opening is a bright, effervescent rush — grapefruit, lemon and bergamot lifted by cool mint, pink pepper and a sparkle of aldehydes, with coriander adding an unexpected edge.\n\nAs it settles, the heart turns spicy and luminous: warm ginger and nutmeg wrapped around soft jasmine and a touch of melon, balancing sharp freshness with quiet depth.\n\nThe reign is cemented in the base — incense, amber, cedar and sandalwood over patchouli, labdanum and amberwood, leaving a trail of undeniable authority." },
-  { id:'urban-ember', no:'02', name:'Urban Ember', tagline:'Ignite Your Presence', price:'₹ 2,499', priceNum:2499,
+  { id:'urban-ember', volume:'100ml', no:'02', name:'Urban Ember', tagline:'Ignite Your Presence', price:'₹ 2,499', priceNum:2499,
     img:'urban_ember.png', model:'urban_ember.glb', orientation:'0deg -90deg 0deg',
     character:'Spicy & Leathery', wear:'Evening',
     intro:'For the modern trailblazer who commands attention without saying a word — the electric energy of the city at twilight.',
@@ -380,7 +380,7 @@ const PRODUCTS = [
       base:'Tobacco Leaf · Guaiac Wood · Oakmoss · Opoponax'},
     head:'Leather and port wine, resting on tobacco and guaiac wood.',
     narrative:"Capture the electric energy of the city at twilight. The journey begins with a vibrant spark — fresh bergamot and lavender colliding with the fiery heat of cinnamon and black pepper.\n\nAs the scent settles, it reveals a heart of pure sophistication: the intoxicating richness of port wine blends seamlessly with rugged leather and the soft allure of mimosa.\n\nThe dry down is where it lingers longest — tobacco leaf and guaiac wood over oakmoss and warm opoponax resin, leaving a lasting, smoky impression." },
-  { id:'flora-essence', no:'03', name:'Flora Essence', tagline:'The Scent of Sunlight', price:'₹ 2,499', priceNum:2499,
+  { id:'flora-essence', volume:'100ml', no:'03', name:'Flora Essence', tagline:'The Scent of Sunlight', price:'₹ 2,499', priceNum:2499,
     img:'flora_essence.jpeg', model:'flora_essence.glb', orientation:'0deg 0deg 0deg',
     character:'Floral & Bright', wear:'Daytime',
     intro:'A fragrance that celebrates light, nature, and pure optimism — the golden glow of a blooming garden at dawn.',
@@ -389,7 +389,7 @@ const PRODUCTS = [
       base:'Sandalwood · Patchouli'},
     head:'Peony and rose, grounded in sandalwood and patchouli.',
     narrative:"Capture the golden glow of a blooming garden at dawn. The experience opens with a burst of liquid sunshine — bright citrus and mandarin orange lifting a cool, dewy peony.\n\nAs the scent warms on the skin, it unveils a soft floral heart: apricot-tinged osmanthus wrapped around a velvety rose, opulent yet weightless.\n\nGrounding this bouquet is a smooth base of sandalwood and patchouli, adding a warm, woody texture that lingers close to the skin." },
-  { id:'savage-wind', no:'04', name:'Savage Wind', tagline:'Unleash the Storm', price:'₹ 2,499', priceNum:2499,
+  { id:'savage-wind', volume:'100ml', no:'04', name:'Savage Wind', tagline:'Unleash the Storm', price:'₹ 2,499', priceNum:2499,
     img:'savage_wind.png', model:'savage_wind.glb', orientation:'0deg 0deg 0deg',
     character:'Spicy & Woody', wear:'Day to evening',
     intro:'A powerful force of nature, designed for the free spirit who refuses to be tamed.',
@@ -413,6 +413,22 @@ const FAQS=[
  {c:2,q:'Which fragrance should I choose?',a:'Take the Find Your Scent quiz — four questions and about a minute. If you would rather decide yourself: Blue Monarch for fresh citrus and woods, Urban Ember for leather and tobacco at night, Flora Essence for peony and rose by day, Savage Wind for pepper, vetiver and warm woods.'},
  {c:2,q:'How should I store it?',a:'Keep the flacon away from direct sunlight, heat and humidity — a drawer or closed cupboard is ideal. Stored properly, an extrait holds its character for years.'}
 ];
+
+function applyProducts(rows){
+  if(!rows||!rows.length) return false;
+  const mapped=rows.map(r=>({
+    id:r.id, no:r.no||'', name:r.name, tagline:r.tagline||'',
+    price:'₹ '+(Number(r.price)||0).toLocaleString('en-IN'), priceNum:Number(r.price)||0,
+    volume:(r.volume_ml||100)+'ml',
+    img:r.img||'blue_monarch.png', model:r.model||'', orientation:r.orientation||'0deg 0deg 0deg',
+    character:r.character||'', wear:r.wear||'',
+    intro:r.intro||'',
+    notes:{top:r.note_top||'',heart:r.note_heart||'',base:r.note_base||''},
+    head:r.head||'', narrative:r.narrative||''
+  }));
+  PRODUCTS.length=0; mapped.forEach(m=>PRODUCTS.push(m));
+  return true;
+}
 
 const money=(n)=>'₹ '+(Number(n)||0).toLocaleString('en-IN');
 
@@ -457,13 +473,13 @@ async function resolvePromo(raw,notify){
 const Announce=()=>h('div',{className:'announce'},
   h('span',{className:'track'},('✦ 100ML EXTRAIT DE PARFUM ✦ FREE SHIPPING OVER ₹499 ✦ CASH ON DELIVERY AVAILABLE ✦ HAND-FILLED IN LUDHIANA ').repeat(4)));
 
-const Nav=({cartCount,onCart,onAccount,onHome,onMenu})=>h('nav',null,
+const Nav=({cartCount,onCart,onAccount,onHome,onMenu,hasReviews})=>h('nav',null,
   h('div',{className:'wrap nav-in'},
     h('button',{className:'burger',onClick:onMenu,'aria-label':'Menu'},h('i')),
     h('div',{className:'nav-links'},
       h('a',{onClick:()=>onHome('collection')},'Collection'),
       h('a',{onClick:()=>onHome('guide')},'Find Your Scent'),
-      h('a',{onClick:()=>onHome('reviews')},'Reviews'),
+      hasReviews?h('a',{onClick:()=>onHome('reviews')},'Reviews'):null,
       h('a',{onClick:()=>onHome('story')},'Maison')),
     h('div',{className:'brand',onClick:()=>onHome()},'Scent Obsessed'),
     h('div',{className:'nav-right'},
@@ -663,7 +679,7 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,
     h('p',{className:'eyebrow'},'The Maison'),
     h('blockquote',null,'We don’t make perfume to please a room. We make it to ',h('em',null,'haunt'),' one — a signature so complete that people remember you by the air you left behind.'),
     h('p',{className:'sig'},'— Scent Obsessed, Extrait de Parfum'))),
-  h('section',{className:'sec',id:'reviews'},h('div',{className:'wrap'},
+  reviews.length>0 && h('section',{className:'sec',id:'reviews'},h('div',{className:'wrap'},
     h('div',{className:'sec-head'},
       h('h2',{className:'display'},'From the ',h('em',null,'obsessed')),
       reviews.length>0?h('div',{className:'revsum'},
@@ -671,15 +687,11 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,
         h('div',null,h(Stars,{n:Math.round(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length)}),
           h('div',{style:{fontSize:'11px',color:'var(--muted)',letterSpacing:'.14em',textTransform:'uppercase',marginTop:'3px'}},
             reviews.length+(reviews.length===1?' review':' reviews')))):null),
-    reviews.length>0
-      ? h('div',{className:'revgrid'},reviews.slice(0,9).map((r,i)=>h('div',{className:'rev',key:i},
-          h('div',{className:'st'},h(Stars,{n:r.rating})),
-          h('p',null,'“'+r.body+'”'),
-          h('div',{className:'who'},r.customer_name+(r.customer_city?(', '+r.customer_city):''),
-            r.verified?h('span',{className:'vbadge'},'Verified buyer'):null))))
-      : h('div',{style:{textAlign:'center',padding:'30px 0',color:'var(--muted)'}},
-          h('p',{style:{fontFamily:'Fraunces,serif',fontSize:'19px',color:'var(--ink)',marginBottom:'8px'}},'Be the first to review'),
-          h('p',{style:{fontSize:'14px'}},'Bought from us? Your words help the next person decide.')),
+    h('div',{className:'revgrid'},reviews.slice(0,9).map((r,i)=>h('div',{className:'rev',key:i},
+      h('div',{className:'st'},h(Stars,{n:r.rating})),
+      h('p',null,'“'+r.body+'”'),
+      h('div',{className:'who'},r.customer_name+(r.customer_city?(', '+r.customer_city):''),
+        r.verified?h('span',{className:'vbadge'},'Verified buyer'):null)))),
     h(ReviewForm,{onDone:reloadReviews,notify:notify,canReview:canReview,user:user,onSignIn:onSignIn}))),
   h('section',{className:'sec',style:{paddingTop:0}},h('div',{className:'wrap'},
     h('div',{className:'sec-head'},h('h2',{className:'display'},'Why ',h('em',null,'extrait')),
@@ -717,8 +729,11 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
       h('div',{className:'info'},
         h('div',{className:'tag'},p.tagline),
         h('h1',{className:'display'},p.name),
-        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,'100ml · Extrait de Parfum')),
-        h('div',{className:'perml'},'₹25 per ml · 100ml · '+p.character),
+        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,(p.volume||'100ml')+' · Extrait de Parfum')),
+        h('div',{className:'perml'},(function(){
+          const ml=parseInt(p.volume||'100',10)||100;
+          return '₹'+Math.round(p.priceNum/ml)+' per ml · '+(p.volume||'100ml')+(p.character?(' · '+p.character):'');
+        })()),
         h('p',{className:'intro'},p.intro),
         h('div',{className:'buyrow'},
           h('div',{className:'qty'},h('button',{onClick:()=>setQty(Math.max(1,qty-1))},'−'),h('span',null,qty),h('button',{onClick:()=>setQty(qty+1)},'+')),
@@ -727,7 +742,7 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
           h('a',{href:'/policies.html#shipping',style:{color:'var(--cognac)'}},'Full policy')),
         h('div',{className:'specs'},
           h('div',{className:'s'},h('div',{className:'k display'},'30%'),h('div',{className:'v'},'Concentration')),
-          h('div',{className:'s'},h('div',{className:'k display'},'100ml'),h('div',{className:'v'},'Volume')),
+          h('div',{className:'s'},h('div',{className:'k display'},p.volume||'100ml'),h('div',{className:'v'},'Volume')),
           h('div',{className:'s'},h('div',{className:'k display'},'8h+'),h('div',{className:'v'},'Longevity'))),
         h('div',{className:'notes'},h('h3',null,'The Notes'),
           h('div',{className:'layer'},h('div',{className:'lname'},'Top'),h('div',{className:'lval'},p.notes.top)),
@@ -742,7 +757,7 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
         h('div',{className:'tag'},x.tagline),h('h3',{className:'display'},x.name),
         h('div',{className:'price'},h('span',{className:'amt'},x.price),h('span',{className:'addbtn'},'View'))))))),
     h('div',{className:'buybar'},
-      h('div',{className:'bp'},h('div',{className:'bn display'},p.price),h('div',{className:'bs'},'100ml · Free over ₹499')),
+      h('div',{className:'bp'},h('div',{className:'bn display'},p.price),h('div',{className:'bs'},(p.volume||'100ml')+' · Free over ₹499')),
       h('button',{className:'btn',onClick:()=>onAdd(p,qty)},'Add to Cart')));
 };
 
@@ -753,7 +768,7 @@ const MenuDrawer=({open,onClose,onHome,onWheel})=>open?h(React.Fragment,null,
     h('div',{className:'drawer-body'},h('div',{className:'mlinks'},
       h('span',{onClick:()=>{onClose();onHome('collection');}},'The Collection'),
       h('span',{onClick:()=>{onClose();onHome('guide');}},'Find Your Scent'),
-      h('span',{onClick:()=>{onClose();onHome('reviews');}},'Reviews'),
+
       h('span',{onClick:()=>{onClose();onHome('story');}},'Maison'),
       h('span',{onClick:()=>{onClose();onHome('faq');}},'FAQ'),
       h('span',{style:{color:'var(--cognac)'},onClick:()=>{onClose();onWheel();}},'Unlock the Vault'))))
@@ -1042,6 +1057,11 @@ const App=()=>{
   useEffect(()=>{promoRef.current=promo;},[promo]);
 
   const notify=(m)=>{setNote(m);setTimeout(()=>setNote(null),3000);};
+  const [ver,setVer]=useState(0);
+  useEffect(()=>{ (async()=>{
+    try{ const r=await fetch('/api/products'); const d=await r.json();
+      if(d&&d.products&&applyProducts(d.products)) setVer(v=>v+1); }catch(e){}
+  })(); },[]);
   const loadReviews=async()=>{
     try{ const r=await fetch('/api/reviews'); const d=await r.json();
       if(d&&d.reviews) setReviews(d.reviews); }catch(e){}
@@ -1147,7 +1167,7 @@ const App=()=>{
 
   return h(React.Fragment,null,
     h(Announce),
-    h(Nav,{cartCount,onCart:()=>setCartOpen(true),onAccount:()=>setAccOpen(true),onHome:goHome,onMenu:()=>setMenuOpen(true)}),
+    h(Nav,{cartCount,onCart:()=>setCartOpen(true),onAccount:()=>setAccOpen(true),onHome:goHome,onMenu:()=>setMenuOpen(true),hasReviews:reviews.length>0}),
     product
       ? h(ProductView,{p:product,onAdd:addToCart,onHome:goHome,onOpen:openProduct})
       : h(Home,{onOpen:openProduct,onAdd:addToCart,onOpenFaq:setFaqOpen,faqOpen:faqOpen,reviews:reviews,

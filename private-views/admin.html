@@ -257,6 +257,8 @@ const App=()=>{
   const [surveys,setSurveys]=useState([]);
   const [reviews,setReviews]=useState([]);
   const [subs,setSubs]=useState([]);
+  const [prods,setProds]=useState([]);
+  const [editP,setEditP]=useState(null);
   const [detail,setDetail]=useState(null);
   const [sel,setSel]=useState([]);
   const [q,setQ]=useState('');
@@ -273,8 +275,9 @@ const App=()=>{
     const res=await Promise.all([
       api('/api/admin/orders'),api('/api/admin/customers'),
       api('/api/admin/marketing'),api('/api/admin/surveys'),
-      api('/api/admin/reviews'),api('/api/admin/newsletter')]);
-    const o=res[0],c=res[1],m=res[2],s=res[3],rv=res[4],nb=res[5];
+      api('/api/admin/reviews'),api('/api/admin/newsletter'),api('/api/admin/products')]);
+    const o=res[0],c=res[1],m=res[2],s=res[3],rv=res[4],nb=res[5],pr=res[6];
+    if(pr&&pr.products)setProds(pr.products);
     if(rv&&rv.reviews)setReviews(rv.reviews);
     if(nb&&nb.subscribers)setSubs(nb.subscribers);
     if(o&&o.orders)setOrders(o.orders);
@@ -396,6 +399,29 @@ const App=()=>{
     setPromoModal(false);setPCode('');setPDisc('');notify('Promo created');load();
   };
 
+  const blankProduct=()=>({id:'',no:'',name:'',tagline:'',price:2499,volume_ml:100,img:'',model:'',
+    orientation:'0deg 0deg 0deg',character:'',wear:'',intro:'',note_top:'',note_heart:'',note_base:'',
+    head:'',narrative:'',is_active:true,sort_order:100,_new:true});
+
+  const saveProduct=async()=>{
+    const p=editP;
+    if(!p.name||!p.price){notify('Name and price are required');return;}
+    if(p._new&&!p.id){notify('Enter a URL id, e.g. travel-set');return;}
+    setBusy(true);
+    const body=Object.assign({},p); delete body._new;
+    const r=p._new
+      ? await api('/api/admin/products',{method:'POST',body:JSON.stringify(body)})
+      : await api('/api/admin/products/'+p.id,{method:'PUT',body:JSON.stringify(body)});
+    if(r&&r.success){notify(p._new?'Product created':'Product updated');setEditP(null);await load();}
+    else notify((r&&r.error)||'Could not save');
+    setBusy(false);
+  };
+
+  const archiveProduct=async id=>{
+    if(!confirm('Archive this product? It disappears from the store but past orders stay intact.'))return;
+    await api('/api/admin/products/'+id,{method:'DELETE'});notify('Product archived');load();
+  };
+
   const modReview=async(id,approve)=>{
     setBusy(true);
     const r=await api('/api/admin/reviews/'+id,{method:'PATCH',body:JSON.stringify({is_approved:approve})});
@@ -414,10 +440,11 @@ const App=()=>{
 
   const pendingReviews=reviews.filter(r=>!r.is_approved);
   const TABS=[['dash','Dashboard',0],['orders','Orders',orders.length],['abandoned','Abandoned',pending.length],
-    ['reviews','Reviews',pendingReviews.length],['customers','Customers',customers.length],
+    ['products','Products',prods.length],['reviews','Reviews',pendingReviews.length],['customers','Customers',customers.length],
     ['leads','Leads',leads.length],['promos','Coupons',promos.length],['settings','Settings',0]];
   const TITLE={dash:['Dashboard','Live view of the business'],orders:['Orders','Search, dispatch and update'],
     abandoned:['Abandoned Checkouts','Started but never paid — worth a call'],
+    products:['Products','Add, edit and price what you sell'],
     reviews:['Reviews','Nothing publishes until you approve it'],customers:['Customers','Directory and lifetime value'],
     leads:['Leads','Vault entries and exit answers'],promos:['Coupons','Codes and performance'],settings:['Settings','Exports and diagnostics']};
 
@@ -528,6 +555,27 @@ const App=()=>{
               onClick:()=>{navigator.clipboard.writeText(o.customer_phone||o.customer_email||'');notify('Contact copied');}},'Copy')))))
         ):h('div',{className:'empty'},h('b',null,'Nothing abandoned'),'Every started checkout was completed.'))),
 
+      tab==='products'&&h('div',{className:'panel'},
+        h('div',{className:'panel-h'},h('h3',{className:'display'},'Catalogue'),
+          h('button',{className:'btn acc sm',onClick:()=>setEditP(blankProduct())},'Add Product')),
+        h('div',{className:'tw'},prods.length?h('table',null,
+          h('thead',null,h('tr',null,['','Product','Price','Size','URL id','Order','Status',''].map((x,i)=>h('th',{key:i},x)))),
+          h('tbody',null,prods.map(pr=>h('tr',{key:pr.id},
+            h('td',{style:{width:'52px'}},pr.img?h('img',{src:'/'+pr.img,alt:'',
+              style:{width:'34px',height:'44px',objectFit:'contain',background:'var(--bone2)'}}):null),
+            h('td',null,h('div',null,pr.name),h('div',{style:{fontSize:'11px',color:'var(--muted)'}},pr.tagline||'')),
+            h('td',null,'₹'+(Number(pr.price)||0).toLocaleString('en-IN')),
+            h('td',null,(pr.volume_ml||100)+'ml'),
+            h('td',{className:'mono'},pr.id),
+            h('td',null,pr.sort_order),
+            h('td',null,h('span',{className:'tag '+(pr.is_active===false?'t-mut':'t-ok')},pr.is_active===false?'Hidden':'Live')),
+            h('td',{style:{whiteSpace:'nowrap'}},
+              h('button',{className:'btn ghost sm',onClick:()=>setEditP(Object.assign({},pr))},'Edit'),
+              pr.is_active!==false?h('button',{className:'btn danger sm',style:{marginLeft:'6px'},
+                onClick:()=>archiveProduct(pr.id)},'Archive'):null))))
+        ):h('div',{className:'empty'},h('b',null,'No products yet'),
+            'Run supabase-products.sql once, then refresh — your four fragrances will appear here.'))),
+
       tab==='reviews'&&h(React.Fragment,null,
         h('div',{className:'stats'},
           h('div',{className:'stat acc'},h('div',{className:'l'},'Awaiting approval'),h('div',{className:'v'},pendingReviews.length)),
@@ -629,6 +677,61 @@ const App=()=>{
             h('button',{className:'btn danger sm',onClick:async()=>{await api('/api/admin/logout',{method:'POST'});window.location.href='/login.html';}},'Sign out'))))
       )),
     detail&&h(OrderDrawer,{order:detail,onClose:()=>setDetail(null),onAction:act,busy:busy,notify:notify}),
+    editP&&h(React.Fragment,null,
+      h('div',{className:'scrim',onClick:()=>setEditP(null)}),
+      h('aside',{className:'dw'},
+        h('div',{className:'dw-h'},
+          h('h3',{className:'display'},editP._new?'New product':('Edit · '+editP.name)),
+          h('button',{className:'x',onClick:()=>setEditP(null)},'×')),
+        h('div',{className:'dw-b'},
+          (function(){
+            const f=(k,label,ph,type)=>h('div',{key:k,style:{marginBottom:'12px'}},
+              h('label',{className:'lbl'},label),
+              h('input',{className:'f',type:type||'text',placeholder:ph||'',value:editP[k]==null?'':editP[k],
+                onChange:e=>setEditP(Object.assign({},editP,{[k]:type==='number'?e.target.value:e.target.value}))}));
+            const ta=(k,label,ph,rows)=>h('div',{key:k,style:{marginBottom:'12px'}},
+              h('label',{className:'lbl'},label),
+              h('textarea',{className:'f',rows:rows||3,placeholder:ph||'',value:editP[k]==null?'':editP[k],
+                onChange:e=>setEditP(Object.assign({},editP,{[k]:e.target.value}))}));
+            return h(React.Fragment,null,
+              h('div',{className:'sub-h'},'Essentials'),
+              editP._new?f('id','URL id (cannot change later)','travel-set'):h('div',{style:{marginBottom:'12px'}},
+                h('label',{className:'lbl'},'URL id'),h('div',{className:'mono'},editP.id)),
+              f('name','Name','Travel & Gifting Set'),
+              f('tagline','Tagline','Four signatures, pocket sized'),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+                f('price','Price (₹)','2499','number'),
+                f('volume_ml','Volume (ml)','20','number')),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+                f('no','Display number','05'),
+                f('sort_order','Sort order','50','number')),
+              h('div',{className:'sub-h'},'Media'),
+              f('img','Image filename or URL','travel_set.png'),
+              h('p',{style:{fontSize:'11px',color:'var(--muted)',marginTop:'-6px',marginBottom:'12px'}},
+                'Upload the image to the public folder in GitHub, then type its filename here.'),
+              f('model','3D model file (optional)','travel_set.glb'),
+              f('orientation','3D orientation','0deg 0deg 0deg'),
+              h('div',{className:'sub-h'},'Description'),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+                f('character','Character','Fresh & Woody'),
+                f('wear','Best worn','Day to evening')),
+              ta('intro','Short intro','One or two lines shown under the name',2),
+              h('div',{className:'sub-h'},'Notes'),
+              f('note_top','Top notes','Bergamot · Lemon'),
+              f('note_heart','Heart notes','Jasmine · Ginger'),
+              f('note_base','Base notes','Sandalwood · Amber'),
+              h('div',{className:'sub-h'},'Long copy'),
+              f('head','Headline','A line that sums up the dry-down'),
+              ta('narrative','Full narrative','Use blank lines between paragraphs',7),
+              h('div',{className:'sub-h'},'Visibility'),
+              h('label',{style:{display:'flex',alignItems:'center',gap:'9px',fontSize:'13px',marginBottom:'16px'}},
+                h('input',{type:'checkbox',checked:editP.is_active!==false,
+                  onChange:e=>setEditP(Object.assign({},editP,{is_active:e.target.checked}))}),
+                'Show on the storefront'),
+              h('div',{className:'acts'},
+                h('button',{className:'btn acc',disabled:busy,onClick:saveProduct},busy?'Saving…':(editP._new?'Create product':'Save changes')),
+                h('button',{className:'btn ghost',onClick:()=>setEditP(null)},'Cancel')));
+          })()))),
     promoModal&&h('div',{className:'modal',onClick:e=>{if(e.target.className==='modal')setPromoModal(false);}},
       h('div',{className:'mb'},h('h3',{className:'display'},'New promo code'),
         h('label',{className:'lbl'},'Code'),
