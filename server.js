@@ -635,7 +635,15 @@ app.get('/refund-policy',    (req, res) => res.redirect(301, '/policies.html#ref
 app.get('/shipping-policy',  (req, res) => res.redirect(301, '/policies.html#shipping'));
 app.get('/contact',          (req, res) => res.redirect(301, '/policies.html#contact'));
 
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '7d', etag: true }));
+app.use(express.static(path.join(__dirname, 'public'), {
+    etag: true,
+    setHeaders: (res, filePath) => {
+        // HTML must never be cached, or policy/price updates take days to reach customers.
+        if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        // images and 3D models are content-stable, so cache them hard
+        else res.setHeader('Cache-Control', 'public, max-age=604800');
+    }
+}));
 
 // anything else -> storefront
 app.use((req, res) => {
