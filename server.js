@@ -437,6 +437,81 @@ app.post('/api/admin/ship-order/:orderId', verifyAdmin, async (req, res) => {
     }
 });
 
+
+// ==========================================
+// --- ORDER STATUS WORKFLOW (Godsin parity) ---
+// ==========================================
+const ALLOWED_STATUS = ['PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+
+app.patch('/api/admin/orders/:orderId/status', verifyAdmin, async (req, res) => {
+    try {
+        const status = String(req.body.status || '').toUpperCase();
+        if (!ALLOWED_STATUS.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+        const patch = { tracking_status: status };
+        if (status === 'CANCELLED') patch.payment_status = 'CANCELLED';
+        const { error } = await supabase.from('orders').update(patch).eq('order_id', req.params.orderId);
+        if (error) return res.status(500).json({ error: error.message });
+        res.json({ success: true, status });
+    } catch (e) { res.status(500).json({ error: 'Status update failed' }); }
+});
+
+app.patch('/api/admin/orders/:orderId/mark-paid', verifyAdmin, async (req, res) => {
+    try {
+        const r = await fulfilOrder(req.params.orderId);
+        if (!r.ok) return res.status(404).json({ error: 'Order not found' });
+        res.json({ success: true, already: !!r.already });
+    } catch (e) { res.status(500).json({ error: 'Could not mark paid' }); }
+});
+
+app.patch('/api/admin/orders/bulk-status', verifyAdmin, async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body.orderIds) ? req.body.orderIds.slice(0, 200) : [];
+        const status = String(req.body.status || '').toUpperCase();
+        if (!ids.length) return res.status(400).json({ error: 'No orders selected' });
+        if (!ALLOWED_STATUS.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+        const patch = { tracking_status: status };
+        if (status === 'CANCELLED') patch.payment_status = 'CANCELLED';
+        const { error } = await supabase.from('orders').update(patch).in('order_id', ids);
+        if (error) return res.status(500).json({ error: error.message });
+        res.json({ success: true, updated: ids.length, status });
+    } catch (e) { res.status(500).json({ error: 'Bulk update failed' }); }
+});
+
+// abandoned checkouts = payment never completed
+app.get('/api/admin/abandoned', verifyAdmin, async (req, res) => {
+    try {
+        const { data } = await supabase.from('orders').select('*')
+            .eq('payment_status', 'PENDING').order('created_at', { ascending: false }).limit(300);
+        res.json({ success: true, abandoned: data || [] });
+    } catch (e) { res.status(500).json({ success: false }); }
+});
+
+// exit-intent survey answers
+app.get('/api/admin/surveys', verifyAdmin, async (req, res) => {
+    try {
+        const { data } = await supabase.from('exit_survey_responses').select('*')
+            .order('created_at', { ascending: false }).limit(500);
+        res.json({ success: true, surveys: data || [] });
+    } catch (e) { res.json({ success: true, surveys: [] }); }
+});
+
+// courier connectivity check (does not book anything)
+app.get('/api/admin/shiprocket/diagnose', verifyAdmin, async (req, res) => {
+    try {
+        if (!process.env.SHIPROCKET_EMAIL || !process.env.SHIPROCKET_PASSWORD)
+            return res.json({ ok: false, reason: 'Shiprocket credentials not set in environment' });
+        const auth = await axios.post('https://apiv2.shiprocket.in/v1/external/auth/login', {
+            email: process.env.SHIPROCKET_EMAIL, password: process.env.SHIPROCKET_PASSWORD
+        });
+        if (!auth.data.token) return res.json({ ok: false, reason: 'Login returned no token' });
+        const pin = process.env.SHIPROCKET_PICKUP_PINCODE || '141002';
+        const q = await axios.get(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pin}&delivery_postcode=110001&weight=0.5&cod=0`,
+            { headers: { Authorization: `Bearer ${auth.data.token}` } });
+        const n = q.data?.data?.available_courier_companies?.length || 0;
+        res.json({ ok: true, couriers: n, pickup: pin });
+    } catch (e) { res.json({ ok: false, reason: e.response?.data?.message || e.message }); }
+});
+
 // ==========================================
 // --- STATIC + PAGES ---
 // ==========================================

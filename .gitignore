@@ -24,3 +24,7 @@ Thumbs.db
 dist/
 tmp/
 *.tmp
+.env
+.env.*
+!.env.example
+node_modules/
