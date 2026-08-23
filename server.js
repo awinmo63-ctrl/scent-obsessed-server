@@ -559,12 +559,21 @@ app.post('/api/reviews', reviewLimiter, async (req, res) => {
         if (!(rating >= 1 && rating <= 5)) return res.status(400).json({ error: 'Please choose a rating.' });
         if (body.length < 10) return res.status(400).json({ error: 'Please write a little more.' });
 
-        // mark as a verified buyer if this email has a paid order
-        let verified = false, orderId = null;
-        if (email) {
-            const { data: ord } = await supabase.from('orders').select('order_id')
-                .eq('customer_email', email).in('payment_status', ['SUCCESS','PAID']).limit(1);
-            if (ord && ord.length) { verified = true; orderId = ord[0].order_id; }
+        // 🔒 only genuine buyers may review — the email must have a completed order
+        if (!email || !email.includes('@')) {
+            return res.status(403).json({ error: 'Please use the email address you ordered with.' });
+        }
+        const { data: ord } = await supabase.from('orders').select('order_id')
+            .eq('customer_email', email).in('payment_status', ['SUCCESS','PAID']).limit(1);
+        if (!ord || !ord.length) {
+            return res.status(403).json({ error: 'We could not find an order for that email address. Only customers who have ordered can leave a review.' });
+        }
+        const verified = true, orderId = ord[0].order_id;
+
+        // one review per order
+        const { data: existing } = await supabase.from('reviews').select('id').eq('order_id', orderId).limit(1);
+        if (existing && existing.length) {
+            return res.status(409).json({ error: 'You have already left a review for this order. Thank you!' });
         }
 
         await supabase.from('reviews').insert([{
