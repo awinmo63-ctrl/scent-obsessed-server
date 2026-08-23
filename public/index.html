@@ -245,7 +245,46 @@ footer ul span:hover{color:var(--cognac2)}
 .tdot.on{background:var(--cognac)}
 .tstep .tl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase}
 .tstep .td{font-size:11px;color:var(--muted);margin-top:2px}
+/* quiz */
+.quiz{border:1px solid var(--line);background:#fff;padding:26px 20px}
+.qprog{height:3px;background:var(--line);margin-bottom:22px;position:relative;overflow:hidden}
+.qprog i{position:absolute;left:0;top:0;bottom:0;background:var(--cognac);transition:width .4s}
+.qq{font-family:'Fraunces',serif;font-size:clamp(20px,5.4vw,28px);font-weight:400;margin-bottom:20px;line-height:1.25}
+.qopts{display:grid;grid-template-columns:1fr;gap:9px}
+.qopt{text-align:left;background:transparent;border:1px solid var(--line);padding:15px 16px;cursor:pointer;font-size:14.5px;transition:.25s;min-height:52px;color:var(--ink)}
+.qopt:hover{border-color:var(--cognac);background:var(--bone2)}
+.qres{text-align:center}
+.qres img{max-height:200px;margin:0 auto 14px;display:block;filter:drop-shadow(0 18px 22px rgba(26,23,20,.2))}
+.qback{background:none;border:none;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;margin-top:14px}
+/* comparison */
+.cmp{border:1px solid var(--line);background:#fff;overflow:hidden}
+.cmprow{display:grid;grid-template-columns:1.2fr 1fr 1fr;border-bottom:1px solid var(--line)}
+.cmprow:last-child{border-bottom:none}
+.cmprow>div{padding:14px 12px;font-size:13px;display:flex;align-items:center}
+.cmprow.hd>div{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:var(--bone2);font-weight:600}
+.cmprow .us{background:rgba(138,90,44,.06);font-weight:600}
+.cmprow.hd .us{background:var(--cognac);color:#fff}
+/* reviews */
 .revgrid{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line)}
+.revsum{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.revsum .big{font-family:'Fraunces',serif;font-size:40px;color:var(--cognac);line-height:1}
+.vbadge{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ok,#2F6B45);border:1px solid rgba(47,107,69,.4);padding:2px 7px;border-radius:9px;margin-left:8px}
+.starpick{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+.starpick button{background:none;border:none;font-size:28px;cursor:pointer;color:var(--line);line-height:1;padding:0 2px}
+.starpick button.on{color:var(--cognac)}
+/* newsletter */
+.nl{display:flex;gap:8px;margin-top:14px;max-width:340px}
+.nl input{flex:1;background:transparent;border:1px solid #4A4238;color:var(--bone);padding:11px 12px;font-size:14px;outline:none;min-height:44px}
+.nl input:focus{border-color:var(--cognac2)}
+.nl button{background:var(--cognac);color:#fff;border:none;padding:0 16px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;min-height:44px}
+/* gift */
+.gift{background:rgba(138,90,44,.08);border:1px dashed var(--cognac);padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--cognac);text-align:center}
+.gift .gbar{height:3px;background:rgba(138,90,44,.2);margin-top:8px;position:relative;overflow:hidden}
+.gift .gbar i{position:absolute;left:0;top:0;bottom:0;background:var(--cognac);transition:width .5s}
+/* faq tabs */
+.faqtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.faqtabs button{background:transparent;border:1px solid var(--line);padding:9px 14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;color:var(--muted);min-height:42px}
+.faqtabs button.on{background:var(--ink);color:var(--bone);border-color:var(--ink)}
 .rev{padding:22px 0;border-bottom:1px solid var(--line)}
 .rev .st{color:var(--cognac);letter-spacing:.2em;font-size:12px}
 .rev p{margin:10px 0;font-family:'Fraunces',serif;font-size:16px;line-height:1.6}
@@ -292,6 +331,8 @@ footer ul span:hover{color:var(--cognac2)}
  .mbox{border:1px solid var(--line);padding:38px}
  .grid2{grid-template-columns:1fr 1fr;gap:10px}
  .revgrid{grid-template-columns:repeat(3,1fr);gap:0;border-left:1px solid var(--line)}
+ .qopts{grid-template-columns:1fr 1fr}
+ .quiz{padding:40px}
  .rev{padding:26px 22px;border-right:1px solid var(--line);border-top:1px solid var(--line)}
  .chat-win{right:24px;left:auto;bottom:88px;width:370px}
  .chat-btn{right:24px;bottom:24px}
@@ -313,14 +354,11 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZmFzbWlpZnloZnZ1emNiamxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTI3NjAsImV4cCI6MjA4ODEyODc2MH0.0PkXE4FEKUnUtIXVehmyz-NRCNPqQyPMk1Mqdz-GUsA'
 );
 
-const CART_KEY='scent_obsessed_cart', ML_PER_BOTTLE=10, REWARD_ML=100;
+const CART_KEY='scent_obsessed_cart', ML_PER_BOTTLE=10, REWARD_ML=100, GIFT_THRESHOLD=4999;
 const WHATSAPP='';   // <-- put your WhatsApp number here e.g. '919876543210' to show the WhatsApp link
 
-/* ===== REAL REVIEWS ONLY =====
-   Leave empty until you have genuine customer reviews.
-   Format: { stars:5, text:'...', who:'Name, City' }
-   The section stays hidden while this array is empty.        */
-const REVIEWS = [];
+/* Reviews are loaded from the database and only appear once you have
+   approved them in Admin → Reviews. Nothing is ever hard-coded here. */
 
 const PRODUCTS = [
   { id:'blue-monarch', no:'01', name:'Blue Monarch', tagline:'Rule Your Realm', price:'₹ 2,499', priceNum:2499,
@@ -353,13 +391,14 @@ const PRODUCTS = [
     narrative:"Experience the rush of the untamed. The scent opens with a gust of crisp, electric freshness — Bergamot hits the skin like a cool breeze.\n\nBut the wind soon shifts, carrying the spicy warmth of Nutmeg and the aromatic calm of Lavender, creating a magnetic pull that is impossible to resist.\n\nAs the storm settles, it leaves behind a trail of pure addiction — a rich, dark overdose of Vanilla Absolute wraps the fragrance in a smooth, smoky sweetness." }
 ];
 
+const FAQ_CATS=['The Fragrance','Ordering & Delivery','Getting Started'];
 const FAQS=[
- {q:'What is extrait de parfum, and why does it matter?',a:'Extrait de parfum carries roughly 30% fragrance oil. Eau de parfum typically carries 15–20%, and eau de toilette 5–15%. Higher concentration means the scent sits closer to true, projects longer, and needs fewer sprays — which is why a 50ml extrait outlasts a far larger bottle of EDT.'},
- {q:'How long will it last on skin?',a:'Expect 8 hours or more on skin, longer on fabric. Longevity varies with skin type, weather, and where you apply — pulse points and clothing hold a fragrance longest.'},
- {q:'How long does delivery take?',a:'Orders are dispatched within 24–48 hours and typically arrive in 3–5 business days anywhere in India. Every parcel ships tracked and insured through Shiprocket, and shipping is complimentary on all orders.'},
- {q:'Can I return a fragrance?',a:'Unopened, sealed flacons can be returned within 7 days of delivery. If a parcel arrives damaged, send us photographs within 48 hours and we will replace it at no cost. Opened bottles cannot be returned for hygiene reasons.'},
- {q:'Are these authentic and safe to wear?',a:'Every flacon is composed and hand-filled by us in Ludhiana in small batches. Nothing is resold or decanted from other houses. If your skin is sensitive, spray once on the inner wrist and wait a few hours before fuller wear.'},
- {q:'Which fragrance should I choose?',a:'If you want fresh and versatile, choose Blue Monarch. For something warm and dressed-up at night, Urban Ember. For a bright, floral daytime signature, Flora Essence. For sweet, smoky vanilla depth, Savage Wind.'}
+ {c:0,q:'What is extrait de parfum, and why does it matter?',a:'Extrait de parfum carries roughly 30% fragrance oil. Eau de parfum typically carries 15–20%, and eau de toilette 5–15%. Higher concentration means the scent sits closer to true, projects longer, and needs fewer sprays — which is why a 50ml extrait outlasts a far larger bottle of EDT.'},
+ {c:0,q:'How long will it last on skin?',a:'Expect 8 hours or more on skin, longer on fabric. Longevity varies with skin type, weather, and where you apply — pulse points and clothing hold a fragrance longest.'},
+ {c:1,q:'How long does delivery take?',a:'Orders are dispatched within 24–48 hours and typically arrive in 3–5 business days anywhere in India. Every parcel ships tracked and insured through Shiprocket, and shipping is complimentary on all orders.'},
+ {c:1,q:'Can I return a fragrance?',a:'Unopened, sealed flacons can be returned within 7 days of delivery. If a parcel arrives damaged, send us photographs within 48 hours and we will replace it at no cost. Opened bottles cannot be returned for hygiene reasons.'},
+ {c:0,q:'Are these authentic and safe to wear?',a:'Every flacon is composed and hand-filled by us in Ludhiana in small batches. Nothing is resold or decanted from other houses. If your skin is sensitive, spray once on the inner wrist and wait a few hours before fuller wear.'},
+ {c:2,q:'Which fragrance should I choose?',a:'If you want fresh and versatile, choose Blue Monarch. For something warm and dressed-up at night, Urban Ember. For a bright, floral daytime signature, Flora Essence. For sweet, smoky vanilla depth, Savage Wind.'}
 ];
 
 const money=(n)=>'₹ '+(Number(n)||0).toLocaleString('en-IN');
@@ -411,6 +450,7 @@ const Nav=({cartCount,onCart,onAccount,onHome,onMenu})=>h('nav',null,
     h('div',{className:'nav-links'},
       h('a',{onClick:()=>onHome('collection')},'Collection'),
       h('a',{onClick:()=>onHome('guide')},'Find Your Scent'),
+      h('a',{onClick:()=>onHome('reviews')},'Reviews'),
       h('a',{onClick:()=>onHome('story')},'Maison'),
       h('a',{onClick:()=>onHome('faq')},'FAQ')),
     h('div',{className:'brand',onClick:()=>onHome()},'Scent Obsessed'),
@@ -423,7 +463,142 @@ const TrustBar=()=>h('div',{className:'trustbar'},h('div',{className:'wrap tg'},
   h('div',{className:'ti'},h('b',null,'30% extrait'),' · 8h+ longevity'),
   h('div',{className:'ti'},h('b',null,'Secure payment'),' · UPI, cards, netbanking')));
 
-const Home=({onOpen,onAdd,onOpenFaq,faqOpen})=>h(React.Fragment,null,
+const QUIZ=[
+ {q:'When will you wear it most?',a:[{t:'Daytime — work, errands, sunlight',s:{'flora-essence':2,'blue-monarch':2}},
+   {t:'Evening — dinners, nights out',s:{'urban-ember':2,'savage-wind':2}},
+   {t:'Both, I want one signature',s:{'blue-monarch':2,'savage-wind':1}}]},
+ {q:'Which of these appeals most?',a:[{t:'Citrus, mint, clean air',s:{'blue-monarch':3}},
+   {t:'Leather, spice, smoke',s:{'urban-ember':3}},
+   {t:'Jasmine, magnolia, sunlight',s:{'flora-essence':3}},
+   {t:'Vanilla, warmth, sweetness',s:{'savage-wind':3}}]},
+ {q:'How should people notice it?',a:[{t:'Subtle — they lean in to catch it',s:{'flora-essence':2,'blue-monarch':1}},
+   {t:'Confident — noticed across a room',s:{'urban-ember':2,'savage-wind':2}}]},
+ {q:'Pick a mood.',a:[{t:'Composed and in control',s:{'blue-monarch':2}},
+   {t:'Magnetic and a little dangerous',s:{'urban-ember':2}},
+   {t:'Bright and optimistic',s:{'flora-essence':2}},
+   {t:'Untamed and free',s:{'savage-wind':2}}]}
+];
+
+const ScentQuiz=({onOpen,onAdd,notify})=>{
+  const [step,setStep]=useState(0);
+  const [score,setScore]=useState({});
+  const [done,setDone]=useState(null);
+  const [email,setEmail]=useState('');
+  const [sent,setSent]=useState(false);
+  const pick=(opt)=>{
+    const next={...score};
+    Object.keys(opt.s).forEach(k=>{next[k]=(next[k]||0)+opt.s[k];});
+    setScore(next);
+    if(step+1<QUIZ.length) setStep(step+1);
+    else{
+      let best=PRODUCTS[0].id,bv=-1;
+      PRODUCTS.forEach(pr=>{const v=next[pr.id]||0;if(v>bv){bv=v;best=pr.id;}});
+      setDone(best);
+    }
+  };
+  const restart=()=>{setStep(0);setScore({});setDone(null);setSent(false);setEmail('');};
+  const saveEmail=async()=>{
+    if(!email.includes('@')){notify('Please enter a valid email');return;}
+    try{ await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,source:'quiz'})}); }catch(e){}
+    setSent(true);notify('Saved — we’ll send your match and new releases.');
+  };
+  if(done){
+    const p=PRODUCTS.find(x=>x.id===done);
+    return h('div',{className:'quiz qres'},
+      h('p',{className:'eyebrow',style:{marginBottom:'12px'}},'Your match'),
+      h('img',{src:p.img,alt:p.name,loading:'lazy'}),
+      h('h3',{className:'display',style:{fontSize:'30px',fontWeight:400,marginBottom:'6px'}},p.name),
+      h('div',{style:{color:'var(--cognac)',fontSize:'11px',letterSpacing:'.18em',textTransform:'uppercase',marginBottom:'14px'}},p.character+' · '+p.wear),
+      h('p',{style:{color:'var(--muted)',maxWidth:'420px',margin:'0 auto 22px',lineHeight:1.7,fontSize:'15px'}},p.intro),
+      h('div',{style:{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}},
+        h('button',{className:'btn',onClick:()=>onOpen(p.id)},'See '+p.name),
+        h('button',{className:'btn ghost',onClick:()=>onAdd(p,1)},'Add to Cart · '+p.price)),
+      !sent?h('div',{style:{maxWidth:'340px',margin:'22px auto 0'}},
+        h('p',{style:{fontSize:'12.5px',color:'var(--muted)',marginBottom:'8px'}},'Want your match emailed, plus new releases?'),
+        h('div',{style:{display:'flex',gap:'8px'}},
+          h('input',{className:'field',style:{marginBottom:0},placeholder:'Email address',type:'email',value:email,onChange:e=>setEmail(e.target.value)}),
+          h('button',{className:'btn',style:{padding:'0 18px'},onClick:saveEmail},'Send'))
+      ):h('p',{style:{fontSize:'12.5px',color:'var(--cognac)',marginTop:'18px'}},'Saved. Welcome to the house.'),
+      h('button',{className:'qback',onClick:restart},'Retake the quiz'));
+  }
+  const cur=QUIZ[step];
+  return h('div',{className:'quiz'},
+    h('div',{className:'qprog'},h('i',{style:{width:((step)/QUIZ.length*100)+'%'}})),
+    h('p',{className:'eyebrow',style:{marginBottom:'10px'}},'Question '+(step+1)+' of '+QUIZ.length),
+    h('h3',{className:'qq display'},cur.q),
+    h('div',{className:'qopts'},cur.a.map((o,i)=>h('button',{key:i,className:'qopt',onClick:()=>pick(o)},o.t))),
+    step>0?h('button',{className:'qback',onClick:()=>setStep(step-1)},'← Back'):null);
+};
+
+const Comparison=()=>h('div',{className:'cmp'},
+  h('div',{className:'cmprow hd'},h('div',null,''),h('div',{className:'us'},'Scent Obsessed'),h('div',null,'Typical designer EDP')),
+  [['Fragrance oil concentration','30% — extrait','15–20% — eau de parfum'],
+   ['Typical wear time','8h+ on skin','4–6h on skin'],
+   ['Bottle size','50ml','50–100ml'],
+   ['Typical price in India','₹2,499','₹6,000–₹12,000'],
+   ['Cost per ml','₹50','₹120–₹240'],
+   ['Made','Hand-filled, small batch, Ludhiana','Mass produced'],
+   ['Shipping','Free, tracked, insured','Varies']
+  ].map((r,i)=>h('div',{className:'cmprow',key:i},
+    h('div',{style:{color:'var(--muted)',fontSize:'12px'}},r[0]),
+    h('div',{className:'us'},r[1]),h('div',null,r[2]))));
+
+const Stars=({n})=>h('span',{style:{color:'var(--cognac)',letterSpacing:'.14em'}},'★'.repeat(n)+'☆'.repeat(5-n));
+
+const ReviewForm=({onDone,notify})=>{
+  const [open,setOpen]=useState(false);
+  const [rating,setRating]=useState(0);
+  const [name,setName]=useState('');const [city,setCity]=useState('');
+  const [email,setEmail]=useState('');const [body,setBody]=useState('');
+  const [busy,setBusy]=useState(false);
+  if(!open) return h('div',{style:{textAlign:'center',padding:'26px 0'}},
+    h('button',{className:'btn ghost',onClick:()=>setOpen(true)},'Write a Review'));
+  const submit=async()=>{
+    if(!rating){notify('Please choose a rating');return;}
+    if(!name.trim()||body.trim().length<10){notify('Add your name and a few words');return;}
+    setBusy(true);
+    try{
+      const r=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({customer_name:name,customer_city:city,email:email,rating:rating,body:body})});
+      const d=await r.json();
+      if(d&&d.success){notify('Thank you — your review will appear once approved.');setOpen(false);onDone&&onDone();}
+      else notify((d&&d.error)||'Could not submit right now');
+    }catch(e){notify('Could not submit right now');}
+    setBusy(false);
+  };
+  return h('div',{style:{maxWidth:'440px',margin:'26px auto 0',border:'1px solid var(--line)',background:'#fff',padding:'22px'}},
+    h('p',{className:'eyebrow',style:{textAlign:'center',marginBottom:'12px'}},'Share your experience'),
+    h('div',{className:'starpick'},[1,2,3,4,5].map(n=>h('button',{key:n,className:rating>=n?'on':'',
+      onClick:()=>setRating(n),'aria-label':n+' stars'},'★'))),
+    h('input',{className:'field',placeholder:'Your name',value:name,onChange:e=>setName(e.target.value)}),
+    h('input',{className:'field',placeholder:'City (optional)',value:city,onChange:e=>setCity(e.target.value)}),
+    h('input',{className:'field',placeholder:'Email used for your order (optional)',type:'email',value:email,onChange:e=>setEmail(e.target.value)}),
+    h('textarea',{className:'field',rows:4,placeholder:'What did you think of the fragrance?',value:body,onChange:e=>setBody(e.target.value)}),
+    h('p',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'12px'}},'Reviews are published after a quick check. Adding your order email marks you a verified buyer.'),
+    h('div',{style:{display:'flex',gap:'8px'}},
+      h('button',{className:'btn block',disabled:busy,onClick:submit},busy?'Sending…':'Submit Review'),
+      h('button',{className:'btn ghost',onClick:()=>setOpen(false)},'Cancel')));
+};
+
+const Newsletter=({notify})=>{
+  const [email,setEmail]=useState('');const [done,setDone]=useState(false);
+  const go=async()=>{
+    if(!email.includes('@')){notify('Please enter a valid email');return;}
+    try{ await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,source:'footer'})}); }catch(e){}
+    setDone(true);notify('Subscribed. Welcome to the house.');
+  };
+  if(done) return h('p',{style:{marginTop:'14px',color:'var(--cognac2)',fontSize:'13px'}},'Subscribed — watch your inbox.');
+  return h('div',null,
+    h('p',{style:{fontSize:'13px',marginTop:'16px'}},'New releases and private offers. No noise.'),
+    h('div',{className:'nl'},
+      h('input',{type:'email',placeholder:'Your email',value:email,onChange:e=>setEmail(e.target.value),
+        onKeyDown:e=>{if(e.key==='Enter')go();}}),
+      h('button',{onClick:go},'Join')));
+};
+
+const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,setFaqCat})=>h(React.Fragment,null,
   h('header',{className:'hero'},h('div',{className:'wrap'},
     h('div',{className:'hero-visual'},h('div',{className:'halo'}),
       h('img',{className:'hero-bottle',src:'transparent_bottle.png',alt:'Scent Obsessed flacon',
@@ -454,7 +629,8 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen})=>h(React.Fragment,null,
   )),
   h('section',{className:'sec',id:'guide',style:{paddingTop:0}},h('div',{className:'wrap'},
     h('div',{className:'sec-head'},h('h2',{className:'display'},'Find your ',h('em',null,'scent')),h('p',{className:'eyebrow'},'Four characters, one signature')),
-    h('div',{className:'guide'},
+    h(ScentQuiz,{onOpen:onOpen,onAdd:onAdd,notify:notify}),
+    h('div',{className:'guide',style:{marginTop:'18px'}},
       h('div',{className:'grow hd'},h('div',null,'Fragrance'),h('div',null,'Character'),h('div',null,'Best worn')),
       PRODUCTS.map(p=>h('div',{className:'grow',key:p.id},
         h('div',{className:'gn',onClick:()=>onOpen(p.id)},p.name,h('small',null,'View →')),
@@ -464,19 +640,42 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen})=>h(React.Fragment,null,
     h('p',{className:'eyebrow'},'The Maison'),
     h('blockquote',null,'We don’t make perfume to please a room. We make it to ',h('em',null,'haunt'),' one — a signature so complete that people remember you by the air you left behind.'),
     h('p',{className:'sig'},'— Scent Obsessed, Extrait de Parfum'))),
-  REVIEWS.length>0 && h('section',{className:'sec'},h('div',{className:'wrap'},
-    h('div',{className:'sec-head'},h('h2',{className:'display'},'From the ',h('em',null,'obsessed'))),
-    h('div',{className:'revgrid'},REVIEWS.map((r,i)=>h('div',{className:'rev',key:i},
-      h('div',{className:'st'},'★'.repeat(r.stars)),h('p',null,'“'+r.text+'”'),h('div',{className:'who'},r.who)))))),
+  h('section',{className:'sec',id:'reviews'},h('div',{className:'wrap'},
+    h('div',{className:'sec-head'},
+      h('h2',{className:'display'},'From the ',h('em',null,'obsessed')),
+      reviews.length>0?h('div',{className:'revsum'},
+        h('span',{className:'big display'},(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length).toFixed(1)),
+        h('div',null,h(Stars,{n:Math.round(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length)}),
+          h('div',{style:{fontSize:'11px',color:'var(--muted)',letterSpacing:'.14em',textTransform:'uppercase',marginTop:'3px'}},
+            reviews.length+(reviews.length===1?' review':' reviews')))):null),
+    reviews.length>0
+      ? h('div',{className:'revgrid'},reviews.slice(0,9).map((r,i)=>h('div',{className:'rev',key:i},
+          h('div',{className:'st'},h(Stars,{n:r.rating})),
+          h('p',null,'“'+r.body+'”'),
+          h('div',{className:'who'},r.customer_name+(r.customer_city?(', '+r.customer_city):''),
+            r.verified?h('span',{className:'vbadge'},'Verified buyer'):null))))
+      : h('div',{style:{textAlign:'center',padding:'30px 0',color:'var(--muted)'}},
+          h('p',{style:{fontFamily:'Fraunces,serif',fontSize:'19px',color:'var(--ink)',marginBottom:'8px'}},'Be the first to review'),
+          h('p',{style:{fontSize:'14px'}},'Bought from us? Your words help the next person decide.')),
+    h(ReviewForm,{onDone:reloadReviews,notify:notify}))),
+  h('section',{className:'sec',style:{paddingTop:0}},h('div',{className:'wrap'},
+    h('div',{className:'sec-head'},h('h2',{className:'display'},'Why ',h('em',null,'extrait')),
+      h('p',{className:'eyebrow'},'The tier above eau de parfum')),
+    h(Comparison),
+    h('p',{style:{fontSize:'12px',color:'var(--muted)',marginTop:'12px',lineHeight:1.6}},
+      'Comparison uses typical published concentrations for designer eau de parfum. Wear time varies with skin and climate.'))),
   h('section',{className:'sec'},h('div',{className:'wrap'},h('div',{className:'pillars'},
     h('div',{className:'pillar'},h('div',{className:'n display'},'01'),h('h4',{className:'display'},'True Extrait'),h('p',null,'30% fragrance concentration — not eau de parfum. Richer, deeper, and built to last the entire day on skin.')),
     h('div',{className:'pillar'},h('div',{className:'n display'},'02'),h('h4',{className:'display'},'Secure Dispatch'),h('p',null,'Tracked, insured Shiprocket delivery in 3–5 business days. Shipping is complimentary on every order.')),
     h('div',{className:'pillar'},h('div',{className:'n display'},'03'),h('h4',{className:'display'},'The Loyalty Vessel'),h('p',null,'Every acquisition pours 10ml into your vessel. Reach 100ml and claim a full flacon, complimentary.'))))),
   h('section',{className:'sec',id:'faq',style:{paddingTop:0}},h('div',{className:'wrap'},
     h('div',{className:'sec-head'},h('h2',{className:'display'},'Questions, ',h('em',null,'answered'))),
-    h('div',{className:'faq'},FAQS.map((f,i)=>h('div',{className:'fq'+(faqOpen===i?' open':''),key:i},
-      h('button',{onClick:()=>onOpenFaq(faqOpen===i?null:i)},f.q),
-      h('div',{className:'fa'},f.a))))))
+    h('div',{className:'faqtabs'},FAQ_CATS.map((c,ci)=>h('button',{key:ci,className:faqCat===ci?'on':'',
+      onClick:()=>{setFaqCat(ci);onOpenFaq(null);}},c))),
+    h('div',{className:'faq'},FAQS.map((f,i)=>({f:f,i:i})).filter(x=>x.f.c===faqCat).map(x=>
+      h('div',{className:'fq'+(faqOpen===x.i?' open':''),key:x.i},
+        h('button',{onClick:()=>onOpenFaq(faqOpen===x.i?null:x.i)},x.f.q),
+        h('div',{className:'fa'},x.f.a))))))
 );
 
 const ProductView=({p,onAdd,onHome,onOpen})=>{
@@ -530,6 +729,7 @@ const MenuDrawer=({open,onClose,onHome,onWheel})=>open?h(React.Fragment,null,
     h('div',{className:'drawer-body'},h('div',{className:'mlinks'},
       h('span',{onClick:()=>{onClose();onHome('collection');}},'The Collection'),
       h('span',{onClick:()=>{onClose();onHome('guide');}},'Find Your Scent'),
+      h('span',{onClick:()=>{onClose();onHome('reviews');}},'Reviews'),
       h('span',{onClick:()=>{onClose();onHome('story');}},'Maison'),
       h('span',{onClick:()=>{onClose();onHome('faq');}},'FAQ'),
       h('span',{style:{color:'var(--cognac)'},onClick:()=>{onClose();onWheel();}},'Unlock the Vault'))))
@@ -558,6 +758,13 @@ const CartDrawer=({open,onClose,cart,updateQty,removeItem,promo,onCheckout})=>{
                     : h('div',{className:'qty'},h('button',{onClick:()=>updateQty(i.id,-1)},'−'),h('span',null,i.qty),h('button',{onClick:()=>updateQty(i.id,1)},'+')),
                   h('button',{className:'rm',onClick:()=>removeItem(i.id)},'Remove')))))),
       cart.length>0&&h('div',{className:'drawer-foot'},
+        (function(){
+          const need=GIFT_THRESHOLD-finalTotal;
+          return finalTotal>=GIFT_THRESHOLD
+            ? h('div',{className:'gift'},'✦ A complimentary 5ml discovery vial is included with this order')
+            : h('div',{className:'gift'},'Add '+money(need)+' more for a complimentary 5ml discovery vial',
+                h('div',{className:'gbar'},h('i',{style:{width:Math.min(100,finalTotal/GIFT_THRESHOLD*100)+'%'}})));
+        })(),
         discount>0&&h('div',{className:'saveline'},'You’re saving '+money(discount)+' on this order'),
         h('div',{className:'trow'},h('span',null,'Subtotal'),h('span',null,money(subtotal))),
         promo&&h('div',{className:'trow'},h('span',null,'Discount ('+promo.code+')'),h('span',{style:{color:'var(--cognac)'}},'− '+money(discount))),
@@ -804,11 +1011,18 @@ const App=()=>{
   const [payState,setPayState]=useState(null);
   const [busy,setBusy]=useState(false);
   const [faqOpen,setFaqOpen]=useState(null);
+  const [faqCat,setFaqCat]=useState(0);
+  const [reviews,setReviews]=useState([]);
   const [form,setForm]=useState({name:'',email:'',phone:'',street:'',city:'',state:'',pincode:''});
   const promoRef=useRef(null);
   useEffect(()=>{promoRef.current=promo;},[promo]);
 
   const notify=(m)=>{setNote(m);setTimeout(()=>setNote(null),3000);};
+  const loadReviews=async()=>{
+    try{ const r=await fetch('/api/reviews'); const d=await r.json();
+      if(d&&d.reviews) setReviews(d.reviews); }catch(e){}
+  };
+  useEffect(()=>{loadReviews();},[]);
   useEffect(()=>{localStorage.setItem(CART_KEY,JSON.stringify(cart));},[cart]);
   useEffect(()=>{ document.body.style.overflow=(cartOpen||accOpen||menuOpen||checkoutOpen)?'hidden':''; },[cartOpen,accOpen,menuOpen,checkoutOpen]);
 
@@ -912,7 +1126,7 @@ const App=()=>{
     h(Nav,{cartCount,onCart:()=>setCartOpen(true),onAccount:()=>setAccOpen(true),onHome:goHome,onMenu:()=>setMenuOpen(true)}),
     product
       ? h(ProductView,{p:product,onAdd:addToCart,onHome:goHome,onOpen:openProduct})
-      : h(Home,{onOpen:openProduct,onAdd:addToCart,onOpenFaq:setFaqOpen,faqOpen}),
+      : h(Home,{onOpen:openProduct,onAdd:addToCart,onOpenFaq:setFaqOpen,faqOpen:faqOpen,reviews:reviews,reloadReviews:loadReviews,notify:notify,faqCat:faqCat,setFaqCat:setFaqCat}),
     !product&&h('section',{className:'sec',id:'loyalty',style:{paddingTop:0}},h('div',{className:'wrap'},
       h('div',{className:'loyal'},
         h('div',null,h('div',{className:'ring'},
@@ -928,7 +1142,8 @@ const App=()=>{
         h('div',{className:'foot-brand'},h('div',{className:'fbrand'},'Scent Obsessed'),
           h('p',null,'Extrait de parfum, hand-filled in Ludhiana for those who intend to be unforgettable.'),
           WHATSAPP?h('a',{href:'https://wa.me/'+WHATSAPP,target:'_blank',rel:'noopener',
-            style:{display:'inline-block',marginTop:'14px',color:'var(--cognac2)',fontSize:'13px',letterSpacing:'.06em'}},'Chat on WhatsApp →'):null),
+            style:{display:'inline-block',marginTop:'14px',color:'var(--cognac2)',fontSize:'13px',letterSpacing:'.06em'}},'Chat on WhatsApp →'):null,
+          h(Newsletter,{notify:notify})),
         h('div',null,h('h5',null,'Shop'),h('ul',null,PRODUCTS.map(p=>h('li',{key:p.id},h('span',{onClick:()=>openProduct(p.id)},p.name))))),
         h('div',null,h('h5',null,'Help'),h('ul',null,
           h('li',null,h('span',{onClick:()=>setLegal('shipping')},'Shipping')),

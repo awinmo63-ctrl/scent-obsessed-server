@@ -255,6 +255,8 @@ const App=()=>{
   const [promos,setPromos]=useState([]);
   const [leads,setLeads]=useState([]);
   const [surveys,setSurveys]=useState([]);
+  const [reviews,setReviews]=useState([]);
+  const [subs,setSubs]=useState([]);
   const [detail,setDetail]=useState(null);
   const [sel,setSel]=useState([]);
   const [q,setQ]=useState('');
@@ -270,8 +272,11 @@ const App=()=>{
     setLoading(true);
     const res=await Promise.all([
       api('/api/admin/orders'),api('/api/admin/customers'),
-      api('/api/admin/marketing'),api('/api/admin/surveys')]);
-    const o=res[0],c=res[1],m=res[2],s=res[3];
+      api('/api/admin/marketing'),api('/api/admin/surveys'),
+      api('/api/admin/reviews'),api('/api/admin/newsletter')]);
+    const o=res[0],c=res[1],m=res[2],s=res[3],rv=res[4],nb=res[5];
+    if(rv&&rv.reviews)setReviews(rv.reviews);
+    if(nb&&nb.subscribers)setSubs(nb.subscribers);
     if(o&&o.orders)setOrders(o.orders);
     if(c&&c.customers)setCustomers(c.customers);
     if(m){setPromos(m.promos||[]);setLeads(m.leads||[]);}
@@ -391,15 +396,29 @@ const App=()=>{
     setPromoModal(false);setPCode('');setPDisc('');notify('Promo created');load();
   };
 
+  const modReview=async(id,approve)=>{
+    setBusy(true);
+    const r=await api('/api/admin/reviews/'+id,{method:'PATCH',body:JSON.stringify({is_approved:approve})});
+    notify(r&&r.success?(approve?'Review published':'Review hidden'):'Update failed');
+    await load();setBusy(false);
+  };
+  const delReview=async id=>{
+    if(!confirm('Delete this review permanently?'))return;
+    await api('/api/admin/reviews/'+id,{method:'DELETE'});notify('Review deleted');load();
+  };
+
   const delPromo=async id=>{
     if(!confirm('Delete this code?'))return;
     await api('/api/admin/promo-codes/'+id,{method:'DELETE'});notify('Code deleted');load();
   };
 
+  const pendingReviews=reviews.filter(r=>!r.is_approved);
   const TABS=[['dash','Dashboard',0],['orders','Orders',orders.length],['abandoned','Abandoned',pending.length],
-    ['customers','Customers',customers.length],['leads','Leads',leads.length],['promos','Coupons',promos.length],['settings','Settings',0]];
+    ['reviews','Reviews',pendingReviews.length],['customers','Customers',customers.length],
+    ['leads','Leads',leads.length],['promos','Coupons',promos.length],['settings','Settings',0]];
   const TITLE={dash:['Dashboard','Live view of the business'],orders:['Orders','Search, dispatch and update'],
-    abandoned:['Abandoned Checkouts','Started but never paid — worth a call'],customers:['Customers','Directory and lifetime value'],
+    abandoned:['Abandoned Checkouts','Started but never paid — worth a call'],
+    reviews:['Reviews','Nothing publishes until you approve it'],customers:['Customers','Directory and lifetime value'],
     leads:['Leads','Vault entries and exit answers'],promos:['Coupons','Codes and performance'],settings:['Settings','Exports and diagnostics']};
 
   if(loading)return h('div',{className:'load'},h('span',{className:'spin'}),h('div',{style:{marginTop:'12px'}},'Loading operations…'));
@@ -509,6 +528,36 @@ const App=()=>{
               onClick:()=>{navigator.clipboard.writeText(o.customer_phone||o.customer_email||'');notify('Contact copied');}},'Copy')))))
         ):h('div',{className:'empty'},h('b',null,'Nothing abandoned'),'Every started checkout was completed.'))),
 
+      tab==='reviews'&&h(React.Fragment,null,
+        h('div',{className:'stats'},
+          h('div',{className:'stat acc'},h('div',{className:'l'},'Awaiting approval'),h('div',{className:'v'},pendingReviews.length)),
+          h('div',{className:'stat'},h('div',{className:'l'},'Published'),h('div',{className:'v'},reviews.filter(r=>r.is_approved).length)),
+          h('div',{className:'stat'},h('div',{className:'l'},'Average rating'),
+            h('div',{className:'v'},reviews.filter(r=>r.is_approved).length
+              ? (reviews.filter(r=>r.is_approved).reduce((a,r)=>a+r.rating,0)/reviews.filter(r=>r.is_approved).length).toFixed(1) : '—')),
+          h('div',{className:'stat'},h('div',{className:'l'},'Verified buyers'),h('div',{className:'v'},reviews.filter(r=>r.verified).length))),
+        h('div',{className:'panel'},
+          h('div',{className:'panel-h'},h('h3',{className:'display'},'Moderation queue'),
+            h('button',{className:'btn ghost sm',onClick:()=>csv(reviews.map(r=>({name:r.customer_name,city:r.customer_city,
+              rating:r.rating,body:r.body,verified:r.verified,approved:r.is_approved,date:r.created_at})),'reviews.csv')},'Export CSV')),
+          h('div',{className:'tw'},reviews.length?h('table',null,
+            h('thead',null,h('tr',null,['Rating','Review','From','Received','Status',''].map((x,i)=>h('th',{key:i},x)))),
+            h('tbody',null,reviews.map(r=>h('tr',{key:r.id},
+              h('td',{style:{color:'var(--cognac)',whiteSpace:'nowrap'}},'★'.repeat(r.rating)),
+              h('td',{style:{maxWidth:'380px'}},r.body),
+              h('td',null,h('div',null,r.customer_name),
+                h('div',{style:{fontSize:'11px',color:'var(--muted)'}},
+                  (r.customer_city||'—')+(r.verified?' · verified':''))),
+              h('td',null,dstr(r.created_at)),
+              h('td',null,h('span',{className:'tag '+(r.is_approved?'t-ok':'t-warn')},r.is_approved?'Live':'Pending')),
+              h('td',{style:{whiteSpace:'nowrap'}},
+                r.is_approved
+                  ? h('button',{className:'btn ghost sm',disabled:busy,onClick:()=>modReview(r.id,false)},'Hide')
+                  : h('button',{className:'btn acc sm',disabled:busy,onClick:()=>modReview(r.id,true)},'Approve'),
+                h('button',{className:'btn danger sm',style:{marginLeft:'6px'},onClick:()=>delReview(r.id)},'Delete')))))
+          ):h('div',{className:'empty'},h('b',null,'No reviews yet'),
+              'Ask your first customers for one — they appear here for approval before going live.')))),
+
       tab==='customers'&&h('div',{className:'panel'},
         h('div',{className:'panel-h'},h('h3',{className:'display'},'Customer directory'),
           h('button',{className:'btn ghost sm',onClick:()=>csv(customers.map(c=>({name:c.full_name,email:c.email,
@@ -568,7 +617,8 @@ const App=()=>{
                 pincode:parseAddr(o.shipping_address).pincode||'',total:o.total_amount,payment:o.payment_status,
                 fulfilment:o.tracking_status,awb:o.awb_code||'',promo:o.applied_promo||''})),'all-orders.csv')},'All orders'),
               h('button',{className:'btn ghost sm',onClick:()=>csv(customers.map(c=>({name:c.full_name,email:c.email,phone:c.phone,loyalty_ml:c.loyalty_ml})),'all-customers.csv')},'All customers'),
-              h('button',{className:'btn ghost sm',onClick:()=>csv(leads.map(l=>({phone:l.phone,prize:l.prize_won,date:l.created_at})),'all-leads.csv')},'All leads')))),
+              h('button',{className:'btn ghost sm',onClick:()=>csv(leads.map(l=>({phone:l.phone,prize:l.prize_won,date:l.created_at})),'all-leads.csv')},'All leads'),
+              h('button',{className:'btn ghost sm',onClick:()=>csv(subs.map(x=>({email:x.email,source:x.source,date:x.created_at})),'newsletter.csv')},'Newsletter ('+subs.length+')')))),
         h('div',{className:'panel'},h('div',{className:'panel-h'},h('h3',{className:'display'},'Courier connection')),
           h('div',{className:'panel-b'},
             h('p',{style:{color:'var(--muted)',marginBottom:'14px'}},'Checks that Shiprocket credentials work and couriers are serviceable. Books nothing.'),

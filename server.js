@@ -88,6 +88,8 @@ const SPECIAL_PROMOS = {
     VIP10:   { type: 'PERCENTAGE',  discount: 10 }
 };
 const REWARD_ML = 100;
+const GIFT_THRESHOLD = 4999;                 // spend this much (after discount) to unlock…
+const GIFT_ITEM = { id: 'gift-discovery', name: 'Discovery Vial 5ml (complimentary)' };
 
 async function resolvePromoServer(code) {
     const c = String(code || '').trim().toUpperCase();
@@ -150,7 +152,12 @@ async function computeOrder(cartItems, promoCode, customerEmail) {
     }
     if (amount < 0) amount = 0;
 
-    return { amount: Number(amount.toFixed(2)), rewardMl: paidUnits * 10, claimedMl, items: clean, promo: promo ? promo.code : '' };
+    // complimentary discovery vial — decided here, never by the browser
+    if (amount >= GIFT_THRESHOLD) {
+        clean.push({ id: GIFT_ITEM.id, name: GIFT_ITEM.name, price: '₹ 0', qty: 1, isReward: true, isGift: true });
+    }
+
+    return { amount: Number(amount.toFixed(2)), rewardMl: paidUnits * 10, claimedMl, items: clean, promo: promo ? promo.code : '', gift: amount >= GIFT_THRESHOLD };
 }
 
 // ==========================================
@@ -510,6 +517,89 @@ app.get('/api/admin/shiprocket/diagnose', verifyAdmin, async (req, res) => {
         const n = q.data?.data?.available_courier_companies?.length || 0;
         res.json({ ok: true, couriers: n, pickup: pin });
     } catch (e) { res.json({ ok: false, reason: e.response?.data?.message || e.message }); }
+});
+
+
+// ==========================================
+// --- REVIEWS (public submit, admin approves) ---
+// ==========================================
+const reviewLimiter = rateLimit({ windowMs: 60*60*1000, max: 5, message: { error: "Too many reviews submitted. Please try again later." } });
+
+// public: only approved reviews are ever returned
+app.get('/api/reviews', async (req, res) => {
+    try {
+        const { data } = await supabase.from('reviews')
+            .select('product_id,customer_name,customer_city,rating,body,verified,created_at')
+            .eq('is_approved', true).order('created_at', { ascending: false }).limit(60);
+        res.json({ success: true, reviews: data || [] });
+    } catch (e) { res.json({ success: true, reviews: [] }); }
+});
+
+app.post('/api/reviews', reviewLimiter, async (req, res) => {
+    try {
+        const name = String(req.body.customer_name || '').trim().slice(0, 60);
+        const city = String(req.body.customer_city || '').trim().slice(0, 60);
+        const body = String(req.body.body || '').trim().slice(0, 600);
+        const productId = String(req.body.product_id || '').trim().slice(0, 40);
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const rating = parseInt(req.body.rating, 10);
+
+        if (!name || !body) return res.status(400).json({ error: 'Please add your name and a few words.' });
+        if (!(rating >= 1 && rating <= 5)) return res.status(400).json({ error: 'Please choose a rating.' });
+        if (body.length < 10) return res.status(400).json({ error: 'Please write a little more.' });
+
+        // mark as a verified buyer if this email has a paid order
+        let verified = false, orderId = null;
+        if (email) {
+            const { data: ord } = await supabase.from('orders').select('order_id')
+                .eq('customer_email', email).in('payment_status', ['SUCCESS','PAID']).limit(1);
+            if (ord && ord.length) { verified = true; orderId = ord[0].order_id; }
+        }
+
+        await supabase.from('reviews').insert([{
+            product_id: productId || null, customer_name: name, customer_city: city || null,
+            rating, body, order_id: orderId, verified, is_approved: false
+        }]);
+        res.json({ success: true, verified });
+    } catch (e) { res.status(500).json({ error: 'Could not submit your review right now.' }); }
+});
+
+app.get('/api/admin/reviews', verifyAdmin, async (req, res) => {
+    try {
+        const { data } = await supabase.from('reviews').select('*').order('created_at', { ascending: false }).limit(400);
+        res.json({ success: true, reviews: data || [] });
+    } catch (e) { res.json({ success: true, reviews: [] }); }
+});
+app.patch('/api/admin/reviews/:id', verifyAdmin, async (req, res) => {
+    try {
+        const approve = req.body.is_approved === true;
+        const { error } = await supabase.from('reviews').update({ is_approved: approve }).eq('id', req.params.id);
+        if (error) return res.status(500).json({ error: error.message });
+        res.json({ success: true, is_approved: approve });
+    } catch (e) { res.status(500).json({ error: 'Update failed' }); }
+});
+app.delete('/api/admin/reviews/:id', verifyAdmin, async (req, res) => {
+    const { error } = await supabase.from('reviews').delete().eq('id', req.params.id);
+    res.json({ success: !error });
+});
+
+// ==========================================
+// --- NEWSLETTER ---
+// ==========================================
+const newsLimiter = rateLimit({ windowMs: 60*60*1000, max: 10 });
+app.post('/api/newsletter', newsLimiter, async (req, res) => {
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        if (!email || !email.includes('@') || email.length > 120) return res.status(400).json({ error: 'Please enter a valid email address.' });
+        await supabase.from('newsletter_subscribers').insert([{ email, source: String(req.body.source || 'footer').slice(0, 30) }]);
+        res.json({ success: true });
+    } catch (e) { res.json({ success: true }); }   // duplicate email -> still a success for the visitor
+});
+app.get('/api/admin/newsletter', verifyAdmin, async (req, res) => {
+    try {
+        const { data } = await supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false }).limit(2000);
+        res.json({ success: true, subscribers: data || [] });
+    } catch (e) { res.json({ success: true, subscribers: [] }); }
 });
 
 // ==========================================
