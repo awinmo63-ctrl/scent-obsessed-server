@@ -766,7 +766,13 @@ app.post('/api/admin/upload-image', verifyAdmin, uploadLimiter, async (req, res)
 // --- STATIC + PAGES ---
 // ==========================================
 app.get('/healthz', (req, res) => res.json({ ok: true, uptime: process.uptime() }));
-app.get('/admin', verifyAdmin, (req, res) => res.sendFile(path.join(__dirname, 'private-views', 'admin.html')));
+app.get('/admin', verifyAdmin, (req, res) => {
+    // never cache the admin panel, or updates sit behind a stale browser copy
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(path.join(__dirname, 'private-views', 'admin.html'));
+});
 
 // public policy URLs (payment gateways expect these to be reachable)
 app.get('/terms',            (req, res) => res.redirect(301, '/policies.html#terms'));
