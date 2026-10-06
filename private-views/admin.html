@@ -399,9 +399,20 @@ const App=()=>{
     setPromoModal(false);setPCode('');setPDisc('');notify('Promo created');load();
   };
 
-  const blankProduct=()=>({id:'',no:'',name:'',tagline:'',price:2499,volume_ml:100,img:'',model:'',
+  const blankProduct=()=>({id:'',no:'',name:'',tagline:'',price:2499,volume_ml:100,category:'Fragrance',concentration:'Extrait de Parfum',img:'',model:'',
     orientation:'0deg 0deg 0deg',character:'',wear:'',intro:'',note_top:'',note_heart:'',note_base:'',
     head:'',narrative:'',is_active:true,sort_order:100,_new:true});
+
+  const uploadImage=async(file)=>{
+    if(!file)return;
+    if(file.size>8*1024*1024){notify('Image is over 8MB — please compress it first');return;}
+    setBusy(true);notify('Uploading image…');
+    const dataUrl=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(file);});
+    const r=await api('/api/admin/upload-image',{method:'POST',body:JSON.stringify({filename:file.name,dataUrl:dataUrl})});
+    if(r&&r.success&&r.url){setEditP(p=>Object.assign({},p,{img:r.url}));notify('Image uploaded');}
+    else notify((r&&r.error)||'Upload failed');
+    setBusy(false);
+  };
 
   const saveProduct=async()=>{
     const p=editP;
@@ -559,11 +570,12 @@ const App=()=>{
         h('div',{className:'panel-h'},h('h3',{className:'display'},'Catalogue'),
           h('button',{className:'btn acc sm',onClick:()=>setEditP(blankProduct())},'Add Product')),
         h('div',{className:'tw'},prods.length?h('table',null,
-          h('thead',null,h('tr',null,['','Product','Price','Size','URL id','Order','Status',''].map((x,i)=>h('th',{key:i},x)))),
+          h('thead',null,h('tr',null,['','Product','Category','Price','Size','URL id','Order','Status',''].map((x,i)=>h('th',{key:i},x)))),
           h('tbody',null,prods.map(pr=>h('tr',{key:pr.id},
-            h('td',{style:{width:'52px'}},pr.img?h('img',{src:'/'+pr.img,alt:'',
+            h('td',{style:{width:'52px'}},pr.img?h('img',{src:(String(pr.img).indexOf('http')===0?pr.img:('/'+pr.img)),alt:'',
               style:{width:'34px',height:'44px',objectFit:'contain',background:'var(--bone2)'}}):null),
             h('td',null,h('div',null,pr.name),h('div',{style:{fontSize:'11px',color:'var(--muted)'}},pr.tagline||'')),
+            h('td',null,h('span',{className:'tag t-mut'},pr.category||'Fragrance')),
             h('td',null,'₹'+(Number(pr.price)||0).toLocaleString('en-IN')),
             h('td',null,(pr.volume_ml||100)+'ml'),
             h('td',{className:'mono'},pr.id),
@@ -705,10 +717,21 @@ const App=()=>{
               h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
                 f('no','Display number','05'),
                 f('sort_order','Sort order','50','number')),
-              h('div',{className:'sub-h'},'Media'),
-              f('img','Image filename or URL','travel_set.png'),
-              h('p',{style:{fontSize:'11px',color:'var(--muted)',marginTop:'-6px',marginBottom:'12px'}},
-                'Upload the image to the public folder in GitHub, then type its filename here.'),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+                f('category','Category','Gifting'),
+                f('concentration','Concentration','Eau de Parfum')),
+              h('div',{className:'sub-h'},'Image'),
+              editP.img?h('div',{style:{display:'flex',gap:'12px',alignItems:'center',marginBottom:'10px'}},
+                h('img',{src:editP.img.indexOf('http')===0?editP.img:('/'+editP.img),alt:'',
+                  style:{width:'62px',height:'80px',objectFit:'contain',background:'var(--bone2)',border:'1px solid var(--line)'}}),
+                h('button',{className:'btn ghost sm',onClick:()=>setEditP(Object.assign({},editP,{img:''}))},'Remove')):null,
+              h('label',{className:'btn ghost',style:{display:'inline-flex',cursor:'pointer',marginBottom:'8px'}},
+                busy?'Uploading…':'Choose image file',
+                h('input',{type:'file',accept:'image/png,image/jpeg,image/webp,image/avif',style:{display:'none'},
+                  onChange:e=>{uploadImage(e.target.files&&e.target.files[0]);e.target.value='';}})),
+              h('p',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'10px'}},
+                'Uploads straight to storage — no GitHub needed. Max 8MB. Or paste a filename/URL below.'),
+              f('img','Image filename or URL','travel-set.jpg'),
               f('model','3D model file (optional)','travel_set.glb'),
               f('orientation','3D orientation','0deg 0deg 0deg'),
               h('div',{className:'sub-h'},'Description'),

@@ -420,7 +420,9 @@ function applyProducts(rows){
     id:r.id, no:r.no||'', name:r.name, tagline:r.tagline||'',
     price:'₹ '+(Number(r.price)||0).toLocaleString('en-IN'), priceNum:Number(r.price)||0,
     volume:(r.volume_ml||100)+'ml',
-    img:r.img||'blue_monarch.png', model:r.model||'', orientation:r.orientation||'0deg 0deg 0deg',
+    img:(r.img&&String(r.img).indexOf('http')===0)?r.img:(r.img||'blue_monarch.png'),
+    model:r.model||'', orientation:r.orientation||'0deg 0deg 0deg',
+    category:r.category||'Fragrance', concentration:r.concentration||'Extrait de Parfum',
     character:r.character||'', wear:r.wear||'',
     intro:r.intro||'',
     notes:{top:r.note_top||'',heart:r.note_heart||'',base:r.note_base||''},
@@ -729,7 +731,7 @@ const ProductView=({p,onAdd,onHome,onOpen})=>{
       h('div',{className:'info'},
         h('div',{className:'tag'},p.tagline),
         h('h1',{className:'display'},p.name),
-        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,(p.volume||'100ml')+' · Extrait de Parfum')),
+        h('div',{className:'pprice'},h('span',{className:'pv display'},p.price),h('small',null,(p.volume||'100ml')+' · '+(p.concentration||'Extrait de Parfum'))),
         h('div',{className:'perml'},(function(){
           const ml=parseInt(p.volume||'100',10)||100;
           return '₹'+Math.round(p.priceNum/ml)+' per ml · '+(p.volume||'100ml')+(p.character?(' · '+p.character):'');

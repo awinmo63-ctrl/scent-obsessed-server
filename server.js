@@ -59,7 +59,7 @@ if (!process.env.ADMIN_PASSWORD_HASH && !process.env.ADMIN_PASSWORD) {
 }
 
 // keep raw body so we can verify Cashfree webhook signatures
-app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
+app.use(express.json({ limit: '12mb', verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(globalLimiter);
@@ -642,7 +642,7 @@ app.get('/api/admin/newsletter', verifyAdmin, async (req, res) => {
 // --- PRODUCTS (public read, admin manage) ---
 // ==========================================
 const PRODUCT_FIELDS = ['id','no','name','tagline','price','volume_ml','img','model','orientation',
-    'character','wear','intro','note_top','note_heart','note_base','head','narrative','is_active','sort_order'];
+    'character','wear','intro','note_top','note_heart','note_base','head','narrative','is_active','sort_order','category','concentration'];
 
 function cleanProduct(body) {
     const out = {};
@@ -701,6 +701,44 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
         await getCatalog(true);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: 'Could not archive product' }); }
+});
+
+
+// ==========================================
+// --- PRODUCT IMAGE UPLOAD (Supabase Storage) ---
+// ==========================================
+const uploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 40 });
+const IMAGE_BUCKET = 'product-images';
+
+app.post('/api/admin/upload-image', verifyAdmin, uploadLimiter, async (req, res) => {
+    try {
+        const dataUrl = String(req.body.dataUrl || '');
+        const rawName = String(req.body.filename || 'image');
+        const m = dataUrl.match(/^data:(image\/(png|jpe?g|webp|avif));base64,(.+)$/i);
+        if (!m) return res.status(400).json({ error: 'Please choose a PNG, JPG, WEBP or AVIF image.' });
+
+        const mime = m[1];
+        const buffer = Buffer.from(m[3], 'base64');
+        if (buffer.length > 8 * 1024 * 1024) return res.status(400).json({ error: 'Image is larger than 8MB. Please compress it first.' });
+
+        const ext = (mime.split('/')[1] || 'png').replace('jpeg', 'jpg');
+        const safe = rawName.toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'image';
+        const key = safe + '-' + Date.now() + '.' + ext;
+
+        const { error } = await supabase.storage.from(IMAGE_BUCKET)
+            .upload(key, buffer, { contentType: mime, upsert: false, cacheControl: '604800' });
+        if (error) {
+            if (String(error.message || '').toLowerCase().includes('bucket')) {
+                return res.status(400).json({ error: "Storage bucket missing. In Supabase → Storage, create a PUBLIC bucket named 'product-images'." });
+            }
+            return res.status(400).json({ error: error.message });
+        }
+        const { data: pub } = supabase.storage.from(IMAGE_BUCKET).getPublicUrl(key);
+        res.json({ success: true, url: (pub && pub.publicUrl) || '', key });
+    } catch (e) {
+        console.error('Image upload failed:', e.message);
+        res.status(500).json({ error: 'Upload failed. Please try a smaller image.' });
+    }
 });
 
 // ==========================================
