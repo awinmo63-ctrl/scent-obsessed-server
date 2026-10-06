@@ -327,31 +327,47 @@ app.post('/api/cashfree-webhook', async (req, res) => {
 // --- AI CONCIERGE ---
 // ==========================================
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const systemInstruction = `You are the digital concierge for Scent Obsessed, an extrait de parfum house in Ludhiana, India.
+const BRAND_RULES = `You are the digital concierge for Scent Obsessed, a fragrance house in Ludhiana, India.
 Tone: warm, precise, boutique. Never pushy. Keep answers under 3 sentences.
-
-PRODUCTS — four 100ml extrait de parfum flacons, Rs 2,499 each (Rs 25 per ml):
-- Blue Monarch — fresh & woody, day to evening. Top: grapefruit, lemon, bergamot, mint, pink pepper, aldehydes, coriander. Heart: ginger, nutmeg, jasmine, melon. Base: incense, amber, cedar, sandalwood, patchouli, labdanum, amberwood.
-- Urban Ember — spicy & leathery, evening. Top: bergamot, lavender, cinnamon, black pepper. Heart: leather, mimosa, port wine. Base: tobacco leaf, guaiac wood, oakmoss, opoponax.
-- Flora Essence — floral & bright, daytime. Top: peony, citrus, mandarin orange. Heart: osmanthus, rose. Base: sandalwood, patchouli.
-- Savage Wind — spicy & woody, day to evening. Top: Calabrian bergamot, pepper. Heart: sichuan pepper, lavender, pink pepper, vetiver, patchouli, geranium, elemi. Base: ambroxan, cedar, labdanum.
 
 SHIPPING: dispatched in 24-48 hours (not Sundays/holidays). Surface shipping. Punjab & North India 2-4 business days; metros 3-6; rest of India 5-8; remote/North East 7-10. Shipping is FREE above Rs 499; flat Rs 99 below Rs 499. Partners: Shiprocket with Blue Dart / Delhivery. Tracking ID sent on dispatch.
 PAYMENT: Cashfree (UPI, cards, netbanking). Cash on Delivery IS available across most PIN codes, with a Rs 49 handling fee.
-RETURNS: unopened sealed flacons within 7 days. Opened/sprayed bottles cannot be returned (hygiene). Discovery sets are final sale. Damaged or wrong item: report within 24 hours WITH a continuous unboxing video for a free replacement or full refund. Refunds in 5-7 business days; COD refunds as store credit or bank transfer.
+RETURNS: unopened sealed bottles within 7 days. Opened or sprayed bottles cannot be returned (hygiene). Discovery sets are final sale. Damaged or wrong item: report within 24 hours WITH a continuous unboxing video for a free replacement or full refund. Refunds in 5-7 business days; COD refunds as store credit or bank transfer.
 CANCELLATION: allowed any time before dispatch only.
 CONTACT: info@scentobsessed.in or WhatsApp 78149 30720.
 
-RULES: never invent stock levels, discount codes, delivery dates or notes not listed above. Prices are fixed. For refunds, complaints or anything you are unsure about, direct them to info@scentobsessed.in or WhatsApp 78149 30720.`;
+RULES: never invent stock levels, discount codes, delivery dates, prices, or notes that are not in the catalogue below. Prices are fixed. If a product is not listed below, say we do not currently offer it. For refunds, complaints or anything you are unsure about, direct them to info@scentobsessed.in or WhatsApp 78149 30720.`;
+
+let _aiCat = null, _aiCatAt = 0;
+async function catalogueForAI() {
+    if (_aiCat && (Date.now() - _aiCatAt) < 120000) return _aiCat;
+    let text = 'CURRENT CATALOGUE:\n';
+    try {
+        const { data } = await supabase.from('products').select('*').eq('is_active', true).order('sort_order');
+        (data || []).forEach(p => {
+            text += `\n- ${p.name} (${p.category || 'Fragrance'}) — Rs ${p.price}, ${p.volume_ml || 100}ml, ${p.concentration || 'Extrait de Parfum'}.`;
+            if (p.tagline) text += ` Tagline: ${p.tagline}.`;
+            if (p.character) text += ` Character: ${p.character}.`;
+            if (p.wear) text += ` Best worn: ${p.wear}.`;
+            if (p.note_top) text += ` Top: ${p.note_top}.`;
+            if (p.note_heart) text += ` Heart: ${p.note_heart}.`;
+            if (p.note_base) text += ` Base: ${p.note_base}.`;
+        });
+        _aiCat = text; _aiCatAt = Date.now();
+    } catch (e) { text += '\n(catalogue unavailable)'; }
+    return text;
+}
 let aiModel;
-if (process.env.GEMINI_API_KEY) aiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction });
+if (process.env.GEMINI_API_KEY) aiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 app.post('/api/chat', chatLimiter, async (req, res) => {
     try {
         if (!aiModel) return res.status(500).json({ error: "Our concierge is offline right now." });
         const userMessage = String(req.body.message || '').slice(0, 500);
         if (!userMessage) return res.status(400).json({ error: "Message is required." });
-        const result = await aiModel.generateContent(userMessage);
+        const catalogue = await catalogueForAI();
+        const prompt = BRAND_RULES + '\n\n' + catalogue + '\n\nCustomer question: ' + userMessage;
+        const result = await aiModel.generateContent(prompt);
         res.json({ reply: result.response.text() });
     } catch (error) {
         console.error("Gemini error:", error.message);
@@ -642,7 +658,7 @@ app.get('/api/admin/newsletter', verifyAdmin, async (req, res) => {
 // --- PRODUCTS (public read, admin manage) ---
 // ==========================================
 const PRODUCT_FIELDS = ['id','no','name','tagline','price','volume_ml','img','model','orientation',
-    'character','wear','intro','note_top','note_heart','note_base','head','narrative','is_active','sort_order','category','concentration'];
+    'character','wear','intro','note_top','note_heart','note_base','head','narrative','is_active','sort_order','category','concentration','images'];
 
 function cleanProduct(body) {
     const out = {};
@@ -652,6 +668,11 @@ function cleanProduct(body) {
     if (out.volume_ml !== undefined) out.volume_ml = Math.max(1, parseInt(out.volume_ml, 10) || 100);
     if (out.sort_order !== undefined) out.sort_order = parseInt(out.sort_order, 10) || 100;
     if (out.is_active !== undefined) out.is_active = !!out.is_active;
+    if (out.images !== undefined) {
+        const arr = Array.isArray(out.images) ? out.images : [];
+        out.images = arr.filter(u => typeof u === 'string' && u.trim()).slice(0, 10);
+        if (!out.img && out.images.length) out.img = out.images[0];
+    }
     return out;
 }
 

@@ -399,7 +399,7 @@ const App=()=>{
     setPromoModal(false);setPCode('');setPDisc('');notify('Promo created');load();
   };
 
-  const blankProduct=()=>({id:'',no:'',name:'',tagline:'',price:2499,volume_ml:100,category:'Fragrance',concentration:'Extrait de Parfum',img:'',model:'',
+  const blankProduct=()=>({id:'',no:'',name:'',tagline:'',price:2499,volume_ml:100,category:'Fragrance',concentration:'Extrait de Parfum',img:'',images:[],model:'',
     orientation:'0deg 0deg 0deg',character:'',wear:'',intro:'',note_top:'',note_heart:'',note_base:'',
     head:'',narrative:'',is_active:true,sort_order:100,_new:true});
 
@@ -409,8 +409,13 @@ const App=()=>{
     setBusy(true);notify('Uploading image…');
     const dataUrl=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(file);});
     const r=await api('/api/admin/upload-image',{method:'POST',body:JSON.stringify({filename:file.name,dataUrl:dataUrl})});
-    if(r&&r.success&&r.url){setEditP(p=>Object.assign({},p,{img:r.url}));notify('Image uploaded');}
-    else notify((r&&r.error)||'Upload failed');
+    if(r&&r.success&&r.url){
+      setEditP(p=>{
+        const gal=(Array.isArray(p.images)?p.images.slice():[]).concat([r.url]).slice(0,10);
+        return Object.assign({},p,{images:gal,img:p.img||r.url});
+      });
+      notify('Image added');
+    } else notify((r&&r.error)||'Upload failed');
     setBusy(false);
   };
 
@@ -721,16 +726,29 @@ const App=()=>{
                 f('category','Category','Gifting'),
                 f('concentration','Concentration','Eau de Parfum')),
               h('div',{className:'sub-h'},'Image'),
-              editP.img?h('div',{style:{display:'flex',gap:'12px',alignItems:'center',marginBottom:'10px'}},
-                h('img',{src:editP.img.indexOf('http')===0?editP.img:('/'+editP.img),alt:'',
-                  style:{width:'62px',height:'80px',objectFit:'contain',background:'var(--bone2)',border:'1px solid var(--line)'}}),
-                h('button',{className:'btn ghost sm',onClick:()=>setEditP(Object.assign({},editP,{img:''}))},'Remove')):null,
+              (function(){
+                const gal=Array.isArray(editP.images)?editP.images:(editP.img?[editP.img]:[]);
+                if(!gal.length)return null;
+                return h('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap',marginBottom:'12px'}},
+                  gal.map((u,i)=>h('div',{key:i,style:{textAlign:'center'}},
+                    h('img',{src:String(u).indexOf('http')===0?u:('/'+u),alt:'',
+                      style:{width:'64px',height:'82px',objectFit:'contain',background:'var(--bone2)',
+                        border:(editP.img===u?'2px solid var(--cognac)':'1px solid var(--line)'),display:'block'}}),
+                    h('div',{style:{fontSize:'9px',marginTop:'4px',color:'var(--muted)'}},
+                      editP.img===u?'MAIN':h('span',{style:{cursor:'pointer',color:'var(--cognac)'},
+                        onClick:()=>setEditP(Object.assign({},editP,{img:u}))},'Set main')),
+                    h('div',{style:{fontSize:'9px',marginTop:'2px',color:'var(--bad)',cursor:'pointer'},
+                      onClick:()=>setEditP(p=>{
+                        const left=gal.filter(x=>x!==u);
+                        return Object.assign({},p,{images:left,img:(p.img===u?(left[0]||''):p.img)});
+                      })},'Remove'))));
+              })(),
               h('label',{className:'btn ghost',style:{display:'inline-flex',cursor:'pointer',marginBottom:'8px'}},
-                busy?'Uploading…':'Choose image file',
+                busy?'Uploading…':'Add image',
                 h('input',{type:'file',accept:'image/png,image/jpeg,image/webp,image/avif',style:{display:'none'},
                   onChange:e=>{uploadImage(e.target.files&&e.target.files[0]);e.target.value='';}})),
               h('p',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'10px'}},
-                'Uploads straight to storage — no GitHub needed. Max 8MB. Or paste a filename/URL below.'),
+                'Add as many as you like (up to 10) — click Add image again for each. The one marked MAIN is used on product cards. Max 8MB each.'),
               f('img','Image filename or URL','travel-set.jpg'),
               f('model','3D model file (optional)','travel_set.glb'),
               f('orientation','3D orientation','0deg 0deg 0deg'),

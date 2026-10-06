@@ -423,6 +423,7 @@ function applyProducts(rows){
     img:(r.img&&String(r.img).indexOf('http')===0)?r.img:(r.img||'blue_monarch.png'),
     model:r.model||'', orientation:r.orientation||'0deg 0deg 0deg',
     category:r.category||'Fragrance', concentration:r.concentration||'Extrait de Parfum',
+    images:(Array.isArray(r.images)&&r.images.length)?r.images:(r.img?[r.img]:[]),
     character:r.character||'', wear:r.wear||'',
     intro:r.intro||'',
     notes:{top:r.note_top||'',heart:r.note_heart||'',base:r.note_base||''},
@@ -716,18 +717,27 @@ const Home=({onOpen,onAdd,onOpenFaq,faqOpen,reviews,reloadReviews,notify,faqCat,
 );
 
 const ProductView=({p,onAdd,onHome,onOpen})=>{
-  const [qty,setQty]=useState(1); const [is3D,setIs3D]=useState(false);
-  useEffect(()=>{ setQty(1); setIs3D(false); window.scrollTo(0,0); },[p.id]);
+  const [qty,setQty]=useState(1); const [is3D,setIs3D]=useState(false); const [shot,setShot]=useState(null);
+  useEffect(()=>{ setQty(1); setIs3D(false); setShot(null); window.scrollTo(0,0); },[p.id]);
   return h(React.Fragment,null,
     h('div',{className:'wrap crumb'},h('span',{onClick:()=>onHome()},'Home'),' / ',h('span',{onClick:()=>onHome('collection')},'Collection'),' / ',p.name),
     h('main',{className:'wrap pd'},
       h('div',{className:'visual'},
         h('div',{className:'stage'},h('div',{className:'no'},'N° '+p.no),h('div',{className:'halo'}),
-          is3D?h('model-viewer',{src:p.model,orientation:p.orientation,'camera-controls':true,'auto-rotate':true,'disable-zoom':true,'shadow-intensity':'0.6',exposure:'1','interaction-prompt':'none'})
-              :h('img',{src:p.img,alt:p.name,fetchpriority:'high'})),
+          (is3D&&p.model)?h('model-viewer',{src:p.model,orientation:p.orientation,'camera-controls':true,'auto-rotate':true,'disable-zoom':true,'shadow-intensity':'0.6',exposure:'1','interaction-prompt':'none'})
+              :h('img',{src:shot||p.img,alt:p.name,fetchpriority:'high'})),
+        (function(){
+          const gal=(p.images&&p.images.length)?p.images:[p.img];
+          if(gal.length<2)return null;
+          return h('div',{style:{display:'flex',gap:'8px',marginTop:'10px',flexWrap:'wrap'}},
+            gal.map((u,i)=>h('button',{key:i,onClick:()=>{setShot(u);setIs3D(false);},
+              style:{width:'58px',height:'72px',padding:'4px',background:'#fff',cursor:'pointer',
+                border:((shot||gal[0])===u?'1px solid var(--cognac)':'1px solid var(--line)')}},
+              h('img',{src:u,alt:'',loading:'lazy',style:{width:'100%',height:'100%',objectFit:'contain'}}))));
+        })(),
         h('div',{className:'toggles'},
           h('button',{className:!is3D?'on':'',onClick:()=>setIs3D(false)},'Flacon'),
-          h('button',{className:is3D?'on':'',onClick:()=>setIs3D(true)},'View in 3D'))),
+          p.model?h('button',{className:is3D?'on':'',onClick:()=>setIs3D(true)},'View in 3D'):null)),
       h('div',{className:'info'},
         h('div',{className:'tag'},p.tagline),
         h('h1',{className:'display'},p.name),
