@@ -259,6 +259,7 @@ const App=()=>{
   const [subs,setSubs]=useState([]);
   const [prods,setProds]=useState([]);
   const [editP,setEditP]=useState(null);
+  const [upStatus,setUpStatus]=useState('');
   const [detail,setDetail]=useState(null);
   const [sel,setSel]=useState([]);
   const [q,setQ]=useState('');
@@ -403,20 +404,36 @@ const App=()=>{
     orientation:'0deg 0deg 0deg',character:'',wear:'',intro:'',note_top:'',note_heart:'',note_base:'',
     head:'',narrative:'',is_active:true,sort_order:100,_new:true});
 
-  const uploadImage=async(file)=>{
-    if(!file)return;
-    if(file.size>8*1024*1024){notify('Image is over 8MB — please compress it first');return;}
-    setBusy(true);notify('Uploading image…');
-    const dataUrl=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(file);});
-    const r=await api('/api/admin/upload-image',{method:'POST',body:JSON.stringify({filename:file.name,dataUrl:dataUrl})});
-    if(r&&r.success&&r.url){
-      setEditP(p=>{
-        const gal=(Array.isArray(p.images)?p.images.slice():[]).concat([r.url]).slice(0,10);
-        return Object.assign({},p,{images:gal,img:p.img||r.url});
-      });
-      notify('Image added');
-    } else notify((r&&r.error)||'Upload failed');
+  const uploadImages=async(fileList)=>{
+    const files=Array.prototype.slice.call(fileList||[]);
+    if(!files.length)return;
+    const current=Array.isArray(editP.images)?editP.images.length:0;
+    const room=10-current;
+    if(room<=0){notify('You already have 10 images — remove one first');return;}
+    const batch=files.slice(0,room);
+    if(files.length>room) notify('Only '+room+' more image(s) can be added');
+
+    setBusy(true);
+    let added=0, failed=0;
+    for(let i=0;i<batch.length;i++){
+      const file=batch[i];
+      if(file.size>8*1024*1024){failed++;continue;}
+      setUpStatus('Uploading '+(i+1)+' of '+batch.length+'…');
+      try{
+        const dataUrl=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(file);});
+        const r=await api('/api/admin/upload-image',{method:'POST',body:JSON.stringify({filename:file.name,dataUrl:dataUrl})});
+        if(r&&r.success&&r.url){
+          added++;
+          setEditP(p=>{
+            const gal=(Array.isArray(p.images)?p.images.slice():[]).concat([r.url]).slice(0,10);
+            return Object.assign({},p,{images:gal,img:p.img||r.url});
+          });
+        } else failed++;
+      }catch(e){ failed++; }
+    }
+    setUpStatus('');
     setBusy(false);
+    notify(added+' image'+(added===1?'':'s')+' added'+(failed?(' · '+failed+' failed (over 8MB or rejected)'):''));
   };
 
   const saveProduct=async()=>{
@@ -744,11 +761,11 @@ const App=()=>{
                       })},'Remove'))));
               })(),
               h('label',{className:'btn ghost',style:{display:'inline-flex',cursor:'pointer',marginBottom:'8px'}},
-                busy?'Uploading…':'Add image',
-                h('input',{type:'file',accept:'image/png,image/jpeg,image/webp,image/avif',style:{display:'none'},
-                  onChange:e=>{uploadImage(e.target.files&&e.target.files[0]);e.target.value='';}})),
+                upStatus||(busy?'Uploading…':'Add images'),
+                h('input',{type:'file',multiple:true,accept:'image/png,image/jpeg,image/webp,image/avif',style:{display:'none'},
+                  onChange:e=>{uploadImages(e.target.files);e.target.value='';}})),
               h('p',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'10px'}},
-                'Add as many as you like (up to 10) — click Add image again for each. The one marked MAIN is used on product cards. Max 8MB each.'),
+                'Select several at once — hold Ctrl (or Shift) in the file picker to pick multiple. Up to 10 per product, max 8MB each. The one marked MAIN is used on product cards.'),
               f('img','Image filename or URL','travel-set.jpg'),
               f('model','3D model file (optional)','travel_set.glb'),
               f('orientation','3D orientation','0deg 0deg 0deg'),
